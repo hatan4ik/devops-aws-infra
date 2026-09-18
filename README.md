@@ -9,6 +9,10 @@ This repository is the GitOps source for a proposed AWS-native, multi-account, t
 - No Terraform backend, plan, apply, AWS resource, GitHub environment, OIDC role, branch ruleset, or release tag is configured by this source alone.
 - Cognito MRR is intentionally blocked until it has a provider-backed Terraform lifecycle; see [ADR 0011](docs/adr/0011-cognito-mrr-provider-boundary.md).
 
+## Engineering reference documentation
+
+A full O'Reilly-style engineering reference is available in [`docs/book/`](docs/book/README.md). It covers platform overview, architecture diagrams, network/security design, identity/compute/data, CI/CD pipeline, Terraform module catalog, SRE/observability, cost model, ADR index, runbooks, verification strategy, and the pre-deployment checklist.
+
 ## Repository map
 
 | Directory | Contents |
