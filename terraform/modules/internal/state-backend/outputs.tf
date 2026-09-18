@@ -6,6 +6,9 @@ output "backend_configuration" {
       kms_key_id     = aws_kms_key.state[tier].arn
       dynamodb_table = aws_dynamodb_table.state_lock[tier].name
       use_lockfile   = true
+      replica_bucket = aws_s3_bucket.state_replica[tier].id
+      replica_region = var.replica_region
+      replica_key_id = aws_kms_replica_key.state[tier].arn
     }
   }
 }
@@ -14,9 +17,11 @@ output "state_access_policy_arns" {
   description = "State bucket and KMS ARNs to scope the CI and break-glass identity policies."
   value = {
     for tier in keys(var.state_tiers) : tier => {
-      bucket_arn = aws_s3_bucket.state[tier].arn
-      key_arn    = aws_kms_key.state[tier].arn
-      lock_arn   = aws_dynamodb_table.state_lock[tier].arn
+      bucket_arn         = aws_s3_bucket.state[tier].arn
+      key_arn            = aws_kms_key.state[tier].arn
+      lock_arn           = aws_dynamodb_table.state_lock[tier].arn
+      replica_bucket_arn = aws_s3_bucket.state_replica[tier].arn
+      replica_key_arn    = aws_kms_replica_key.state[tier].arn
     }
   }
 }

@@ -20,6 +20,17 @@ variable "aws_account_id" {
   }
 }
 
+variable "aws_replica_region" {
+  description = "Approved distinct AWS Region for state-bucket and KMS replicas."
+  type        = string
+  nullable    = false
+
+  validation {
+    condition     = can(regex("^[a-z]{2}(-gov)?-[a-z]+-[0-9]+$", var.aws_replica_region))
+    error_message = "aws_replica_region must be a valid AWS Region identifier."
+  }
+}
+
 variable "environment" {
   description = "Fixed root environment label. This root uses shared because it owns shared-services state infrastructure."
   type        = string
@@ -34,9 +45,12 @@ variable "environment" {
 variable "state_backend" {
   description = "Typed non-secret state-backend configuration; role ARNs come from the approved OIDC and break-glass design."
   type = object({
-    name_prefix = string
+    name_prefix            = string
+    access_log_bucket_name = string
+    access_log_prefix      = string
     state_tiers = map(object({
       bucket_name                                  = string
+      replica_bucket_name                          = string
       noncurrent_version_expiration_in_days        = number
       abort_incomplete_multipart_upload_after_days = number
       object_lock = object({

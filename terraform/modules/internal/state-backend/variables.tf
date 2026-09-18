@@ -9,10 +9,55 @@ variable "name_prefix" {
   }
 }
 
+variable "primary_region" {
+  description = "Approved AWS Region containing the primary state buckets and KMS multi-Region primary keys."
+  type        = string
+  nullable    = false
+
+  validation {
+    condition     = can(regex("^[a-z]{2}(-gov)?-[a-z]+-[0-9]+$", var.primary_region))
+    error_message = "primary_region must be a valid AWS Region identifier."
+  }
+}
+
+variable "replica_region" {
+  description = "Approved, distinct AWS Region containing the state-bucket replicas and KMS replica keys."
+  type        = string
+  nullable    = false
+
+  validation {
+    condition     = can(regex("^[a-z]{2}(-gov)?-[a-z]+-[0-9]+$", var.replica_region))
+    error_message = "replica_region must be a valid AWS Region identifier."
+  }
+}
+
+variable "access_log_bucket_name" {
+  description = "Pre-existing approved centralized S3 access-log bucket, normally owned by Log Archive; this module does not create the shared log destination."
+  type        = string
+  nullable    = false
+
+  validation {
+    condition     = can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", var.access_log_bucket_name))
+    error_message = "access_log_bucket_name must be a valid S3 bucket name."
+  }
+}
+
+variable "access_log_prefix" {
+  description = "Approved non-empty access-log prefix inside the centralized log bucket."
+  type        = string
+  nullable    = false
+
+  validation {
+    condition     = length(trimspace(var.access_log_prefix)) > 0
+    error_message = "access_log_prefix must not be empty."
+  }
+}
+
 variable "state_tiers" {
   description = "Exactly one state bucket and lock table configuration for each approved environment tier. Object Lock is optional only when a retention decision explicitly disables it."
   type = map(object({
     bucket_name                                  = string
+    replica_bucket_name                          = string
     noncurrent_version_expiration_in_days        = number
     abort_incomplete_multipart_upload_after_days = number
     object_lock = object({
@@ -31,9 +76,9 @@ variable "state_tiers" {
   validation {
     condition = alltrue([
       for tier in values(var.state_tiers) :
-      can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", tier.bucket_name)) && tier.noncurrent_version_expiration_in_days > 0 && floor(tier.noncurrent_version_expiration_in_days) == tier.noncurrent_version_expiration_in_days && tier.abort_incomplete_multipart_upload_after_days > 0 && floor(tier.abort_incomplete_multipart_upload_after_days) == tier.abort_incomplete_multipart_upload_after_days
+      can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", tier.bucket_name)) && can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", tier.replica_bucket_name)) && tier.bucket_name != tier.replica_bucket_name && tier.noncurrent_version_expiration_in_days > 0 && floor(tier.noncurrent_version_expiration_in_days) == tier.noncurrent_version_expiration_in_days && tier.abort_incomplete_multipart_upload_after_days > 0 && floor(tier.abort_incomplete_multipart_upload_after_days) == tier.abort_incomplete_multipart_upload_after_days
     ])
-    error_message = "Every tier needs a valid S3 bucket name and positive whole-number noncurrent-version and incomplete-multipart-upload retention periods."
+    error_message = "Every tier needs distinct valid primary and replica S3 bucket names and positive whole-number noncurrent-version and incomplete-multipart-upload retention periods."
   }
 
   validation {

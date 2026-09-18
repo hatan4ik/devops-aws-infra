@@ -1,10 +1,19 @@
 mock_provider "aws" {}
 
+mock_provider "aws" {
+  alias = "replica"
+}
+
 variables {
-  name_prefix = "test-platform"
+  name_prefix            = "test-platform"
+  primary_region         = "us-east-1"
+  replica_region         = "us-west-2"
+  access_log_bucket_name = "test-platform-central-access-logs"
+  access_log_prefix      = "test-platform/terraform-state"
   state_tiers = {
     dev = {
       bucket_name                                  = "test-platform-dev-tfstate"
+      replica_bucket_name                          = "test-platform-dev-tfstate-replica"
       noncurrent_version_expiration_in_days        = 30
       abort_incomplete_multipart_upload_after_days = 7
       object_lock = {
@@ -13,6 +22,7 @@ variables {
     }
     staging = {
       bucket_name                                  = "test-platform-staging-tfstate"
+      replica_bucket_name                          = "test-platform-staging-tfstate-replica"
       noncurrent_version_expiration_in_days        = 30
       abort_incomplete_multipart_upload_after_days = 7
       object_lock = {
@@ -23,6 +33,7 @@ variables {
     }
     prod = {
       bucket_name                                  = "test-platform-prod-tfstate"
+      replica_bucket_name                          = "test-platform-prod-tfstate-replica"
       noncurrent_version_expiration_in_days        = 30
       abort_incomplete_multipart_upload_after_days = 7
       object_lock = {
@@ -62,6 +73,17 @@ run "plans_one_encrypted_versioned_backend_per_tier" {
     condition     = length(aws_s3_bucket_object_lock_configuration.state) == 2
     error_message = "Only tiers explicitly configured for Object Lock may receive an Object Lock rule."
   }
+
+  assert {
+    condition = (
+      length(aws_s3_bucket.state_replica) == 3 &&
+      length(aws_kms_replica_key.state) == 3 &&
+      length(aws_s3_bucket_replication_configuration.state) == 3 &&
+      length(aws_s3_bucket_logging.state) == 3 &&
+      length(aws_s3_bucket_notification.state) == 3
+    )
+    error_message = "Every state tier must have encrypted cross-Region replication, logging, and notifications."
+  }
 }
 
 run "rejects_missing_environment_tier" {
@@ -71,6 +93,7 @@ run "rejects_missing_environment_tier" {
     state_tiers = {
       dev = {
         bucket_name                                  = "test-platform-dev-tfstate"
+        replica_bucket_name                          = "test-platform-dev-tfstate-replica"
         noncurrent_version_expiration_in_days        = 30
         abort_incomplete_multipart_upload_after_days = 7
         object_lock = {
@@ -79,6 +102,7 @@ run "rejects_missing_environment_tier" {
       }
       prod = {
         bucket_name                                  = "test-platform-prod-tfstate"
+        replica_bucket_name                          = "test-platform-prod-tfstate-replica"
         noncurrent_version_expiration_in_days        = 30
         abort_incomplete_multipart_upload_after_days = 7
         object_lock = {
@@ -89,4 +113,14 @@ run "rejects_missing_environment_tier" {
   }
 
   expect_failures = [var.state_tiers]
+}
+
+run "rejects_same_primary_and_replica_region" {
+  command = plan
+
+  variables {
+    replica_region = "us-east-1"
+  }
+
+  expect_failures = [aws_s3_bucket.state]
 }
