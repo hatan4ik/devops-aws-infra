@@ -43,8 +43,3 @@ terraform.rc
 ehthumbs.db
 Thumbs.db
 
-# Local editor/runtime metadata and shallow reference clones are review aids,
-# not GitOps source or dependencies.
-.vscode/
-.ruby-lsp/
-reference/github/

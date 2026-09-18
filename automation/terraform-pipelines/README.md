@@ -1,8 +1,8 @@
 # Terraform pipeline staging area
 
-This directory is the reviewed source for the future `<org>-terraform-pipelines` repository defined in the [repository strategy](../../docs/architecture/repository-strategy.md). It is deliberately not an active GitHub Actions directory in this local documentation workspace: GitHub only discovers workflows in a repository's top-level `.github/workflows/` directory.
+This directory is the reviewed source for the future `<org>-terraform-pipelines` repository defined in the [repository strategy](../../docs/architecture/repository-strategy.md). It is deliberately not an active GitHub Actions directory in this repository: GitHub only discovers workflows in a repository's top-level `.github/workflows/` directory.
 
-No workflow is active, no AWS identity is configured, and no release can be created from this staging area. Copying this directory to a newly approved pipeline repository and enabling a caller are separate remote-change gates.
+No plan/apply/drift/release workflow from this staging area is active, no AWS identity is configured, and no release can be created from this staging area. The root credential-free Terraform quality workflow validates this source, but copying these reusable workflows to a newly approved pipeline repository and enabling callers remain separate remote-change gates.
 
 ## Workflow contracts
 

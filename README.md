@@ -1,0 +1,27 @@
+# AWS platform GitOps source
+
+This repository is the GitOps source for a proposed AWS-native, multi-account, two-Region platform. It contains reviewed architecture, Terraform module/root source, local pipeline definitions, runbooks, and verification contracts. It does not contain cloud credentials, state, customer data, or an AWS deployment history.
+
+## Current operating boundary
+
+- The root [Terraform quality workflow](.github/workflows/terraform-quality.yml) is credential-free. It validates and tests Terraform, scans IaC, checks generated documentation, and verifies reusable-workflow policy.
+- The plan, apply, drift, and release workflows are staged under [`automation/terraform-pipelines`](automation/terraform-pipelines/) for a future dedicated pipeline repository. They are not active deployment paths in this repository.
+- No Terraform backend, plan, apply, AWS resource, GitHub environment, OIDC role, branch ruleset, or release tag is configured by this source alone.
+- Cognito MRR is intentionally blocked until it has a provider-backed Terraform lifecycle; see [ADR 0011](docs/adr/0011-cognito-mrr-provider-boundary.md).
+
+## Repository map
+
+| Directory | Contents |
+|---|---|
+| [`docs/architecture`](docs/architecture/README.md) | Architecture, threat/security controls, costs, prerequisites, and traceability. |
+| [`docs/adr`](docs/adr/) | Accepted architecture decisions and their rejected alternatives. |
+| [`docs/runbooks`](docs/runbooks/README.md) | Account vending, Region expansion, hybrid VPN/BGP, failover, and break-glass operations. |
+| [`terraform`](terraform/README.md) | Candidate reusable modules, internal composition, and nine backend-disabled roots. |
+| [`automation/terraform-pipelines`](automation/terraform-pipelines/README.md) | SHA-pinned quality/plan/apply/drift/release pipeline source and caller templates. |
+| [`tests`](tests/README.md) | Mocked module, read-only AWS, public synthetic, and AuthN/AuthZ test contracts. |
+
+## Before enabling AWS delivery
+
+Follow the [external verification checklist](docs/architecture/external-verification.md) and [Phase 6–7 traceability](docs/architecture/phase-6-7-traceability.md). At minimum, the organization/account design, selected Regions, CIDR/ASN/prefix plan, state retention, KMS ownership, DNS/certificates, OIDC roles, GitHub protection/environments, service quotas, workload/data design, and cost approval must be supplied and approved.
+
+Do not add credentials or production values to `terraform.tfvars`, source control, workflow logs, or CI artifacts.
