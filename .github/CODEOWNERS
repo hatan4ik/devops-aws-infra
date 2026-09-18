@@ -1,8 +1,6 @@
-# GitHub CODEOWNERS begins with the repository owner until organization teams
-# are confirmed during the remote-control preflight.
+# Default code owners
 * @hatan4ik
 
-/terraform/ @hatan4ik
-/.github/ @hatan4ik
-/automation/ @hatan4ik
-/docs/ @hatan4ik
+# Specific layers (assuming this repo becomes the roots monorepo)
+/docs/adr/ @hatan4ik
+/docs/architecture/ @hatan4ik
