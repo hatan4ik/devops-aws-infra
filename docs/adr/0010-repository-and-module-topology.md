@@ -1,0 +1,39 @@
+# ADR 0010: Use a hybrid repository topology with three independently released modules
+
+**Status:** Accepted — Phase 4 stakeholder approval recorded 2026-09-18.  
+**Decision date:** 2026-09-18
+
+## Context
+
+The platform needs clear ownership, independently deployable account/Region/environment roots, reusable Terraform modules, and GitHub controls that make changes auditable. Phase 1–2 references show useful modular patterns but also demonstrate the cost of over-generalizing a module before its interface has stable consumers. The brief requires GitHub, a specific naming convention, and module repositories only where the lifecycle is independent.
+
+## Options considered
+
+1. One monorepo containing every root, module, documentation artifact, and reusable workflow.
+2. One repository for every Terraform module and every platform layer from the beginning.
+3. A hybrid: three stable reusable-module repositories (`terraform-aws-vpc-workload`, `terraform-aws-tgw-hub`, and `terraform-aws-cognito-userpool`); separate root repositories by organization, foundation, network, security, identity, and application; plus dedicated documentation and reusable-workflow repositories. Keep immature composition modules beside their live roots until the defined extraction threshold is met.
+
+## Quorum review
+
+| Reviewer | Position and owned concern |
+|---|---|
+| Cloud Architect | **Approve 3.** The split reflects platform blast-radius boundaries and preserves a stable contract for the three cross-cutting components. |
+| Network Engineer | **Approve 3.** The TGW and workload-VPC contracts need independent consumer compatibility, while Resolver/VPN composition should stay with the network root initially. |
+| Security Engineer | **Approve 3.** Separate security/identity roots and central GitHub controls give review ownership without turning every policy fragment into a repository. |
+| SRE | **Approve 3.** Environment roots can be planned, promoted, and rolled back independently; a monorepo would force unrelated plans and increase operational coupling. |
+| Platform/DevOps Lead | **Approve 3.** Semantic module releases, immutable dependency references, and a workflow repository provide reusable delivery without premature module maintenance overhead. |
+
+**Result:** 5–0 for option 3; no dissent.
+
+## Decision
+
+Adopt option 3 and the naming, inventory, lifecycle, and GitHub-control model in [the Phase 4 repository strategy](../architecture/repository-strategy.md) and [planned GitHub controls](../architecture/github-repository-controls.md). Treat only the three named components as initial independent Terraform module repositories. All other initial Terraform modules are internal composition under `modules/` in their owner root repository.
+
+Require a root for each `(account, Region, environment)` deployment tuple, module inputs rather than cross-team remote-state reads, semantic and signed module tags, protected `main`, CODEOWNERS, two approvals including a code owner, required checks, and GitHub OIDC rather than long-lived AWS credentials. The exact GitHub organization name, teams, plan capabilities, repositories, rulesets, and trust policies remain uncreated pending separate approval.
+
+## Consequences
+
+- Option 1 is rejected: it has a low initial setup cost, but it couples unrelated plans, review queues, releases, and least-privilege deployment credentials.
+- Option 2 is rejected: it creates versioning, ownership, release, and compatibility obligations before modules have independent consumers or stable interfaces.
+- A candidate module cannot be extracted merely to remove duplication. It needs the A-18 threshold, an ADR, semantic-version/migration plan, owners, tests, and consumer migration evidence.
+- This decision does not authorize GitHub repository creation, branch/ruleset changes, tags, workflow execution, AWS role creation, Terraform initialization, plan, or apply. Those are separately controlled Phase 4 remote and later implementation actions.

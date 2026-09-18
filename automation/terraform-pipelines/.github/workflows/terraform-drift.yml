@@ -1,0 +1,82 @@
+name: terraform-drift
+
+on:
+  workflow_call:
+    inputs:
+      working_directory:
+        description: Terraform root directory to inspect for drift.
+        required: true
+        type: string
+      aws_region:
+        description: AWS Region for the OIDC session.
+        required: true
+        type: string
+      aws_drift_role_arn:
+        description: Dedicated read-only Terraform drift role ARN.
+        required: true
+        type: string
+      terraform_version:
+        description: Terraform CLI version satisfying the repository constraint.
+        required: false
+        default: 1.7.5
+        type: string
+    secrets:
+      backend_config_b64:
+        description: Base64-encoded non-logged S3 backend configuration.
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  drift:
+    name: detect-drift
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: terraform-drift-${{ github.repository }}-${{ inputs.working_directory }}
+      cancel-in-progress: false
+    env:
+      TF_IN_AUTOMATION: "true"
+      AWS_REGION: ${{ inputs.aws_region }}
+      AWS_DEFAULT_REGION: ${{ inputs.aws_region }}
+    steps:
+      - name: Check out immutable caller revision
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: ${{ inputs.terraform_version }}
+          terraform_wrapper: false
+
+      - name: Acquire short-lived read-only drift credentials through GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.0
+        with:
+          role-to-assume: ${{ inputs.aws_drift_role_arn }}
+          role-session-name: terraform-drift-${{ github.run_id }}
+          aws-region: ${{ inputs.aws_region }}
+          mask-aws-account-id: true
+
+      - name: Materialize backend configuration only in runner temporary storage
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s' '${{ secrets.backend_config_b64 }}' | base64 --decode > "$RUNNER_TEMP/backend.hcl"
+          chmod 600 "$RUNNER_TEMP/backend.hcl"
+
+      - name: Fail loudly on detected drift and never remediate automatically
+        shell: bash
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          set -euo pipefail
+          terraform init -input=false -no-color -backend-config="$RUNNER_TEMP/backend.hcl"
+          set +e
+          terraform plan -input=false -lock-timeout=5m -no-color -detailed-exitcode
+          plan_exit=$?
+          set -e
+          case "$plan_exit" in
+            0) echo "No Terraform drift detected." ;;
+            2) echo "Terraform drift detected; no remediation was performed." >&2; exit 2 ;;
+            *) echo "Terraform drift check failed before a result was available." >&2; exit "$plan_exit" ;;
+          esac

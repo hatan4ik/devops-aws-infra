@@ -1,0 +1,41 @@
+# Copy reviewed non-secret values into terraform.tfvars only after the bootstrap change record is approved.
+aws_region     = "REPLACE_WITH_APPROVED_REGION"
+aws_account_id = "REPLACE_WITH_SHARED_SERVICES_ACCOUNT_ID"
+
+state_backend = {
+  name_prefix = "REPLACE_WITH_APPROVED_PREFIX"
+  state_tiers = {
+    dev = {
+      bucket_name                           = "REPLACE_WITH_DEV_BUCKET"
+      noncurrent_version_expiration_in_days = 0
+      abort_incomplete_multipart_upload_after_days = 0
+      object_lock = { enabled = false }
+    }
+    staging = {
+      bucket_name                           = "REPLACE_WITH_STAGING_BUCKET"
+      noncurrent_version_expiration_in_days = 0
+      abort_incomplete_multipart_upload_after_days = 0
+      object_lock = { enabled = false }
+    }
+    prod = {
+      bucket_name                           = "REPLACE_WITH_PROD_BUCKET"
+      noncurrent_version_expiration_in_days = 0
+      abort_incomplete_multipart_upload_after_days = 0
+      object_lock = { enabled = false }
+    }
+  }
+  state_access_principal_arns = [
+    "arn:aws:iam::REPLACE_WITH_ACCOUNT_ID:role/REPLACE_WITH_CI_ROLE",
+    "arn:aws:iam::REPLACE_WITH_ACCOUNT_ID:role/REPLACE_WITH_BREAK_GLASS_ROLE",
+  ]
+  kms_key_deletion_window_in_days = 0 # Deliberately invalid until the approved recovery window is supplied.
+  key_administrator_arns = [
+    "arn:aws:iam::REPLACE_WITH_ACCOUNT_ID:role/REPLACE_WITH_KEY_ADMIN_ROLE",
+  ]
+}
+
+tags = {
+  Application = "platform"
+  CostCenter  = "REPLACE_WITH_APPROVED_VALUE"
+  Owner       = "REPLACE_WITH_APPROVED_VALUE"
+}

@@ -1,0 +1,16 @@
+aws_region     = "REPLACE_WITH_APPROVED_REGION"
+aws_account_id = "REPLACE_WITH_NETWORK_ACCOUNT_ID"
+
+network = {
+  name            = "REPLACE_WITH_REGIONAL_TGW_NAME"
+  amazon_side_asn = 0 # Deliberately invalid until the approved private ASN is supplied.
+  ram_principal_arns = [
+    "arn:aws:organizations::REPLACE_WITH_MANAGEMENT_ACCOUNT_ID:organization/REPLACE_WITH_ORGANIZATION_ID",
+  ]
+}
+
+tags = {
+  Application = "platform"
+  CostCenter  = "REPLACE_WITH_APPROVED_VALUE"
+  Owner       = "REPLACE_WITH_APPROVED_VALUE"
+}

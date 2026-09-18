@@ -1,0 +1,82 @@
+name: module-release
+
+on:
+  workflow_call:
+    inputs:
+      release_tag:
+        description: Signed semantic-version tag pointing at the caller revision.
+        required: true
+        type: string
+      module_directory:
+        description: Module directory, normally `.` in a standalone module repository.
+        required: true
+        type: string
+      terraform_version:
+        description: Terraform CLI version satisfying the module constraint.
+        required: false
+        default: 1.7.5
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: verify-and-publish-release
+    runs-on: ubuntu-24.04
+    environment: module-release
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.module_directory }}
+    steps:
+      - name: Check out tag and full tag history
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.release_tag }}
+
+      - name: Enforce semantic version and GitHub-verified annotated tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag='${{ inputs.release_tag }}'
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "tag is not a semantic version: $tag" >&2; exit 64; }
+          tag_object_type="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq '.object.type')"
+          tag_object_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq '.object.sha')"
+          [[ "$tag_object_type" == "tag" ]] || { echo "tag must be annotated; lightweight tags are not accepted" >&2; exit 65; }
+          tag_target_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag_object_sha" --jq '.object.sha')"
+          tag_verified="$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag_object_sha" --jq '.verification.verified')"
+          [[ "$tag_verified" == "true" ]] || { echo "tag signature is not GitHub-verified" >&2; exit 66; }
+          [[ "$tag_target_sha" == "$GITHUB_SHA" ]] || { echo "tag does not point at the checked-out revision" >&2; exit 67; }
+          git tag --points-at "$GITHUB_SHA" | rg --fixed-strings --quiet "$tag" || { echo "tag does not point at the checked-out revision" >&2; exit 65; }
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: ${{ inputs.terraform_version }}
+          terraform_wrapper: false
+
+      - name: Verify module formatting and configuration
+        run: |
+          terraform fmt -check -recursive -no-color
+          terraform init -backend=false -input=false -no-color
+          terraform validate -no-color
+          terraform test -no-color
+
+      - name: Verify generated module documentation
+        uses: terraform-docs/gh-actions@6de6da0cefcc6b4b7a5cbea4d79d97060733093c # v1.4.1
+        with:
+          working-dir: ${{ inputs.module_directory }}
+          output-file: README.md
+          output-method: inject
+          fail-on-diff: "true"
+          git-push: "false"
+
+      - name: Publish GitHub release for the protected tag
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.3.3
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          generate_release_notes: true

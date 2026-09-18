@@ -1,0 +1,20 @@
+# Template only. Replace <org> and <FULL_40_CHAR_COMMIT_SHA> after the approved
+# pipeline repository exists. Keep this caller on `pull_request`, never
+# `pull_request_target`, so untrusted pull-request code cannot obtain secrets.
+name: terraform-quality
+
+on:
+  pull_request:
+    paths:
+      - "**/*.tf"
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    uses: <org>/terraform-pipelines/.github/workflows/terraform-quality.yml@<FULL_40_CHAR_COMMIT_SHA>
+    with:
+      working_directory: .
+      check_docs: true
