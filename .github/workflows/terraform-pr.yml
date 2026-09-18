@@ -1,4 +1,4 @@
-name: 'Terraform PR Checks'
+name: Terraform GitOps policy checks
 
 on:
   pull_request:
@@ -6,59 +6,28 @@ on:
       - main
 
 permissions:
-  id-token: write # Required for AWS OIDC
-  contents: read  # Required to checkout code
-  pull-requests: write # Required to post PR comments
+  contents: read
 
 jobs:
-  terraform-checks:
-    name: 'Terraform Validation & Plan'
+  policy-checks:
+    name: GitOps policy checks
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.0
-          
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check -recursive
-        continue-on-error: true
+      - name: Validate reusable workflow structure and action pins
+        run: |
+          set -euo pipefail
+          cd automation/terraform-pipelines
+          ruby scripts/validate-workflows.rb
+          ruby scripts/check-reusable-contracts.rb
+          scripts/check-action-pins.sh .github/workflows
 
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v4
-        with:
-          tflint_version: latest
-
-      - name: Run TFLint
-        run: tflint --recursive
-
-      - name: Run Checkov (Security Scan)
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: .
-          framework: terraform
-          soft_fail: false # Fail on HIGH/CRITICAL unless suppressed
-          skip_check: CKV_AWS_1 # Example skip, adjust per actual rules
-
-      - name: Configure AWS Credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }} # Replace with actual Dev role ARN
-          aws-region: us-east-1
-
-      # Note: Actual plan requires initialized backend, this is a placeholder structure
-      - name: Terraform Init
-        run: terraform init -backend=false
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Terraform Test
-        run: terraform test
-        continue-on-error: true # Will be false once tests are written
-
+      - name: Assert no root workflow can access AWS before delivery setup
+        run: |
+          set -euo pipefail
+          if rg --hidden -g '!terraform-pr.yml' 'id-token:[[:space:]]*write|configure-aws-credentials|terraform apply|terraform plan' .github/workflows; then
+            echo "Root workflows must remain credential-free until the approved OIDC/backend setup exists." >&2
+            exit 1
+          fi

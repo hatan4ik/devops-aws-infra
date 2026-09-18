@@ -1,53 +1,22 @@
-name: 'Terraform Drift Detection'
+name: Terraform drift preflight
 
 on:
-  schedule:
-    - cron: '0 8 * * *' # Run daily at 08:00 UTC
   workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: read
-  issues: write # To create an issue if drift is found
 
 jobs:
-  drift-detection:
-    name: 'Check for Drift'
+  drift-preflight:
+    name: Drift preflight
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: [dev, staging, prod]
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
 
-      - name: Configure AWS Credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets[format('AWS_ROLE_ARN_{0}', env.environment)] }}
-          aws-region: us-east-1
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Plan (Detailed Exitcode)
-        id: plan
-        run: terraform plan -detailed-exitcode
-        continue-on-error: true
-
-      - name: Create Issue on Drift
-        if: steps.plan.outputs.exitcode == '2'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Infrastructure Drift Detected in ${{ matrix.environment }}`,
-              body: `Drift has been detected in the ${{ matrix.environment }} environment. Please review the GitHub Actions run for more details.`
-            })
-
+      - name: Explain the drift gate
+        run: |
+          set -euo pipefail
+          echo "Scheduled drift detection is intentionally disabled until a read-only OIDC role, backend configuration, per-root caller, and alert route are verified."
+          echo "The reviewed reusable workflow reports drift and never remediates it automatically."
+          exit 1

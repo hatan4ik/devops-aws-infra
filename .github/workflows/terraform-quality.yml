@@ -5,7 +5,7 @@ on:
     paths:
       - "terraform/**"
       - "scripts/validate-terraform-quality.sh"
-      - ".github/workflows/terraform-quality.yml"
+      - ".github/workflows/**"
       - "automation/terraform-pipelines/**"
   push:
     branches:
@@ -13,7 +13,7 @@ on:
     paths:
       - "terraform/**"
       - "scripts/validate-terraform-quality.sh"
-      - ".github/workflows/terraform-quality.yml"
+      - ".github/workflows/**"
       - "automation/terraform-pipelines/**"
   workflow_dispatch:
 
