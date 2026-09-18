@@ -65,3 +65,4 @@ For independent module repositories (`terraform-aws-*`):
 * Tags follow SemVer (`v1.0.0`).
 * Root repositories must pin module references to a specific SemVer tag:
   `source = "git::https://github.com/ses/terraform-aws-vpc-workload.git?ref=v1.2.0"`
+

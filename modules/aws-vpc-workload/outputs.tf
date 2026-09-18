@@ -17,3 +17,4 @@ output "transit_subnet_ids" {
   description = "List of transit subnet IDs"
   value       = aws_subnet.transit[*].id
 }
+

@@ -19,3 +19,4 @@ variable "config" {
     error_message = "Environment must be one of: dev, staging, prod, shared."
   }
 }
+

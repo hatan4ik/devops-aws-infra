@@ -35,3 +35,4 @@
 * `modules/`: Contains strictly-typed, tested, and documented foundational modules (SOLID).
 * `roots/`: Contains the environment deployments passing variables cleanly without bare resources.
 * `.github/`: Contains full branch protection definitions (`CODEOWNERS`) and CI/CD pipelines.
+

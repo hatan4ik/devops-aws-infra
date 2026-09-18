@@ -17,3 +17,4 @@ output "kms_key_arn" {
   description = "The ARN of the KMS key used for encrypting the state bucket and lock table."
   value       = aws_kms_key.state.arn
 }
+

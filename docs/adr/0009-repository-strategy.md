@@ -28,3 +28,4 @@ We will create dedicated repositories **only** for core foundational modules tha
 ## Dissenting Opinions
 * *DevOps Lead*: Full multi-repo allows granular RBAC via GitHub repo permissions.
 * *Resolution*: Overruled by Platform Lead. Managing 50+ repos for a platform of this size introduces massive overhead for dependabot and PR reviews. Granular RBAC can be enforced via CODEOWNERS inside the monorepo instead.
+

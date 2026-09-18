@@ -114,7 +114,7 @@ resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public_nat[count.index].id
 
-  tags       = merge(local.common_tags, { Name = "${var.config.vpc_name}-nat-${var.config.azs[count.index]}" })
+  tags = merge(local.common_tags, { Name = "${var.config.vpc_name}-nat-${var.config.azs[count.index]}" })
   depends_on = [aws_internet_gateway.igw]
 }
 
@@ -158,3 +158,4 @@ resource "aws_route_table_association" "private_app" {
   subnet_id      = aws_subnet.private_app[count.index].id
   route_table_id = aws_route_table.private_app[count.index].id
 }
+

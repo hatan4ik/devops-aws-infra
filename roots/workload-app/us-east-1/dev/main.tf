@@ -12,3 +12,4 @@ module "vpc" {
     tags                 = var.tags
   }
 }
+

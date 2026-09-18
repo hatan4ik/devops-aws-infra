@@ -7,3 +7,4 @@ output "dynamodb_table_name" {
   description = "The name of the DynamoDB table used for state locking."
   value       = module.tf_state_backend.dynamodb_table_name
 }
+

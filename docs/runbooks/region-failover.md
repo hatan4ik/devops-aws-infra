@@ -24,3 +24,4 @@ Per ADR 0002, the architecture is Active-Active. Both regions serve traffic simu
 1. Verify the failing region is completely healthy via synthetic tests.
 2. Re-enable the DNS Latency record or restore CloudFront Origin weights.
 3. Traffic will naturally balance back based on DNS TTL (usually 60 seconds).
+

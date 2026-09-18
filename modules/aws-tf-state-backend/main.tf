@@ -105,3 +105,4 @@ resource "aws_dynamodb_table" "lock" {
 
   tags = local.common_tags
 }
+

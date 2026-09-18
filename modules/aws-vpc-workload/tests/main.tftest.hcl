@@ -7,11 +7,11 @@ run "valid_configuration" {
 
   variables {
     config = {
-      vpc_name            = "test-vpc"
-      environment         = "dev"
-      ipv4_ipam_pool_id   = "ipam-pool-123"
-      ipv4_netmask_length = 20
-      azs                 = ["us-east-1a", "us-east-1b"]
+      vpc_name             = "test-vpc"
+      environment          = "dev"
+      ipv4_ipam_pool_id    = "ipam-pool-123"
+      ipv4_netmask_length  = 20
+      azs                  = ["us-east-1a", "us-east-1b"]
     }
   }
 
@@ -26,11 +26,11 @@ run "invalid_environment" {
 
   variables {
     config = {
-      vpc_name            = "test-vpc"
-      environment         = "invalid"
-      ipv4_ipam_pool_id   = "ipam-pool-123"
-      ipv4_netmask_length = 20
-      azs                 = ["us-east-1a", "us-east-1b"]
+      vpc_name             = "test-vpc"
+      environment          = "invalid"
+      ipv4_ipam_pool_id    = "ipam-pool-123"
+      ipv4_netmask_length  = 20
+      azs                  = ["us-east-1a", "us-east-1b"]
     }
   }
 
@@ -44,11 +44,11 @@ run "insufficient_azs" {
 
   variables {
     config = {
-      vpc_name            = "test-vpc"
-      environment         = "dev"
-      ipv4_ipam_pool_id   = "ipam-pool-123"
-      ipv4_netmask_length = 20
-      azs                 = ["us-east-1a"]
+      vpc_name             = "test-vpc"
+      environment          = "dev"
+      ipv4_ipam_pool_id    = "ipam-pool-123"
+      ipv4_netmask_length  = 20
+      azs                  = ["us-east-1a"]
     }
   }
 
@@ -56,3 +56,4 @@ run "insufficient_azs" {
     var.config
   ]
 }
+
