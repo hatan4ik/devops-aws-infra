@@ -1,6 +1,6 @@
 # CI action-pin inventory
 
-**Status:** Local Phase 6 source inventory. The workflow staging directory is not active and no GitHub repository setting was changed.  
+**Status:** Phase 6 source inventory. The `hatan4ik/devops-aws-infra` repository enforces full-SHA action pinning; the workflow staging directory is not an active AWS delivery path.
 **Resolved:** 2026-09-18 from the named upstream ref using the authenticated GitHub API. A full commit SHA is immutable; the named upstream tag/ref is recorded only for review and must be revalidated before a future remote activation.
 
 | Action | Reviewed upstream ref | Immutable commit used | Workflow use |

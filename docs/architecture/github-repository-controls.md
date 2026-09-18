@@ -1,6 +1,6 @@
-# Planned GitHub repository controls
+# GitHub repository controls
 
-**Status:** Stakeholder-approved local design — these controls have not been applied. They require confirmation of assumption A-19 and explicit approval to alter remote GitHub state.
+**Status:** The repository now enforces full-SHA action pinning. The remaining controls in this document are stakeholder-approved design requirements, not configured remote controls; they require the target organization, owners, environments, and AWS identity inputs.
 
 GitHub rulesets will be preferred where the selected organization plan supports them, because their rules can layer and the most restrictive applicable rule wins. The preflight must confirm the plan and private-repository feature availability; otherwise an equivalent protected-branch configuration is required. GitHub documents ruleset layering, required signed commits, reviewer requirements, and source-bound status checks in its [ruleset reference](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets).
 
