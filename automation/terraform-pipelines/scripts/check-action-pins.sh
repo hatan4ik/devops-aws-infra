@@ -12,7 +12,13 @@ while IFS= read -r reference; do
     echo "mutable or malformed action reference: $reference" >&2
     exit 1
   }
-done < <(rg --hidden --no-filename --only-matching --pcre2 'uses:\s*\K[^[:space:]#]+' "$workflow_directory")
+done < <(
+  if command -v rg >/dev/null 2>&1; then
+    rg --hidden --no-filename --only-matching --pcre2 'uses:\s*\K[^[:space:]#]+' "$workflow_directory"
+  else
+    grep -RhoE '^[[:space:]]*uses:[[:space:]]*[^[:space:]#]+' "$workflow_directory" | sed -E 's/^[[:space:]]*uses:[[:space:]]*//'
+  fi
+)
 
 "$found_reference" || { echo "no third-party action references found in $workflow_directory" >&2; exit 1; }
 echo "PASS: every third-party action uses a full 40-character commit SHA"
