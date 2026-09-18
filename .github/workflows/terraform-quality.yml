@@ -41,6 +41,12 @@ jobs:
       - name: Set up TFLint
         uses: terraform-linters/setup-tflint@ae78205cfffec9e8d93fd2b3115c7e9d3166d4b6 # v5.0.0
 
+      - name: Reuse Terraform provider packages within this job
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/terraform-plugin-cache"
+          echo "TF_PLUGIN_CACHE_DIR=$RUNNER_TEMP/terraform-plugin-cache" >> "$GITHUB_ENV"
+
       - name: Validate Terraform modules and roots without cloud credentials
         run: scripts/validate-terraform-quality.sh
 
