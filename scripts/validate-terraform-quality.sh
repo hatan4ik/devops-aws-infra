@@ -36,7 +36,15 @@ terraform fmt -check -recursive -no-color terraform
 
 for directory in "${modules[@]}"; do
   terraform -chdir="$directory" init -backend=false -input=false -no-color
-  terraform -chdir="$directory" validate -no-color
+
+  # This child module intentionally requires the aws.replica configuration
+  # alias. A root supplies that configuration; standalone `validate` cannot.
+  # Its mock-backed test and the foundation-root validation below exercise
+  # both the module contract and the real provider mapping.
+  if [[ "$directory" != "terraform/modules/internal/state-backend" ]]; then
+    terraform -chdir="$directory" validate -no-color
+  fi
+
   terraform -chdir="$directory" test -no-color
   tflint --chdir="$directory" --init
   tflint --chdir="$directory"

@@ -10,4 +10,4 @@ These runbooks are execution gates, not evidence that a resource already exists.
 | [Regional failover](regional-failover.md) | Operate a controlled application regional failover. | Health signal, traffic shift, auth/API/data validation, incident timeline, and controlled failback. |
 | [Break-glass access](break-glass-access.md) | Resolve a critical incident requiring exceptional access. | Approval, MFA/session evidence, CloudTrail review, privilege removal, and post-incident review. |
 
-No runbook permits changing AWS or GitHub from this local workspace. The remote-change and apply gates in the architecture and pipeline documentation remain in force.
+No runbook permits changing AWS. The published root quality workflow remains credential-free; AWS delivery requires the remote-control and apply gates in the architecture and pipeline documentation.

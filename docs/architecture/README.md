@@ -1,7 +1,7 @@
 # Proposed AWS multi-account, multi-Region platform
 
-**Status:** Phase 7 local source package complete and stakeholder-approved on 2026-09-18; no AWS or remote GitHub state created.  
-**Scope:** AWS-native platform for a low-latency application serving millions of authenticated users. It is architecture only: no account, AWS resource, Terraform state, or remote configuration has been created.
+**Status:** Phase 7 source package is complete and its credential-free GitOps source is published in `hatan4ik/devops-aws-infra` as of 2026-09-18. No AWS account, resource, Terraform state, AWS OIDC role, GitHub environment, or branch rule has been configured.
+**Scope:** AWS-native platform design and GitOps source for a low-latency application serving millions of authenticated users. The repository is not deployment evidence and has not created cloud infrastructure.
 
 The design is active-active for stateless application and DynamoDB profile/session traffic across two Regions and two AZs per Region. Cognito is intentionally a native multi-Region **primary/secondary directory**: the secondary is activated for authentication and failover, but user creation, password resets, and profile writes remain primary-Region operations. This distinction is material to the stated RTO/RPO and product experience.
 

@@ -1,6 +1,6 @@
 # Phase 4 repository and module strategy
 
-**Status:** Stakeholder-approved local Phase 4 design. No GitHub repository, remote, branch rule, tag, workflow, or AWS resource has been created or changed.
+**Status:** Stakeholder-approved Phase 4 design. The credential-free source has been published to `hatan4ik/devops-aws-infra`; no target platform repository family, branch rule, GitHub environment, release tag, AWS OIDC role, or AWS resource has been configured.
 
 ## Naming contract
 
@@ -86,9 +86,9 @@ Dev, staging, and prod use identical directory and module-call structure. Promot
 
 ## Reference and source-control boundary
 
-The shallow clones in `reference/github/` are review evidence only. They must not be copied into a platform repository, treated as dependencies, or included in a future initial push. Their license, commit, and provenance stay recorded in [the GitHub reference inventory](../reference/github-repos.md). The source documents in this workspace are candidates for `<org>-aws-platform-docs`; creating that remote, initializing its policy, or pushing its contents requires a separate remote-change approval.
+The shallow clones in `reference/github/` are review evidence only. They must not be copied into a platform repository or treated as dependencies; their license, commit, and provenance stay recorded in [the GitHub reference inventory](../reference/github-repos.md). This workspace is published as the GitOps source, but that publication does not create the proposed `<org>` repository family, establish a source dependency, or configure its governance controls.
 
-## Creation sequence after remote-change approval
+## Creation sequence for the target repository family
 
 1. Confirm `<org>`, GitHub plan capabilities, team slugs, repository visibility, license policy, and the first workload app slug.
 2. Create the documentation and pipelines repositories, then the live root repositories, with no AWS deployment credentials or secrets committed.
@@ -96,4 +96,4 @@ The shallow clones in `reference/github/` are review evidence only. They must no
 4. Apply the planned rulesets, CODEOWNERS, environments, release/tag controls, and OIDC trust constraints described in [GitHub repository controls](github-repository-controls.md).
 5. Verify the controls through GitHub API/UI evidence before any pipeline receives AWS role access.
 
-The sequence creates GitHub state and is therefore outside this approved design phase.
+The source repository is already published. Creating any further repository or enabling its AWS delivery path still requires the target organization and account-specific prerequisite data.

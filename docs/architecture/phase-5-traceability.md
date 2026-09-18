@@ -1,6 +1,6 @@
 # Phase 5 implementation traceability
 
-**Status:** Local implementation stakeholder-approved on 2026-09-18. No Terraform initialization against an AWS backend, non-mocked plan, apply, AWS account, or remote GitHub change has occurred or is implied by this evidence.
+**Status:** Implementation source is published in the GitOps repository as of 2026-09-18. No Terraform initialization against an AWS backend, non-mocked plan, apply, AWS account, or cloud resource has occurred or is implied by this evidence.
 
 | Brief requirement | Evidence | Status |
 |---|---|---|
