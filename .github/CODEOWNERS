@@ -1,0 +1,8 @@
+# GitHub CODEOWNERS begins with the repository owner until organization teams
+# are confirmed during the remote-control preflight.
+* @hatan4ik
+
+/terraform/ @hatan4ik
+/.github/ @hatan4ik
+/automation/ @hatan4ik
+/docs/ @hatan4ik
