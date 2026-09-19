@@ -10,7 +10,7 @@ flowchart TD
         Route53 --> CF[CloudFront + WAF]
     end
     
-    subgraph Region 1 [Primary Region - us-east-1]
+    subgraph Region 1 [Primary Region - us-east-2]
         CF --> ALB1[Application Load Balancer]
         
         subgraph Workload VPC

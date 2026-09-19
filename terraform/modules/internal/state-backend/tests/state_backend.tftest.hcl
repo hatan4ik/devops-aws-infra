@@ -6,7 +6,7 @@ mock_provider "aws" {
 
 variables {
   name_prefix            = "test-platform"
-  primary_region         = "us-east-1"
+  primary_region         = "us-east-2"
   replica_region         = "us-west-2"
   access_log_bucket_name = "test-platform-central-access-logs"
   access_log_prefix      = "test-platform/terraform-state"
@@ -119,7 +119,7 @@ run "rejects_same_primary_and_replica_region" {
   command = plan
 
   variables {
-    replica_region = "us-east-1"
+    replica_region = "us-east-2"
   }
 
   expect_failures = [aws_s3_bucket.state]

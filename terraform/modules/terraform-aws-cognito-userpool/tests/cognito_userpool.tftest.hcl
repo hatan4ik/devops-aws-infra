@@ -59,7 +59,7 @@ run "rejects_terraform_managed_replication" {
     replication = {
       enabled          = true
       secondary_region = "us-west-2"
-      kms_key_arn      = "arn:aws:kms:us-east-1:111122223333:key/11111111-1111-1111-1111-111111111111"
+      kms_key_arn      = "arn:aws:kms:us-east-2:111122223333:key/11111111-1111-1111-1111-111111111111"
     }
   }
 

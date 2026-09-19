@@ -10,17 +10,17 @@ If you have already enabled AWS IAM Identity Center (formerly AWS SSO) in your m
    aws configure sso
    ```
 2. **SSO start URL**: Enter your AWS SSO portal URL (e.g., `https://my-sso-portal.awsapps.com/start`).
-3. **SSO region**: Enter the region where you enabled Identity Center (e.g., `us-east-1`).
+3. **SSO region**: Enter the region where you enabled Identity Center (e.g., `us-east-2`).
 4. A browser window will open. Log in with `hatan4ik@gmail.com`.
 5. Allow the AWS CLI to access your data.
 6. The CLI will prompt you to choose an account and a role (e.g., `AdministratorAccess`).
-7. **CLI default client Region**: `us-east-1`
+7. **CLI default client Region**: `us-east-2`
 8. **CLI default output format**: `json`
-9. **CLI profile name**: Name it `ses-admin`.
+9. **CLI profile name**: Name it `platform-admin`.
 
 You can now run Terraform and AWS commands locally using this profile by exporting it:
 ```bash
-export AWS_PROFILE=ses-admin
+export AWS_PROFILE=platform-admin
 ```
 
 ## Option B: Bootstrapping via a New IAM Access Key (Fallback)
@@ -36,7 +36,7 @@ The existing access key for `AWS-hatan4ik` in your `~/.aws/credentials` file is 
    ```bash
    aws configure --profile AWS-hatan4ik
    ```
-8. Paste the new Access Key ID and Secret Access Key when prompted. Set the default region to `us-east-1` and output format to `json`.
+8. Paste the new Access Key ID and Secret Access Key when prompted. Set the default region to `us-east-2` and output format to `json`.
 
 Test your access by running:
 ```bash

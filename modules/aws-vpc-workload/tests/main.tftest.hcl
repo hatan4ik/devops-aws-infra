@@ -11,7 +11,7 @@ run "valid_configuration" {
       environment          = "dev"
       ipv4_ipam_pool_id    = "ipam-pool-123"
       ipv4_netmask_length  = 20
-      azs                  = ["us-east-1a", "us-east-1b"]
+      azs                  = ["us-east-2a", "us-east-2b"]
     }
   }
 
@@ -30,7 +30,7 @@ run "invalid_environment" {
       environment          = "invalid"
       ipv4_ipam_pool_id    = "ipam-pool-123"
       ipv4_netmask_length  = 20
-      azs                  = ["us-east-1a", "us-east-1b"]
+      azs                  = ["us-east-2a", "us-east-2b"]
     }
   }
 
@@ -48,7 +48,7 @@ run "insufficient_azs" {
       environment          = "dev"
       ipv4_ipam_pool_id    = "ipam-pool-123"
       ipv4_netmask_length  = 20
-      azs                  = ["us-east-1a"]
+      azs                  = ["us-east-2a"]
     }
   }
 

@@ -238,7 +238,7 @@ sequenceDiagram
 | A-04 | Auth p50 ≤250 ms, p99 ≤600 ms; API p50 ≤100 ms, p99 ≤250 ms | Synthetic tests from user geographies |
 | A-05 | API availability SLO 99.99%; auth journey SLO 99.9% | Contract/SLA review |
 | A-06 | RTO ≤60 min regional failover; RPO ≤5 min DynamoDB; RPO ≤24 h audit logs | Business continuity approval |
-| A-07 | `us-east-1` / `us-west-2` are pricing benchmarks only, not chosen Regions | User geography + data residency review |
+| A-07 | `us-east-2` / `us-west-2` are pricing benchmarks only, not chosen Regions | User geography + data residency review |
 | A-13 | `10.128.0.0/9` is available for IPAM — placeholder only | Enterprise IPAM + on-premises conflict review |
 
 Full assumption register: [docs/ASSUMPTIONS.md](../ASSUMPTIONS.md)

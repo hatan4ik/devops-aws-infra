@@ -13,10 +13,10 @@ terraform {
   # and run `terraform init -migrate-state`.
   /*
   backend "s3" {
-    bucket         = "ses-tf-state-shared-<random>" # Update with actual generated bucket name
-    key            = "shared-services/us-east-1/prod/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "ses-tf-lock-table"
+    bucket         = "platform-tf-state-shared-<random>" # Update with actual generated bucket name
+    key            = "shared-services/us-east-2/prod/terraform.tfstate"
+    region         = "us-east-2"
+    dynamodb_table = "platform-tf-lock-table"
     encrypt        = true
   }
   */
@@ -24,6 +24,6 @@ terraform {
 
 provider "aws" {
   profile = "AWS-hatan4ik-gmail"
-  region = "us-east-1"
+  region = "us-east-2"
 }
 

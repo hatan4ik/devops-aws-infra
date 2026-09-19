@@ -1,7 +1,7 @@
-# SES Projects Digest
+# platform Projects Digest
 
 ## Overview
-This document summarizes the cloud architecture, best practices, and conventions extracted from the local `~/ses-projects/` repository collection.
+This document summarizes the cloud architecture, best practices, and conventions extracted from the local `~/platform-projects/` repository collection.
 
 ### Repository Inventory Analysis
 The local repositories are overwhelmingly Azure-focused rather than AWS-focused. Key findings include:
@@ -12,7 +12,7 @@ The local repositories are overwhelmingly Azure-focused rather than AWS-focused.
 - **Application Code**: `UCP-Authentication` (Node.js/TypeScript backend).
 
 ## What to Reuse Verbatim
-Given the strict AWS target architecture, there is little *infrastructure code* to reuse verbatim. However, several *process and governance* concepts from the SES CCoE are highly applicable and should be adopted:
+Given the strict AWS target architecture, there is little *infrastructure code* to reuse verbatim. However, several *process and governance* concepts from the platform CCoE are highly applicable and should be adopted:
 1. **MSM Control Framework**:
    - **Playground Controls**: Environments are automatically deployed on request with delegated authorization and deleted automatically at the end of their agreed lifetime.
    - **Incident Response**: Major Incident Response Plan (MIRP) and Health alerts correlation.

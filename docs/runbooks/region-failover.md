@@ -9,7 +9,7 @@ Per ADR 0002, the architecture is Active-Active. Both regions serve traffic simu
 ## Procedure
 1. **Identify Failure**: Verify via CloudWatch Alarms that a regional failure has occurred (e.g., Auth latency spikes > 500ms consistently in `eu-west-1`).
 2. **Shift DNS Routing**:
-   - Navigate to the `ses-aws-platform-roots/network/route53.tf` (or equivalent CloudFront configuration).
+   - Navigate to the `platform-aws-platform-roots/network/route53.tf` (or equivalent CloudFront configuration).
    - If using Route 53 Latency records, disable the record for the failing region, OR change the weight of the failing region to `0`.
    - If using CloudFront Origin Groups (ADR 0006), ensure the primary origin is marked unhealthy. CloudFront will automatically failover to the secondary origin within milliseconds.
 3. **Verify Data Replication**:

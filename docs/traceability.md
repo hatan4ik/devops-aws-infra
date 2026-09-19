@@ -5,7 +5,7 @@
 | Requirement | Description | Evidence / Location | Status |
 | :--- | :--- | :--- | :--- |
 | **Phase 1** | GitHub Reference Inventory | `docs/reference/github-repos.md` (Blocked by gh TLS, but gitOps initialized) | ⚠️ Partial |
-| **Phase 2** | Local SES Projects Digest | `docs/reference/ses-projects-digest.md` | ✅ Complete |
+| **Phase 2** | Local platform Projects Digest | `docs/reference/platform-projects-digest.md` | ✅ Complete |
 | **Phase 3.1** | Requirements / Assumptions | `docs/ASSUMPTIONS.md` | ✅ Complete |
 | **Phase 3.2** | Account Structure ADR | `docs/adr/0001-account-structure.md` | ✅ Complete |
 | **Phase 3.3** | Network ADR (Inspection) | `docs/adr/0005-egress-inspection.md` | ✅ Complete |
@@ -14,7 +14,7 @@
 | **Phase 3 (Out)**| Architecture Diagrams & Cost | `docs/architecture/diagrams.md`, `phase-3-summary.md` | ✅ Complete |
 | **Phase 4** | Repo Strategy & Naming ADR | `docs/adr/0009-repository-strategy.md`, `phase-4-repositories.md` | ✅ Complete |
 | **Phase 5** | Terraform Standards | `modules/aws-tf-state-backend/`, `modules/aws-vpc-workload/` | ✅ Complete |
-| **Phase 5** | Roots Structure (Dev/Stg/Prd) | `roots/workload-app/us-east-1/{dev,staging,prod}/` | ✅ Complete |
+| **Phase 5** | Roots Structure (Dev/Stg/Prd) | `roots/workload-app/us-east-2/{dev,staging,prod}/` | ✅ Complete |
 | **Phase 6** | CI/CD Pipelines (GitOps) | `.github/workflows/*.yml` | ✅ Complete |
 | **Phase 7** | Tests | `modules/*/tests/main.tftest.hcl` (tests pass) | ✅ Complete |
 | **Deliverable 6**| Runbooks | `docs/runbooks/*.md` | ✅ Complete |

@@ -1,6 +1,6 @@
 # Indicative monthly cost estimate
 
-**Currency:** USD. **Benchmark:** `us-east-1` published examples and rates, 730 hours/month. **Status:** planning estimate, not a quote or budget approval. Selected Regions, traffic volume, application benchmark, retention, data transfer, endpoint inventory, and enterprise discounts can materially change every total.
+**Currency:** USD. **Benchmark:** `us-east-2` published examples and rates, 730 hours/month. **Status:** planning estimate, not a quote or budget approval. Selected Regions, traffic volume, application benchmark, retention, data transfer, endpoint inventory, and enterprise discounts can materially change every total.
 
 ## Cost drivers and formulas
 

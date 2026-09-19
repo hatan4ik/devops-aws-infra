@@ -36,7 +36,7 @@ No other repository is proposed for the initial platform. In particular, securit
 
 ## Why the split is deliberately small
 
-The SES material separates network/TGW/VPN concerns from workloads, while the reviewed Modernisation Platform reference keeps internal modules internal until mature enough for their own repository. This plan adopts that boundary: the VPC, TGW, and Cognito interfaces have clear consumers and release compatibility needs; the rest are platform composition, not public abstractions.
+The platform material separates network/TGW/VPN concerns from workloads, while the reviewed Modernisation Platform reference keeps internal modules internal until mature enough for their own repository. This plan adopts that boundary: the VPC, TGW, and Cognito interfaces have clear consumers and release compatibility needs; the rest are platform composition, not public abstractions.
 
 This prevents a central repository from coupling every plan, while avoiding a repository-per-resource estate. Roots compose only published module versions or repository-local composition modules; reusable modules accept identifiers, ARNs, CIDRs, and typed inputs rather than reading another team's state.
 
@@ -51,7 +51,7 @@ Every live repository has the same environment shape. A root represents exactly 
     route53-resolver/
     tgw-attachment/
   roots/
-    network/us-east-1/shared/
+    network/us-east-2/shared/
       backend.tf
       providers.tf
       main.tf

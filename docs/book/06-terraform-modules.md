@@ -111,7 +111,7 @@ flowchart TD
 | `pool_name` | `string` | User pool name |
 | `kms_key_arn` | `string` | Multi-Region CMK ARN |
 | `custom_domain` | `string` | e.g. `auth.example.com` |
-| `acm_certificate_arn` | `string` | ACM cert in `us-east-1` for custom domain |
+| `acm_certificate_arn` | `string` | ACM cert in `us-east-2` for custom domain |
 | `mfa_configuration` | `string` | `"ON"` or `"OPTIONAL"` — TOTP not supported in MRR secondary |
 | `enable_mrr` | `bool` | Blocked — see ADR 0011 |
 

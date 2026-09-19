@@ -18,7 +18,7 @@ We need to define the repository structure for our Terraform infrastructure code
 
 We will create dedicated repositories **only** for core foundational modules that have an independent lifecycle and will be consumed across multiple teams or decoupled environments. 
 - Core modules (e.g., `terraform-aws-tgw-hub`, `terraform-aws-vpc-workload`) will have their own repos and be versioned via Git tags.
-- Root layers (`-org`, `-network`, `-security`, `-identity`, `-workload`) will live in a single root platform monorepo (`ses-aws-platform-roots`) under separate directories. 
+- Root layers (`-org`, `-network`, `-security`, `-identity`, `-workload`) will live in a single root platform monorepo (`platform-aws-platform-roots`) under separate directories. 
 - Any bespoke module that is only used by one workload will stay in the `modules/` folder of the monorepo.
 
 ## Consequences

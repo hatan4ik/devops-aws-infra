@@ -1,7 +1,7 @@
 # Chapter 8 — Cost Model & FinOps
 
 **Status:** Planning estimate — not a quote or budget approval  
-**Benchmark:** `us-east-1` published rates · 730 hours/month  
+**Benchmark:** `us-east-2` published rates · 730 hours/month  
 **Source:** [docs/architecture/cost-estimate.md](../architecture/cost-estimate.md)
 
 > Selected Regions, traffic volume, application benchmark, retention, data transfer, endpoint inventory, and enterprise discounts can materially change every total. Use the [AWS Pricing Calculator](https://calculator.aws) with real measurements before any apply.

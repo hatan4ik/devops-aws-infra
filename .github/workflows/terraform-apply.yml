@@ -23,7 +23,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::448871779014:role/github-actions-terraform-role # Update with actual role
-          aws-region: us-east-1
+          aws-region: us-east-2
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -35,7 +35,7 @@ jobs:
         run: |
           # A real CI setup would use a matrix or terramate to find changed roots. 
           # For this example, we assume execution in a specific root.
-          echo "root_dir=roots/shared-services/us-east-1/prod" >> $GITHUB_ENV
+          echo "root_dir=roots/shared-services/us-east-2/prod" >> $GITHUB_ENV
 
       - name: Terraform Init
         working-directory: ${{ env.root_dir }}
