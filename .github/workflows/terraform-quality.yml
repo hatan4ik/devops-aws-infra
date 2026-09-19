@@ -5,6 +5,16 @@ on:
     paths:
       - "terraform/**"
       - "scripts/validate-terraform-quality.sh"
+      - "scripts/verify-adr-boundary.sh"
+      - "docs/adr/**"
+      - "docs/traceability.md"
+      - "docs/walkthrough.md"
+      - "docs/architecture/phase-3-summary.md"
+      - "docs/architecture/phase-4-repositories.md"
+      - "docs/runbooks/bootstrap-aws-access.md"
+      - "docs/runbooks/region-failover.md"
+      - "modules/**"
+      - "roots/**"
       - ".github/workflows/**"
       - "automation/terraform-pipelines/**"
   push:
@@ -13,6 +23,16 @@ on:
     paths:
       - "terraform/**"
       - "scripts/validate-terraform-quality.sh"
+      - "scripts/verify-adr-boundary.sh"
+      - "docs/adr/**"
+      - "docs/traceability.md"
+      - "docs/walkthrough.md"
+      - "docs/architecture/phase-3-summary.md"
+      - "docs/architecture/phase-4-repositories.md"
+      - "docs/runbooks/bootstrap-aws-access.md"
+      - "docs/runbooks/region-failover.md"
+      - "modules/**"
+      - "roots/**"
       - ".github/workflows/**"
       - "automation/terraform-pipelines/**"
   workflow_dispatch:

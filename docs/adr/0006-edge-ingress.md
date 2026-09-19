@@ -1,7 +1,10 @@
 # ADR 0006: Edge and Ingress Routing
 
 ## Status
-Accepted
+Superseded by [ADR 0014](0014-canonical-architecture-and-iac-boundary.md)
+
+> Historical record only. The active ingress decision is
+> [ADR 0004](0004-edge-ingress-and-egress.md).
 
 ## Context
 We need to ingest user traffic efficiently, securely, and route it to the closest Active-Active region.

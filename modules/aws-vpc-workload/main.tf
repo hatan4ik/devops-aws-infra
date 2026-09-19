@@ -37,7 +37,7 @@ resource "aws_default_security_group" "default" {
 }
 
 # ------------------------------------------------------------------------------
-# Subnets (Private Only per ADR 0006)
+# Historical prototype retained for comparison only; disabled by ADR 0014.
 # ------------------------------------------------------------------------------
 # Since we receive an IPAM CIDR, we compute subnet CIDRs dynamically.
 # For simplicity in this base module, we carve the VPC into chunks:
@@ -78,7 +78,7 @@ resource "aws_subnet" "transit" {
 }
 
 # ------------------------------------------------------------------------------
-# Decentralized NAT Gateways (ADR 0005)
+# Historical NAT topology; not an approved egress model and disabled by ADR 0014.
 # ------------------------------------------------------------------------------
 # Note: Because this VPC has NO public subnets (per requirements), we rely on
 # Transit Gateway to route 0.0.0.0/0 to an external NAT/Egress VPC, OR we place 
@@ -114,7 +114,7 @@ resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public_nat[count.index].id
 
-  tags = merge(local.common_tags, { Name = "${var.config.vpc_name}-nat-${var.config.azs[count.index]}" })
+  tags       = merge(local.common_tags, { Name = "${var.config.vpc_name}-nat-${var.config.azs[count.index]}" })
   depends_on = [aws_internet_gateway.igw]
 }
 
@@ -158,4 +158,3 @@ resource "aws_route_table_association" "private_app" {
   subnet_id      = aws_subnet.private_app[count.index].id
   route_table_id = aws_route_table.private_app[count.index].id
 }
-

@@ -1,48 +1,47 @@
-# Bootstrap AWS Access
+# Bootstrap AWS access
 
-To adhere to our **ADR 0001 (Account Structure)** and **Security Baseline**, we avoid long-lived static IAM keys wherever possible. However, for the very first deployment, you must bootstrap access.
+This runbook implements the access boundary in [ADR 0008](../adr/0008-security-and-state.md)
+and [ADR 0012](../adr/0012-oidc-gated-terraform-delivery.md): humans use
+short-lived IAM Identity Center sessions and CI uses environment-scoped GitHub
+OIDC. Do not create, paste, commit, or configure long-lived IAM access keys for
+this platform.
 
-## Option A: Bootstrapping via AWS IAM Identity Center (Recommended)
-If you have already enabled AWS IAM Identity Center (formerly AWS SSO) in your management account:
+## Human access: IAM Identity Center
 
-1. Open your terminal and run:
-   ```bash
-   aws configure sso
-   ```
-2. **SSO start URL**: Enter your AWS SSO portal URL (e.g., `https://my-sso-portal.awsapps.com/start`).
-3. **SSO region**: Enter the region where you enabled Identity Center (e.g., `us-east-2`).
-4. A browser window will open. Log in with `hatan4ik@gmail.com`.
-5. Allow the AWS CLI to access your data.
-6. The CLI will prompt you to choose an account and a role (e.g., `AdministratorAccess`).
-7. **CLI default client Region**: `us-east-2`
-8. **CLI default output format**: `json`
-9. **CLI profile name**: Name it `platform-admin`.
+An AWS organization administrator must first enable IAM Identity Center,
+create the least-privilege permission set for the approved bootstrap activity,
+and assign the operator to the selected management or delegated account. Then
+configure an SSO profile locally:
 
-You can now run Terraform and AWS commands locally using this profile by exporting it:
 ```bash
-export AWS_PROFILE=platform-admin
+aws configure sso --profile platform-bootstrap
+aws sso login --profile platform-bootstrap
+aws sts get-caller-identity --profile platform-bootstrap
 ```
 
-## Option B: Bootstrapping via a New IAM Access Key (Fallback)
-The existing access key for `AWS-hatan4ik` in your `~/.aws/credentials` file is currently returning an `InvalidClientTokenId` error. If you need a new static key to bootstrap the environment before SSO is set up:
+Use the organization’s approved SSO start URL, SSO Region, account, role, and
+default workload Region when prompted. Do not put a profile name in Terraform
+source; an approved delivery environment supplies authentication at runtime.
 
-1. Log into the [AWS Management Console](https://console.aws.amazon.com/) using `hatan4ik@gmail.com`.
-2. Navigate to the **IAM Dashboard** -> **Users**.
-3. Select your user (e.g., `hatan4ik`).
-4. Go to the **Security credentials** tab.
-5. Under **Access keys**, click **Create access key** (select "CLI" as the use case).
-6. Copy the new **Access Key ID** and **Secret Access Key**.
-7. Open your terminal and run:
-   ```bash
-   aws configure --profile AWS-hatan4ik
-   ```
-8. Paste the new Access Key ID and Secret Access Key when prompted. Set the default region to `us-east-2` and output format to `json`.
+## CI access: GitHub OIDC
 
-Test your access by running:
-```bash
-aws sts get-caller-identity --profile AWS-hatan4ik
-```
+Before enabling a credentialed plan/apply workflow, create an AWS IAM role in
+the target account that trusts GitHub’s OIDC provider. Restrict the trust
+policy to the exact GitHub repository, protected branch or environment, and
+workflow conditions approved for that account. Grant only the actions required
+for the specific root. Store no AWS access key in GitHub secrets.
 
-## Next Steps for Terraform
-Once you have valid credentials configured, we can initialize the AWS provider in our root modules using your chosen profile.
+Record the role ARN, target account, GitHub environment, required reviewers,
+and plan/apply separation in the target repository’s protected-environment
+configuration. The reusable workflow source is under
+[`automation/terraform-pipelines`](../../automation/terraform-pipelines/);
+it is not an enabled deployment path in this repository.
 
+## Preflight
+
+1. Confirm the caller identity and target account without printing credentials.
+2. Confirm the intended root, Region, state backend, and approved input set.
+3. Run a read-only plan from the authoritative backend and retain its review
+   evidence before any apply.
+4. Stop if identity, account, branch/environment protection, backend, or
+   inputs differ from the approved change record.

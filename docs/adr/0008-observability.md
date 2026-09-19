@@ -1,7 +1,10 @@
 # ADR 0008: Observability Architecture
 
 ## Status
-Accepted
+Superseded by [ADR 0014](0014-canonical-architecture-and-iac-boundary.md)
+
+> Historical record only. The active observability decision is
+> [ADR 0009](0009-observability-and-sre.md).
 
 ## Context
 Need to define SLOs, trace requests across regions, and alert SREs.

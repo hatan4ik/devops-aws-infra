@@ -8,6 +8,7 @@ This repository is the GitOps source for a proposed AWS-native, multi-account, t
 - The plan, apply, drift, and release workflows are staged under [`automation/terraform-pipelines`](automation/terraform-pipelines/) for a future dedicated pipeline repository. They are not active deployment paths in this repository.
 - No Terraform backend, plan, apply, AWS resource, GitHub environment, OIDC role, branch ruleset, or release tag is configured by this source alone.
 - Cognito MRR is intentionally blocked until it has a provider-backed Terraform lifecycle; see [ADR 0011](docs/adr/0011-cognito-mrr-provider-boundary.md).
+- [`terraform/`](terraform/README.md) is the only candidate Terraform delivery tree. Root-level [`modules/`](modules/README.md) and [`roots/`](roots/README.md) are disabled historical prototypes; see [ADR 0014](docs/adr/0014-canonical-architecture-and-iac-boundary.md).
 
 ## Engineering reference documentation
 

@@ -1,6 +1,7 @@
+# This historical module must stay unavailable as a deployment dependency.
 mock_provider "aws" {}
 
-run "valid_configuration" {
+run "prototype_is_disabled" {
   command = plan
 
   variables {
@@ -11,9 +12,5 @@ run "valid_configuration" {
     }
   }
 
-  assert {
-    condition     = aws_cloudfront_distribution.this.enabled == true
-    error_message = "Distribution should be enabled."
-  }
+  expect_failures = [terraform_data.prototype_disabled]
 }
-

@@ -1,39 +1,23 @@
 # Requirements Traceability Matrix
 
-## Delivery Checklist mapping
+This matrix tracks the candidate source in this repository. “Designed” and
+“gated” do not mean that AWS resources, a backend, or a delivery identity have
+been created.
 
-| Requirement | Description | Evidence / Location | Status |
-| :--- | :--- | :--- | :--- |
-| **Phase 1** | GitHub Reference Inventory | `docs/reference/github-repos.md` (Blocked by gh TLS, but gitOps initialized) | ⚠️ Partial |
-| **Phase 2** | Local platform Projects Digest | `docs/reference/platform-projects-digest.md` | ✅ Complete |
-| **Phase 3.1** | Requirements / Assumptions | `docs/ASSUMPTIONS.md` | ✅ Complete |
-| **Phase 3.2** | Account Structure ADR | `docs/adr/0001-account-structure.md` | ✅ Complete |
-| **Phase 3.3** | Network ADR (Inspection) | `docs/adr/0005-egress-inspection.md` | ✅ Complete |
-| **Phase 3.4** | Identity & Application ADRs | `docs/adr/0004-identity-provider.md`, `docs/adr/0003-compute-platform.md` | ✅ Complete |
-| **Phase 3.6** | Observability ADR | `docs/adr/0008-observability.md` | ✅ Complete |
-| **Phase 3 (Out)**| Architecture Diagrams & Cost | `docs/architecture/diagrams.md`, `phase-3-summary.md` | ✅ Complete |
-| **Phase 4** | Repo Strategy & Naming ADR | `docs/adr/0009-repository-strategy.md`, `phase-4-repositories.md` | ✅ Complete |
-| **Phase 5** | Terraform Standards | `modules/aws-tf-state-backend/`, `modules/aws-vpc-workload/` | ✅ Complete |
-| **Phase 5** | Terraform Standards | `modules/aws-tf-state-backend`, `modules/aws-vpc-workload`, `modules/aws-cognito-auth`, `modules/aws-ecs-fargate`, `modules/aws-cloudfront-alb` | ✅ Complete |
-| **Phase 5** | Roots Structure (Dev/Stg/Prd) | `roots/workload-app/us-east-2/{dev,staging,prod}/` | ✅ Complete |
-| **Phase 6** | CI/CD Pipelines (GitOps) | `.github/workflows/*.yml` | ✅ Complete |
-| **Phase 7** | Tests | `modules/*/tests/main.tftest.hcl` (tests pass) | ✅ Complete |
-| **Deliverable 6**| Runbooks | `docs/runbooks/*.md` | ✅ Complete |
+| Requirement | Authoritative evidence | Source boundary | Status |
+|---|---|---|---|
+| Reference inventory | [GitHub references](reference/github-repos.md) and [local-project digest](reference/platform-projects-digest.md) | Review material only; no reference clone is a dependency. | Partial — live inventory refresh is external. |
+| Governed multi-account landing zone | [ADR 0001](adr/0001-control-tower-account-vending.md), [account-vending runbook](runbooks/account-vending.md) | Account vending is Control Tower/AFT work, not a direct Terraform Organizations prototype. | Designed; approval-gated. |
+| Two-Region availability and data | [ADR 0002](adr/0002-regional-availability-and-data.md), [regional roots](../terraform/roots/) | Candidate roots are backend-disabled. | Designed; Regions, quotas, and data requirements remain prerequisites. |
+| Segmented networking and hybrid connectivity | [ADR 0003](adr/0003-segmented-tgw-ipam-and-encryption.md), [ADR 0005](adr/0005-hybrid-connectivity.md), [network module](../terraform/modules/terraform-aws-tgw-hub/) | No CIDR, ASN, customer-gateway, or VPN secret values are committed. | Designed; external network inputs required. |
+| Private ingress and conditional egress | [ADR 0004](adr/0004-edge-ingress-and-egress.md), [network security design](architecture/network-security.md) | Workload VPC candidate module has no public subnet or default Internet route. | Candidate implementation covered by credential-free checks. |
+| Million-user authentication and authorization | [ADR 0006](adr/0006-identity-and-authorization.md), [ADR 0011](adr/0011-cognito-mrr-provider-boundary.md), [Cognito module](../terraform/modules/terraform-aws-cognito-userpool/) | Cognito MRR is explicitly blocked until provider-managed lifecycle support exists. | Designed; capacity, MRR, and authorization scope require external validation. |
+| AWS-native compute and data plane | [ADR 0007](adr/0007-compute-and-data.md), [workload composition](../terraform/modules/internal/workload-regional/) | ECS/DynamoDB workload specifics await application contracts. | Designed; not an AWS deployment. |
+| Security and isolated state | [ADR 0008](adr/0008-security-and-state.md), [state backend module](../terraform/modules/internal/state-backend/) | No committed backend configuration, static key, or state. | Candidate implementation covered by credential-free checks. |
+| Observability and SRE evidence | [ADR 0009](adr/0009-observability-and-sre.md), [operations design](architecture/operations.md) | Account IDs, destinations, and retention settings are external inputs. | Designed; integration remains gated. |
+| Repository topology and GitOps delivery | [ADR 0010](adr/0010-repository-and-module-topology.md), [ADR 0012](adr/0012-oidc-gated-terraform-delivery.md), [pipeline source](../automation/terraform-pipelines/) | Quality is credential-free; plan/apply/drift workflow templates are not active AWS delivery paths here. | Source complete; remote controls and OIDC roles are uncreated. |
+| Verification and resilience | [ADR 0013](adr/0013-layered-verification-no-automatic-fault-injection.md), [test contracts](../tests/) | No automatic remediation or fault injection. | Contracted; live evidence requires a deployed, approved environment. |
 
-## Key Decisions
-* **Organizations:** Custom Terraform organizations structure over Control Tower (GitOps purity).
-* **Multi-Region:** Active-Active via Route 53 and DynamoDB Global Tables.
-* **Compute:** ECS Fargate over EKS.
-* **Identity:** Amazon Cognito.
-* **Network Egress:** Decentralized NATs and VPC Endpoints, rejecting Network Firewall for cost savings.
+## Architecture authority
 
-## Open Questions & Blockers
-1. **GitHub Auth**: TLS verification error on `api.github.com` prevents running `gh repo list`.
-2. **Cognito Quota**: Need AWS Support confirmation that Cognito can be scaled to 5,000 RPS.
-3. **On-Premise IPAM**: Need the assigned CIDR blocks from the networking team to inject into the `ipam-pool-xxxxxxxx` placeholders in `terraform.tfvars`.
-
-## State of the Repository
-* `modules/`: Contains strictly-typed, tested, and documented foundational modules (SOLID).
-* `roots/`: Contains the environment deployments passing variables cleanly without bare resources.
-* `.github/`: Contains full branch protection definitions (`CODEOWNERS`) and CI/CD pipelines.
-
+Use [the ADR index](adr/README.md) and [ADR 0014](adr/0014-canonical-architecture-and-iac-boundary.md) for the single authoritative decision set. The root-level `modules/` and `roots/` directories are disabled historical prototypes and are deliberately excluded from this matrix.

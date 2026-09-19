@@ -1,7 +1,10 @@
 # ADR 0003: Compute Platform for Workloads
 
 ## Status
-Accepted
+Superseded by [ADR 0014](0014-canonical-architecture-and-iac-boundary.md)
+
+> Historical record only. The active compute and data decision is
+> [ADR 0007](0007-compute-and-data.md).
 
 ## Context
 We need a compute platform for low-latency APIs serving 25,000 RPS.

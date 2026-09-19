@@ -1,7 +1,10 @@
 # ADR 0009: Repository Strategy for Infrastructure Code
 
 ## Status
-Accepted
+Superseded by [ADR 0014](0014-canonical-architecture-and-iac-boundary.md)
+
+> Historical record only. The active repository and module topology decision is
+> [ADR 0010](0010-repository-and-module-topology.md).
 
 ## Context
 We need to define the repository structure for our Terraform infrastructure code, balancing module reusability, CI/CD pipeline complexity, and release management. The naming convention provided is:
@@ -28,4 +31,3 @@ We will create dedicated repositories **only** for core foundational modules tha
 ## Dissenting Opinions
 * *DevOps Lead*: Full multi-repo allows granular RBAC via GitHub repo permissions.
 * *Resolution*: Overruled by Platform Lead. Managing 50+ repos for a platform of this size introduces massive overhead for dependabot and PR reviews. Granular RBAC can be enforced via CODEOWNERS inside the monorepo instead.
-

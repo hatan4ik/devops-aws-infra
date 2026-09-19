@@ -1,68 +1,19 @@
-# Phase 4: Repository and Code Strategy
+# Phase 4: Repository and code strategy
 
-## Repository List
+The authoritative repository and module topology is
+[ADR 0010](../adr/0010-repository-and-module-topology.md) and its companion
+[repository strategy](repository-strategy.md). This repository is a
+credential-free GitOps source and candidate implementation package; publishing
+it does not create the proposed repository family, branch protections, GitHub
+environments, releases, OIDC roles, or AWS resources.
 
-Following the Hybrid Monorepo strategy (see [ADR-0009](../adr/0009-repository-strategy.md)), here is the proposed repository layout under the target GitHub Organization. 
+Only three modules are candidates for independent release after the required
+extraction criteria are satisfied: `terraform-aws-vpc-workload`,
+`terraform-aws-tgw-hub`, and `terraform-aws-cognito-userpool`. The current
+candidate source for them and for internal composition is under
+[`terraform/`](../../terraform/README.md).
 
-*(Assume organization prefix: `platform-`)*
-
-### 1. Root / Platform Repositories
-* **`platform-aws-platform-roots`**: The primary monorepo containing all environment-specific root instantiations, separated by layer.
-  * `/org` (Control Tower / Organizations / SCPs)
-  * `/network` (TGW Hub, VPN, IPAM)
-  * `/security` (GuardDuty, Security Hub, Macie)
-  * `/identity` (IAM Identity Center, Cognito User Pools)
-  * `/workload-auth` (Fargate clusters, DynamoDB, CloudFront for the Auth API)
-  * `/workload-app` (Fargate clusters, ElastiCache, CloudFront for the core API)
-* **`platform-aws-platform-docs`**: Architecture, ADRs, runbooks, and game-day plans. *(Note: This is effectively the current repository we are working in, which will be renamed or migrated).*
-* **`platform-terraform-pipelines`**: Reusable GitHub Actions workflows (`workflow_call`) to enforce standard CI/CD steps (fmt, validate, tflint, checkov, plan, apply) across all other repos.
-
-### 2. Independent Module Repositories
-These modules have independent lifecycles, strict semantic versioning, and are consumed by the roots.
-* **`terraform-aws-tgw-hub`**: Manages Transit Gateway, Route Tables, and inter-region peering.
-* **`terraform-aws-vpc-workload`**: Standardized spoke VPC with isolated subnets, NAT, and VPC Endpoints.
-* **`terraform-aws-ecs-fargate`**: Standardized ECS cluster, task definitions, and ALB integration.
-* **`terraform-aws-cognito-userpool`**: Cognito User Pool with custom Lambda triggers for multi-region sync.
-* **`terraform-aws-dynamodb-global`**: Multi-region Active-Active DynamoDB configuration.
-
----
-
-## Governance and Branch Protection
-
-The following governance rules are enforced globally via GitHub settings (ideally managed by a `terraform-github` provider in the `platform-aws-platform-roots/org` layer):
-
-### 1. Branch Protection (`main` branch)
-* **Require signed commits**: All commits must be GPG/SSH signed.
-* **Require pull request reviews**: Minimum 2 approvals.
-* **Require review from Code Owners**: Modifications to specific layers require domain-owner approval.
-* **Require status checks to pass before merging**:
-  * `Terraform Format`
-  * `TFLint`
-  * `Checkov (Security)`
-  * `Terraform Plan (No Errors)`
-  * `Terraform Test`
-* **Do not allow bypassing the above settings.**
-
-### 2. CODEOWNERS (`.github/CODEOWNERS`)
-Inside the `platform-aws-platform-roots` monorepo, ownership is granularly delegated:
-```text
-# Global default
-* @platform-platform-engineering
-
-# Network layer requires Network Engineers
-/network/ @platform-network-engineering
-
-# Security layer requires Security Engineers
-/security/ @platform-security-engineering
-
-# Identity layer requires IAM experts
-/identity/ @platform-identity-engineering
-```
-
-### 3. Release Lifecycle (Semantic Versioning)
-For independent module repositories (`terraform-aws-*`):
-* Merges to `main` trigger an automated GitHub Release.
-* Tags follow SemVer (`v1.0.0`).
-* Root repositories must pin module references to a specific SemVer tag:
-  `source = "git::https://github.com/platform/terraform-aws-vpc-workload.git?ref=v1.2.0"`
-
+The root-level `modules/` and `roots/` directories are disabled historical
+prototypes, not an alternative monorepo topology. Their source must not be
+copied into a target repository or delivery workflow; see
+[ADR 0014](../adr/0014-canonical-architecture-and-iac-boundary.md).

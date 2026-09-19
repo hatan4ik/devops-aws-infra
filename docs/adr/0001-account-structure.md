@@ -1,7 +1,10 @@
 # ADR 0001: Account Structure and Landing Zone
 
 ## Status
-Accepted
+Superseded by [ADR 0014](0014-canonical-architecture-and-iac-boundary.md)
+
+> Historical record only. The active account-vending decision is
+> [ADR 0001: Control Tower and Account Factory for Terraform](0001-control-tower-account-vending.md).
 
 ## Context
 We need to establish a multi-account AWS environment. We require a Management, Security, Log Archive, Shared Services/Network, Identity (IAM Identity Center), and per-workload accounts for dev, staging, and prod. We need to decide whether to use AWS Control Tower or build a custom AWS Organizations setup with custom SCPs.

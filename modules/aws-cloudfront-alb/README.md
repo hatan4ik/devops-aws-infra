@@ -1,3 +1,5 @@
+> Historical prototype only. This module is disabled by [ADR 0014](../../docs/adr/0014-canonical-architecture-and-iac-boundary.md) and must not be used as a deployment dependency.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

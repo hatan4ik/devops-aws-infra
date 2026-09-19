@@ -1,7 +1,11 @@
 # ADR 0004: AuthN / AuthZ Provider
 
 ## Status
-Accepted
+Superseded by [ADR 0014](0014-canonical-architecture-and-iac-boundary.md)
+
+> Historical record only. The active identity and authorization decision is
+> [ADR 0006](0006-identity-and-authorization.md), constrained by
+> [ADR 0011](0011-cognito-mrr-provider-boundary.md).
 
 ## Context
 We need to authenticate 5 million MAU with a peak of 5,000 RPS for auth. The solution must support multi-region.

@@ -1,7 +1,10 @@
 # ADR 0007: Fine-Grained Authorization
 
 ## Status
-Accepted
+Superseded by [ADR 0014](0014-canonical-architecture-and-iac-boundary.md)
+
+> Historical record only. The active identity and authorization decision is
+> [ADR 0006](0006-identity-and-authorization.md).
 
 ## Context
 Application requires authorization beyond standard API Gateway/ALB JWT validation.

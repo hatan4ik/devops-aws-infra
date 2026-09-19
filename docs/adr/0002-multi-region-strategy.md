@@ -1,7 +1,10 @@
 # ADR 0002: Multi-Region Availability Strategy
 
 ## Status
-Accepted
+Superseded by [ADR 0014](0014-canonical-architecture-and-iac-boundary.md)
+
+> Historical record only. The active regional availability decision is
+> [ADR 0002](0002-regional-availability-and-data.md).
 
 ## Context
 The application serves millions of users with latency targets (p99 < 300ms auth, < 200ms API) and strict availability (99.99%) and RTO (< 15 mins).

@@ -5,6 +5,11 @@
 **Method:** one independent reviewer per pillar (SOLID, Clean Code, Pragmatic Programming, Systems Engineering, Type-System Thinking), each restricted to read-only inspection and required to quote file evidence, plus the repository's own quality gate (`scripts/validate-terraform-quality.sh`) and Checkov executed on the copy. Every finding below was re-checked against the files before inclusion. No file in the repository was modified by this review other than the creation of this document.
 **Path shorthand:** `vpc-workload/`, `tgw-hub/`, and `cognito/` (or `cognito-userpool/`) abbreviate `terraform/modules/terraform-aws-<name>/`; `state-backend/`, `workload-regional/`, `network-regional/`, and `tgw-vpc-attachment/` are under `terraform/modules/internal/`; `*.tftest.hcl` files are in each module's `tests/` directory; `foundation/.../` is `terraform/roots/foundation/region-a/shared/`; `automation/.../` is `automation/terraform-pipelines/`. Files named only in section 5 and 6 are proposals and do not exist yet.
 
+> **Resolution note (2026-09-19):** The ADR fork and root-level prototype
+> boundary findings were resolved by [ADR 0014](../adr/0014-canonical-architecture-and-iac-boundary.md).
+> This review remains a point-in-time historical assessment; its findings and
+> line references must not be read as current implementation status.
+
 ## 1. Verdict
 
 | Pillar | Verdict | Blockers | Headline |

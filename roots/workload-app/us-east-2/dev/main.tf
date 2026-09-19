@@ -15,7 +15,7 @@ module "vpc" {
 
 module "ecs" {
   source = "../../../../modules/aws-ecs-fargate"
-  
+
   config = {
     cluster_name = "${var.vpc_name}-cluster"
     environment  = var.environment
@@ -25,7 +25,7 @@ module "ecs" {
 
 module "auth" {
   source = "../../../../modules/aws-cognito-auth"
-  
+
   config = {
     pool_name              = "${var.vpc_name}-users"
     environment            = var.environment

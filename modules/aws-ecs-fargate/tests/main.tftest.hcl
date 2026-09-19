@@ -1,6 +1,7 @@
+# This historical module must stay unavailable as a deployment dependency.
 mock_provider "aws" {}
 
-run "valid_configuration" {
+run "prototype_is_disabled" {
   command = plan
 
   variables {
@@ -10,9 +11,5 @@ run "valid_configuration" {
     }
   }
 
-  assert {
-    condition     = aws_ecs_cluster.this.name == "test-cluster"
-    error_message = "Cluster name mismatch."
-  }
+  expect_failures = [terraform_data.prototype_disabled]
 }
-

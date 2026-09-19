@@ -3,6 +3,8 @@
 # every Terraform directory with -backend=false and never calls plan/apply.
 set -euo pipefail
 
+"$(dirname -- "${BASH_SOURCE[0]}")/verify-adr-boundary.sh"
+
 for required_command in terraform tflint; do
   command -v "$required_command" >/dev/null 2>&1 || {
     echo "required command is not available: $required_command" >&2

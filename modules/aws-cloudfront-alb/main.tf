@@ -52,16 +52,16 @@ resource "aws_wafv2_web_acl" "this" {
 }
 
 resource "aws_cloudfront_distribution" "this" {
-  enabled             = true
-  is_ipv6_enabled     = true
-  comment             = "Managed by Terraform"
-  web_acl_id          = var.config.enable_waf ? aws_wafv2_web_acl.this[0].arn : null
-  price_class         = "PriceClass_100"
+  enabled         = true
+  is_ipv6_enabled = true
+  comment         = "Managed by Terraform"
+  web_acl_id      = var.config.enable_waf ? aws_wafv2_web_acl.this[0].arn : null
+  price_class     = "PriceClass_100"
 
   origin {
     domain_name = var.config.primary_alb_domain
     origin_id   = "primary-alb"
-    
+
     custom_origin_config {
       http_port              = 80
       https_port             = 443
@@ -75,7 +75,7 @@ resource "aws_cloudfront_distribution" "this" {
     content {
       domain_name = var.config.secondary_alb_domain
       origin_id   = "secondary-alb"
-      
+
       custom_origin_config {
         http_port              = 80
         https_port             = 443
@@ -85,12 +85,12 @@ resource "aws_cloudfront_distribution" "this" {
     }
   }
 
-  # Active-Active failover Origin Group (ADR 0002 / ADR 0006)
+  # Historical origin-group topology; this disabled prototype is not an ADR 0004 implementation.
   dynamic "origin_group" {
     for_each = var.config.secondary_alb_domain != "" ? [1] : []
     content {
       origin_id = "active-active-group"
-      
+
       failover_criteria {
         status_codes = [500, 502, 503, 504]
       }
@@ -135,4 +135,3 @@ resource "aws_cloudfront_distribution" "this" {
 
   tags = local.common_tags
 }
-

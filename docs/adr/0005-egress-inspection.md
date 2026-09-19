@@ -1,7 +1,10 @@
 # ADR 0005: Egress Traffic Inspection
 
 ## Status
-Accepted
+Superseded by [ADR 0014](0014-canonical-architecture-and-iac-boundary.md)
+
+> Historical record only. The active ingress and egress decision is
+> [ADR 0004](0004-edge-ingress-and-egress.md).
 
 ## Context
 Security baseline requires strict control over outbound traffic. We need to decide if we route all egress through a centralized inspection layer.
