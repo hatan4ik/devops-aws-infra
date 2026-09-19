@@ -13,3 +13,28 @@ module "vpc" {
   }
 }
 
+module "ecs" {
+  source = "../../../../modules/aws-ecs-fargate"
+  
+  config = {
+    cluster_name = "${var.vpc_name}-cluster"
+    environment  = var.environment
+    tags         = var.tags
+  }
+}
+
+module "auth" {
+  source = "../../../../modules/aws-cognito-auth"
+  
+  config = {
+    pool_name              = "${var.vpc_name}-users"
+    environment            = var.environment
+    domain_prefix          = "platform-auth-${var.environment}"
+    callback_urls          = ["https://app.example.com/callback"]
+    logout_urls            = ["https://app.example.com/logout"]
+    advanced_security_mode = "ENFORCED"
+    enable_mfa             = "ON"
+    tags                   = var.tags
+  }
+}
+
