@@ -3,8 +3,8 @@
 # not introduce the future multi-Region state design; ADR 0015 requires that
 # to be a separately reviewed hardening migration after adoption is complete.
 
-#checkov:skip=CKV2_AWS_64: ADR 0015 adopts the existing key without replacing an unknown key policy; a Security-approved least-privilege policy is required before this bootstrap becomes a delivery backend.
 resource "aws_kms_key" "state" {
+  # checkov:skip=CKV2_AWS_64: ADR 0015 adopts the existing key without replacing an unknown key policy; a Security-approved least-privilege policy is required before this bootstrap becomes a delivery backend.
   description             = var.config.kms_key_description
   deletion_window_in_days = var.config.kms_key_deletion_window_in_days
   enable_key_rotation     = true
@@ -21,11 +21,11 @@ resource "aws_kms_alias" "state" {
   target_key_id = aws_kms_key.state.key_id
 }
 
-#checkov:skip=CKV_AWS_18: ADR 0015 adoption must be no-change until a Log Archive destination is approved; logging is a separately gated hardening action.
-#checkov:skip=CKV2_AWS_61: ADR 0015 preserves Object Lock/versioned state before a Security-approved lifecycle policy is defined.
-#checkov:skip=CKV2_AWS_62: ADR 0015 does not create an EventBridge integration without the approved event ownership and retention contract.
-#checkov:skip=CKV_AWS_144: ADR 0015 does not create a replica bucket or replication role; cross-Region recovery is a separately approved migration.
 resource "aws_s3_bucket" "state" {
+  # checkov:skip=CKV_AWS_18: ADR 0015 adoption must be no-change until a Log Archive destination is approved; logging is a separately gated hardening action.
+  # checkov:skip=CKV2_AWS_61: ADR 0015 preserves Object Lock/versioned state before a Security-approved lifecycle policy is defined.
+  # checkov:skip=CKV2_AWS_62: ADR 0015 does not create an EventBridge integration without the approved event ownership and retention contract.
+  # checkov:skip=CKV_AWS_144: ADR 0015 does not create a replica bucket or replication role; cross-Region recovery is a separately approved migration.
   bucket              = var.config.bucket_name
   object_lock_enabled = true
   tags                = var.config.tags
