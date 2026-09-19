@@ -11,15 +11,14 @@ terraform {
   # NOTE: To migrate this root itself to the state backend it manages, 
   # apply this root first with local state, then uncomment the block below 
   # and run `terraform init -migrate-state`.
-  /*
   backend "s3" {
-    bucket         = "platform-tf-state-shared-<random>" # Update with actual generated bucket name
+    bucket         = "platform-tf-state-shared-f3ddb8cc"
     key            = "shared-services/us-east-2/prod/terraform.tfstate"
     region         = "us-east-2"
     dynamodb_table = "platform-tf-lock-table"
     encrypt        = true
+    profile        = "AWS-hatan4ik-gmail"
   }
-  */
 }
 
 provider "aws" {
