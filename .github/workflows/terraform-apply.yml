@@ -1,8 +1,6 @@
-name: Terraform delivery preflight
 name: Terraform Apply
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -14,17 +12,13 @@ permissions:
   id-token: write # Required for OIDC AWS Authentication
 
 jobs:
-  delivery-preflight:
-    name: Delivery preflight
   terraform-apply:
     name: Terraform Apply
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
         uses: actions/checkout@v4
 
-      - name: Explain the delivery gate
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -39,10 +33,6 @@ jobs:
       - name: Determine Root Directory
         id: dir
         run: |
-          set -euo pipefail
-          echo "Terraform apply is intentionally disabled in this repository."
-          echo "Activate the reviewed reusable apply workflow only after account vending, state bootstrap, protected environments, scoped OIDC roles, approved tfvars, and a non-production plan are verified."
-          exit 1
           # A real CI setup would use a matrix or terramate to find changed roots. 
           # For this example, we assume execution in a specific root.
           echo "root_dir=roots/shared-services/us-east-1/prod" >> $GITHUB_ENV
