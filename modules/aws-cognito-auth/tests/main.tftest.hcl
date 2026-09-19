@@ -5,13 +5,13 @@ run "valid_configuration" {
 
   variables {
     config = {
-      pool_name              = "test-pool"
-      environment            = "dev"
-      domain_prefix          = "platform-auth"
-      callback_urls          = ["https://localhost/callback"]
-      logout_urls            = ["https://localhost/logout"]
-      advanced_security_mode = "ENFORCED"
-      enable_mfa             = "ON"
+      pool_name               = "test-pool"
+      environment             = "dev"
+      domain_prefix           = "platform-auth"
+      callback_urls           = ["https://localhost/callback"]
+      logout_urls             = ["https://localhost/logout"]
+      advanced_security_mode  = "ENFORCED"
+      enable_mfa              = "ON"
     }
   }
 
@@ -26,13 +26,13 @@ run "invalid_advanced_security" {
 
   variables {
     config = {
-      pool_name              = "test-pool"
-      environment            = "dev"
-      domain_prefix          = "platform-auth"
-      callback_urls          = ["https://localhost/callback"]
-      logout_urls            = ["https://localhost/logout"]
-      advanced_security_mode = "INVALID"
-      enable_mfa             = "ON"
+      pool_name               = "test-pool"
+      environment             = "dev"
+      domain_prefix           = "platform-auth"
+      callback_urls           = ["https://localhost/callback"]
+      logout_urls             = ["https://localhost/logout"]
+      advanced_security_mode  = "INVALID"
+      enable_mfa              = "ON"
     }
   }
 
@@ -40,3 +40,4 @@ run "invalid_advanced_security" {
     var.config
   ]
 }
+

@@ -31,3 +31,4 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
     capacity_provider = "FARGATE"
   }
 }
+

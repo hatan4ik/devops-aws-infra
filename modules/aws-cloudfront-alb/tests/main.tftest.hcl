@@ -16,3 +16,4 @@ run "valid_configuration" {
     error_message = "Distribution should be enabled."
   }
 }
+

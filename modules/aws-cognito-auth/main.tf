@@ -32,10 +32,10 @@ resource "aws_cognito_user_pool" "this" {
 
   # Standard attributes
   schema {
-    attribute_data_type = "String"
-    name                = "email"
-    required            = true
-    mutable             = true
+    attribute_data_type      = "String"
+    name                     = "email"
+    required                 = true
+    mutable                  = true
   }
 
   software_token_mfa_configuration {
@@ -63,3 +63,4 @@ resource "aws_cognito_user_pool_client" "client" {
   logout_urls                          = var.config.logout_urls
   supported_identity_providers         = ["COGNITO"]
 }
+

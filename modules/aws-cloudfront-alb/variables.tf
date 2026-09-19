@@ -10,3 +10,4 @@ variable "config" {
   })
   nullable = false
 }
+

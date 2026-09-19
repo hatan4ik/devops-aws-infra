@@ -12,3 +12,4 @@ output "user_pool_domain" {
   description = "The domain of the Cognito User Pool"
   value       = aws_cognito_user_pool_domain.this.domain
 }
+

@@ -13,6 +13,7 @@
 | **Phase 3.6** | Observability ADR | `docs/adr/0008-observability.md` | ✅ Complete |
 | **Phase 3 (Out)**| Architecture Diagrams & Cost | `docs/architecture/diagrams.md`, `phase-3-summary.md` | ✅ Complete |
 | **Phase 4** | Repo Strategy & Naming ADR | `docs/adr/0009-repository-strategy.md`, `phase-4-repositories.md` | ✅ Complete |
+| **Phase 5** | Terraform Standards | `modules/aws-tf-state-backend/`, `modules/aws-vpc-workload/` | ✅ Complete |
 | **Phase 5** | Terraform Standards | `modules/aws-tf-state-backend`, `modules/aws-vpc-workload`, `modules/aws-cognito-auth`, `modules/aws-ecs-fargate`, `modules/aws-cloudfront-alb` | ✅ Complete |
 | **Phase 5** | Roots Structure (Dev/Stg/Prd) | `roots/workload-app/us-east-2/{dev,staging,prod}/` | ✅ Complete |
 | **Phase 6** | CI/CD Pipelines (GitOps) | `.github/workflows/*.yml` | ✅ Complete |

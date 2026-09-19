@@ -7,3 +7,4 @@ output "cloudfront_hosted_zone_id" {
   description = "The Route 53 zone ID for the CloudFront distribution"
   value       = aws_cloudfront_distribution.this.hosted_zone_id
 }
+
