@@ -18,6 +18,6 @@
 ## Hard blockers before a production-ready claim
 
 1. Cognito MRR is blocked by current Terraform provider capability under ADR 0011. It has not been deployed, tested, or substituted with imperative automation.
-2. No AWS accounts, Regions, CIDRs, ASNs, IPAM pools, VPN customer gateways, DNS/certificates, state backend, identity roles, service quotas, data model, application image, or synthetic test identity has been supplied or created.
+2. No approved platform accounts, Regions, CIDRs, ASNs, IPAM pools, VPN customer gateways, DNS/certificates, identity roles, service quotas, data model, application image, or synthetic test identity has been supplied or created. A separate legacy state bootstrap is recorded in the [inventory](legacy-state-bootstrap.md) and cannot be used as an approved backend until its disposition is decided.
 3. The GitOps source repository exists, but it has no branch protection/ruleset, GitHub environment, secret, target-organization repository family, or AWS OIDC trust policy. The staged AWS delivery workflows remain disabled until those controls and a sandbox verification are in place.
 4. No live network/security/authentication/failover assertion has run. The module tests and syntax/static checks are not deployment evidence.

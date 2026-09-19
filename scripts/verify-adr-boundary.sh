@@ -95,6 +95,10 @@ if grep -R -nEi --exclude=terraform-pr.yml 'id-token:[[:space:]]*write|configure
   fail 'root workflows must remain credential-free and non-mutating'
 fi
 
+if grep -R -nE --include='*.yml' --include='*.yaml' '[0-9]{12}' .github/workflows; then
+  fail 'root workflows must not contain a hard-coded AWS account identifier'
+fi
+
 grep -Fq 'only candidate Terraform delivery tree' README.md || fail 'root README does not identify the canonical Terraform tree'
 
 printf 'PASS: ADR and Terraform delivery boundary\n'

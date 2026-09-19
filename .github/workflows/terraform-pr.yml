@@ -19,6 +19,7 @@ jobs:
       - name: Validate reusable workflow structure and action pins
         run: |
           set -euo pipefail
+          automation/terraform-pipelines/scripts/check-action-pins.sh .github/workflows
           cd automation/terraform-pipelines
           ruby scripts/validate-workflows.rb
           ruby scripts/check-reusable-contracts.rb

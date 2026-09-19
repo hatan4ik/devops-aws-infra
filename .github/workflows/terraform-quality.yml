@@ -11,8 +11,12 @@ on:
       - "docs/walkthrough.md"
       - "docs/architecture/phase-3-summary.md"
       - "docs/architecture/phase-4-repositories.md"
+      - "docs/architecture/phase-6-7-traceability.md"
+      - "docs/architecture/legacy-state-bootstrap.md"
+      - "docs/book/12-pre-deployment-checklist.md"
       - "docs/runbooks/bootstrap-aws-access.md"
       - "docs/runbooks/region-failover.md"
+      - "README.md"
       - "modules/**"
       - "roots/**"
       - ".github/workflows/**"
@@ -29,8 +33,12 @@ on:
       - "docs/walkthrough.md"
       - "docs/architecture/phase-3-summary.md"
       - "docs/architecture/phase-4-repositories.md"
+      - "docs/architecture/phase-6-7-traceability.md"
+      - "docs/architecture/legacy-state-bootstrap.md"
+      - "docs/book/12-pre-deployment-checklist.md"
       - "docs/runbooks/bootstrap-aws-access.md"
       - "docs/runbooks/region-failover.md"
+      - "README.md"
       - "modules/**"
       - "roots/**"
       - ".github/workflows/**"
@@ -100,6 +108,7 @@ jobs:
       - name: Verify reusable-pipeline source boundaries
         run: |
           set -euo pipefail
+          automation/terraform-pipelines/scripts/check-action-pins.sh .github/workflows
           cd automation/terraform-pipelines
           ruby scripts/validate-workflows.rb
           ruby scripts/check-reusable-contracts.rb

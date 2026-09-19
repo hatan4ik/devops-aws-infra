@@ -1,6 +1,6 @@
 # AWS platform GitOps source
 
-This repository is the GitOps source for a proposed AWS-native, multi-account, two-Region platform. It contains reviewed architecture, Terraform module/root source, local pipeline definitions, runbooks, and verification contracts. It does not contain cloud credentials, state, customer data, or an AWS deployment history.
+This repository is the GitOps source for a proposed AWS-native, multi-account, two-Region platform. It contains reviewed architecture, Terraform module/root source, local pipeline definitions, runbooks, and verification contracts. It does not contain cloud credentials, state, or customer data. A legacy AWS state bootstrap exists outside the canonical delivery tree; its verified inventory and required disposition decision are recorded in the [legacy state bootstrap inventory](docs/architecture/legacy-state-bootstrap.md).
 
 ## Current operating boundary
 

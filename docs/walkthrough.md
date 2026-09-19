@@ -2,16 +2,17 @@
 
 ## Current status
 
-No AWS state backend has been initialized, no plan has been approved, and no
-Terraform apply is authorized from this repository. The source contains no
-cloud credentials, state, or evidence of a completed state migration.
+No canonical Terraform plan or apply is authorized from this repository. The
+source contains no cloud credentials or committed state. A legacy state
+bootstrap does exist outside the canonical delivery tree; see the verified
+[legacy state bootstrap inventory](architecture/legacy-state-bootstrap.md).
 
 The previous walkthrough in this location described an `us-east-2` prototype,
-an authenticated local profile, and a completed state migration. That material
-belonged to the root-level prototype tree, conflicted with the authoritative
-architecture, and is superseded by [ADR 0014](adr/0014-canonical-architecture-and-iac-boundary.md).
-The prototype roots no longer contain a backend or named profile and fail a
-normal Terraform plan.
+an authenticated local profile, and a completed state migration. The prototype
+is not an approved delivery path and is superseded by
+[ADR 0014](adr/0014-canonical-architecture-and-iac-boundary.md). The prototype
+roots no longer contain a backend or named profile and fail a normal Terraform
+plan; that safeguard does not itself adopt or retire the existing bootstrap.
 
 ## Approved delivery sequence
 
