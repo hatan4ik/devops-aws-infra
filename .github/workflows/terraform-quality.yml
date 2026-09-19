@@ -106,8 +106,11 @@ jobs:
           find-dir: terraform/modules
           output-file: README.md
           output-method: inject
-          fail-on-diff: "true"
+          fail-on-diff: "false"
           git-push: "false"
+
+      - name: Fail on generated Terraform documentation drift
+        run: git diff HEAD --exit-code -- terraform/modules
 
       - name: Verify reusable-pipeline source boundaries
         run: |
