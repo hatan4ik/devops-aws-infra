@@ -1,1 +1,2 @@
 s3:CreateBucket kms:CreateKey dynamodb:CreateTable
+
