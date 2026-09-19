@@ -23,6 +23,7 @@ terraform {
 }
 
 provider "aws" {
+  profile = "AWS-hatan4ik-gmail"
   region = "us-east-1"
 }
 
