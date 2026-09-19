@@ -1,6 +1,9 @@
 # Local .terraform directories
 **/.terraform/*
 
+# Local review-only reference clones. They are not GitOps source or dependencies.
+/reference/github/
+
 # .tfstate files
 *.tfstate
 *.tfstate.*
@@ -42,4 +45,3 @@ terraform.rc
 .Trashes
 ehthumbs.db
 Thumbs.db
-
