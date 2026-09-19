@@ -20,6 +20,7 @@ active_adrs=(
   docs/adr/0012-oidc-gated-terraform-delivery.md
   docs/adr/0013-layered-verification-no-automatic-fault-injection.md
   docs/adr/0014-canonical-architecture-and-iac-boundary.md
+  docs/adr/0015-adopt-legacy-state-bootstrap.md
 )
 
 superseded_adrs=(

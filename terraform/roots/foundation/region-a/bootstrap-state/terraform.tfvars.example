@@ -1,0 +1,23 @@
+# Keep the working copy as an ignored *.tfvars file. These are resource
+# identifiers, not credentials; the account ID is supplied at runtime after
+# STS identity verification.
+aws_region     = "us-east-2"
+aws_account_id = "REPLACE_WITH_APPROVED_ACCOUNT_ID"
+
+legacy_state_backend = {
+  bucket_name                          = "platform-tf-state-shared-f3ddb8cc"
+  dynamodb_table_name                  = "platform-tf-lock-table"
+  kms_key_alias                        = "alias/terraform-state-backend"
+  kms_key_description                  = "KMS key for encrypting Terraform state bucket for shared"
+  kms_key_deletion_window_in_days      = 30
+  object_lock_retention_mode           = "COMPLIANCE"
+  object_lock_retention_days           = 14
+  dynamodb_deletion_protection_enabled = false
+  tags = {
+    Environment = "shared"
+    Layer       = "shared-services"
+    ManagedBy   = "Terraform"
+    Module      = "aws-tf-state-backend"
+    Project     = "platform-aws-platform"
+  }
+}

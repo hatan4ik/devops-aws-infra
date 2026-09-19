@@ -1,6 +1,6 @@
 # Phase 4 repository and module strategy
 
-**Status:** Stakeholder-approved Phase 4 design. The credential-free source has been published to `hatan4ik/devops-aws-infra`; no target platform repository family, branch rule, GitHub environment, release tag, AWS OIDC role, or AWS resource has been configured.
+**Status:** Stakeholder-approved Phase 4 design. The credential-free source has been published to `hatan4ik/devops-aws-infra`; no target platform repository family, branch rule, GitHub environment, release tag, or AWS OIDC role has been configured. ADR 0015 records a single observed legacy state bootstrap; it does not establish a deployed platform repository or delivery path.
 
 ## Naming contract
 

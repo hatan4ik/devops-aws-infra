@@ -1,7 +1,7 @@
 # Proposed AWS multi-account, multi-Region platform
 
-**Status:** Phase 7 source package is complete and its credential-free GitOps source is published in `hatan4ik/devops-aws-infra` as of 2026-09-18. No AWS account, resource, Terraform state, AWS OIDC role, GitHub environment, or branch rule has been configured.
-**Scope:** AWS-native platform design and GitOps source for a low-latency application serving millions of authenticated users. The repository is not deployment evidence and has not created cloud infrastructure.
+**Status:** Phase 7 source package is complete and its credential-free GitOps source is published in `hatan4ik/devops-aws-infra`. ADR 0015 records one observed legacy state bootstrap and its transitional canonical source; its state-address migration remains unexecuted. No AWS OIDC role, GitHub environment, or branch rule has been configured.
+**Scope:** AWS-native platform design and GitOps source for a low-latency application serving millions of authenticated users. The repository is not deployment evidence and has not created an application, network, identity, or data-plane deployment.
 
 The design is active-active for stateless application and DynamoDB profile/session traffic across two Regions and two AZs per Region. Cognito is intentionally a native multi-Region **primary/secondary directory**: the secondary is activated for authentication and failover, but user creation, password resets, and profile writes remain primary-Region operations. This distinction is material to the stated RTO/RPO and product experience.
 
@@ -85,6 +85,8 @@ optional regional cache]
 | [0011](../adr/0011-cognito-mrr-provider-boundary.md) | Do not substitute CLI/console steps for Terraform-managed Cognito MRR; block it pending provider support. |
 | [0012](../adr/0012-oidc-gated-terraform-delivery.md) | Separate OIDC plan/apply/drift roles, protected execution environments, SHA-pinned CI, and no automatic remediation. |
 | [0013](../adr/0013-layered-verification-no-automatic-fault-injection.md) | Layered credential-safe verification; controlled game days rather than automatic disruptive tests. |
+| [0014](../adr/0014-canonical-architecture-and-iac-boundary.md) | One authoritative ADR sequence and `terraform/` as the only candidate delivery tree. |
+| [0015](../adr/0015-adopt-legacy-state-bootstrap.md) | Transitional canonical source for the observed bootstrap; state migration remains explicitly gated. |
 
 ## Account and OU topology
 

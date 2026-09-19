@@ -9,5 +9,6 @@ These runbooks are execution gates, not evidence that a resource already exists.
 | [Hybrid VPN/BGP onboarding](hybrid-vpn-bgp-onboarding.md) | Connect an on-premises routing domain to a regional TGW. | Two healthy tunnels/paths, prefix filters, isolation checks, and recorded rollback. |
 | [Regional failover](regional-failover.md) | Operate a controlled application regional failover. | Health signal, traffic shift, auth/API/data validation, incident timeline, and controlled failback. |
 | [Break-glass access](break-glass-access.md) | Resolve a critical incident requiring exceptional access. | Approval, MFA/session evidence, CloudTrail review, privilege removal, and post-incident review. |
+| [Legacy state-backend adoption](adopt-legacy-state-backend.md) | Re-address the observed bootstrap state into the canonical transitional root. | Preflight, protected state backup, active-lock check, no-resource-change plans, reviewers, and cost owner. |
 
 No runbook permits changing AWS. The published root quality workflow remains credential-free; AWS delivery requires the remote-control and apply gates in the architecture and pipeline documentation.

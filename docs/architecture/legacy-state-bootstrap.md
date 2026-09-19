@@ -1,8 +1,9 @@
 # Legacy state bootstrap inventory
 
-**Status:** Observed 2026-09-19; disposition decision required.
-**Scope:** A legacy bootstrap in `us-east-2`; it is not managed by the
-canonical [`terraform/`](../../terraform/README.md) delivery tree.
+**Status:** Adoption selected 2026-09-19; canonical state-address migration pending.
+**Scope:** A legacy bootstrap in `us-east-2`; it is represented by the
+transitional canonical [`bootstrap-state` root](../../terraform/roots/foundation/region-a/bootstrap-state/),
+but the remote Terraform state has not yet been re-addressed.
 
 ## Confirmed resources
 
@@ -24,17 +25,21 @@ is not a claim that those Regions are empty.
 The root repository has no active AWS credential, plan, or apply workflow. The
 legacy prototype roots are disabled and must not be used to alter these
 resources. Do not delete state objects, KMS material, or the lock table while
-the resource-disposition decision is pending.
+the state-address migration and its evidence are pending.
 
-## Required decision
+## Adopted disposition
 
-The platform owner must choose one path and record it in an ADR amendment:
+The Platform Owner selected adoption in [ADR 0015](../adr/0015-adopt-legacy-state-bootstrap.md).
+The canonical source mirrors the observed bootstrap and protects the bucket,
+KMS key, and lock table from Terraform destruction. It does not make an AWS
+change by itself.
 
-1. **Adopt:** import the bootstrap into an approved canonical foundation root,
-   assign an operational owner, and add state restore, cost, and lifecycle
-   controls.
-2. **Retire:** approve a deliberate destruction plan after confirming the
-   retained state is no longer needed and the Compliance Object Lock retention
-   period has elapsed.
+The next permitted action is the explicitly approved state-address migration in
+the [adoption runbook](../runbooks/adopt-legacy-state-backend.md). It requires
+a protected backup, active-lock check, a no-resource-change plan, named
+specialist approvals, and recorded cost ownership. The later hardening change
+must add a Log Archive destination, restrictive state/KMS policies, DynamoDB
+deletion protection, cross-Region recovery, and a tested restore procedure.
 
-Neither path is authorized by this inventory document.
+Until that migration completes, the disabled prototype files remain forensic
+evidence only and are not a deployment path.

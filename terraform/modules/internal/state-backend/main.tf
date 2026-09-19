@@ -11,6 +11,10 @@ resource "aws_kms_key" "state" {
     Name            = "${var.name_prefix}-${each.key}-terraform-state"
     EnvironmentTier = each.key
   })
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_kms_replica_key" "state" {
@@ -27,6 +31,10 @@ resource "aws_kms_replica_key" "state" {
     EnvironmentTier = each.key
     ReplicaRegion   = var.replica_region
   })
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_kms_alias" "state" {
@@ -56,6 +64,8 @@ resource "aws_s3_bucket" "state" {
   })
 
   lifecycle {
+    prevent_destroy = true
+
     precondition {
       condition     = var.replica_region != var.primary_region
       error_message = "replica_region must be distinct from primary_region for cross-Region state replication."
@@ -75,6 +85,10 @@ resource "aws_s3_bucket" "state_replica" {
     EnvironmentTier = each.key
     ReplicaRegion   = var.replica_region
   })
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "state" {
@@ -396,4 +410,8 @@ resource "aws_dynamodb_table" "state_lock" {
     Name            = local.state_lock_table_names[each.key]
     EnvironmentTier = each.key
   })
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }

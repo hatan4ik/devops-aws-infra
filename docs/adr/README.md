@@ -20,6 +20,7 @@ one of these files.
 | 0012 | [OIDC-gated Terraform delivery](0012-oidc-gated-terraform-delivery.md) |
 | 0013 | [Layered verification and no automatic fault injection](0013-layered-verification-no-automatic-fault-injection.md) |
 | 0014 | [Canonical architecture and IaC boundary](0014-canonical-architecture-and-iac-boundary.md) |
+| 0015 | [Adopt the legacy Terraform state bootstrap](0015-adopt-legacy-state-bootstrap.md) |
 
 ## Historical superseded records
 

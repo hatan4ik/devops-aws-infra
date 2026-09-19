@@ -4,6 +4,7 @@
 set -euo pipefail
 
 "$(dirname -- "${BASH_SOURCE[0]}")/verify-adr-boundary.sh"
+bash -n scripts/verify-legacy-state-backend-adoption.sh
 
 for required_command in terraform tflint; do
   command -v "$required_command" >/dev/null 2>&1 || {
@@ -17,6 +18,7 @@ modules=(
   terraform/modules/terraform-aws-tgw-hub
   terraform/modules/terraform-aws-cognito-userpool
   terraform/modules/internal/state-backend
+  terraform/modules/internal/legacy-state-backend-adoption
   terraform/modules/internal/network-regional
   terraform/modules/internal/tgw-vpc-attachment
   terraform/modules/internal/workload-regional
@@ -24,6 +26,7 @@ modules=(
 
 roots=(
   terraform/roots/foundation/region-a/shared
+  terraform/roots/foundation/region-a/bootstrap-state
   terraform/roots/network/region-a/shared
   terraform/roots/network/region-b/shared
   terraform/roots/workload-dev/region-a/dev

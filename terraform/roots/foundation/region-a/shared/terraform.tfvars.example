@@ -11,30 +11,42 @@ state_backend = {
     dev = {
       bucket_name                           = "REPLACE_WITH_DEV_BUCKET"
       replica_bucket_name                   = "REPLACE_WITH_DEV_REPLICA_BUCKET"
-      noncurrent_version_expiration_in_days = 0
-      abort_incomplete_multipart_upload_after_days = 0
-      object_lock = { enabled = false }
+      noncurrent_version_expiration_in_days        = 90
+      abort_incomplete_multipart_upload_after_days = 7
+      object_lock = {
+        enabled        = true
+        retention_mode = "COMPLIANCE"
+        retention_days = 14
+      }
     }
     staging = {
       bucket_name                           = "REPLACE_WITH_STAGING_BUCKET"
       replica_bucket_name                   = "REPLACE_WITH_STAGING_REPLICA_BUCKET"
-      noncurrent_version_expiration_in_days = 0
-      abort_incomplete_multipart_upload_after_days = 0
-      object_lock = { enabled = false }
+      noncurrent_version_expiration_in_days        = 90
+      abort_incomplete_multipart_upload_after_days = 7
+      object_lock = {
+        enabled        = true
+        retention_mode = "COMPLIANCE"
+        retention_days = 14
+      }
     }
     prod = {
       bucket_name                           = "REPLACE_WITH_PROD_BUCKET"
       replica_bucket_name                   = "REPLACE_WITH_PROD_REPLICA_BUCKET"
-      noncurrent_version_expiration_in_days = 0
-      abort_incomplete_multipart_upload_after_days = 0
-      object_lock = { enabled = false }
+      noncurrent_version_expiration_in_days        = 90
+      abort_incomplete_multipart_upload_after_days = 7
+      object_lock = {
+        enabled        = true
+        retention_mode = "COMPLIANCE"
+        retention_days = 14
+      }
     }
   }
   state_access_principal_arns = [
     "arn:aws:iam::REPLACE_WITH_ACCOUNT_ID:role/REPLACE_WITH_CI_ROLE",
     "arn:aws:iam::REPLACE_WITH_ACCOUNT_ID:role/REPLACE_WITH_BREAK_GLASS_ROLE",
   ]
-  kms_key_deletion_window_in_days = 0 # Deliberately invalid until the approved recovery window is supplied.
+  kms_key_deletion_window_in_days = 30
   key_administrator_arns = [
     "arn:aws:iam::REPLACE_WITH_ACCOUNT_ID:role/REPLACE_WITH_KEY_ADMIN_ROLE",
   ]

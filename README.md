@@ -1,12 +1,12 @@
 # AWS platform GitOps source
 
-This repository is the GitOps source for a proposed AWS-native, multi-account, two-Region platform. It contains reviewed architecture, Terraform module/root source, local pipeline definitions, runbooks, and verification contracts. It does not contain cloud credentials, state, or customer data. A legacy AWS state bootstrap exists outside the canonical delivery tree; its verified inventory and required disposition decision are recorded in the [legacy state bootstrap inventory](docs/architecture/legacy-state-bootstrap.md).
+This repository is the GitOps source for a proposed AWS-native, multi-account, two-Region platform. It contains reviewed architecture, Terraform module/root source, local pipeline definitions, runbooks, and verification contracts. It does not contain cloud credentials, state, or customer data. A legacy AWS state bootstrap is recorded by a transitional canonical root; its approved adoption boundary and still-gated state-address migration are in the [legacy state bootstrap inventory](docs/architecture/legacy-state-bootstrap.md).
 
 ## Current operating boundary
 
 - The root [Terraform quality workflow](.github/workflows/terraform-quality.yml) is credential-free. It validates and tests Terraform, scans IaC, checks generated documentation, and verifies reusable-workflow policy.
 - The plan, apply, drift, and release workflows are staged under [`automation/terraform-pipelines`](automation/terraform-pipelines/) for a future dedicated pipeline repository. They are not active deployment paths in this repository.
-- No Terraform backend, plan, apply, AWS resource, GitHub environment, OIDC role, branch ruleset, or release tag is configured by this source alone.
+- No Terraform backend configuration, plan, apply, GitHub environment, OIDC role, branch ruleset, or release tag is configured by this source alone. The one observed legacy state bootstrap is not evidence of a deployed application platform and remains pending its canonical state-address migration.
 - Cognito MRR is intentionally blocked until it has a provider-backed Terraform lifecycle; see [ADR 0011](docs/adr/0011-cognito-mrr-provider-boundary.md).
 - [`terraform/`](terraform/README.md) is the only candidate Terraform delivery tree. Root-level [`modules/`](modules/README.md) and [`roots/`](roots/README.md) are disabled historical prototypes; see [ADR 0014](docs/adr/0014-canonical-architecture-and-iac-boundary.md).
 
@@ -21,7 +21,7 @@ A full O'Reilly-style engineering reference is available in [`docs/book/`](docs/
 | [`docs/architecture`](docs/architecture/README.md) | Architecture, threat/security controls, costs, prerequisites, and traceability. |
 | [`docs/adr`](docs/adr/) | Accepted architecture decisions and their rejected alternatives. |
 | [`docs/runbooks`](docs/runbooks/README.md) | Account vending, Region expansion, hybrid VPN/BGP, failover, and break-glass operations. |
-| [`terraform`](terraform/README.md) | Candidate reusable modules, internal composition, and nine backend-disabled roots. |
+| [`terraform`](terraform/README.md) | Candidate reusable modules, internal composition, and ten backend-disabled roots. |
 | [`automation/terraform-pipelines`](automation/terraform-pipelines/README.md) | SHA-pinned quality/plan/apply/drift/release pipeline source and caller templates. |
 | [`tests`](tests/README.md) | Mocked module, read-only AWS, public synthetic, and AuthN/AuthZ test contracts. |
 

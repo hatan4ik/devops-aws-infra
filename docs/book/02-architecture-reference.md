@@ -1,6 +1,6 @@
 # Chapter 2 — Architecture Reference
 
-**Status:** Stakeholder-approved 2026-09-18 · No AWS resources created
+**Status:** Stakeholder-approved 2026-09-18 · No application-platform resources created; see ADR 0015 for the separately observed state bootstrap
 
 ---
 
