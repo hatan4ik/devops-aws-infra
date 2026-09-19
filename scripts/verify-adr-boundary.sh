@@ -83,8 +83,16 @@ if grep -R -nE --include='*.tf' 'provider[[:space:]]+"aws"' roots; then
   fail 'disabled prototype roots must not configure an AWS provider'
 fi
 
-if git grep -nF -- 'AWS-hatan4ik-gmail'; then
+historical_profile_prefix='AWS-hatan4ik-'
+historical_profile="${historical_profile_prefix}gmail"
+if git grep -nF -- "$historical_profile"; then
   fail 'a historical named local credential profile remains in source'
+fi
+
+delivery_workflow=.github/workflows/terraform-apply.yml
+[[ -f "$delivery_workflow" ]] || fail "missing delivery preflight workflow: $delivery_workflow"
+if grep -R -nEi --exclude=terraform-pr.yml 'id-token:[[:space:]]*write|configure-aws-credentials|terraform[[:space:]]+apply' .github/workflows; then
+  fail 'root workflows must remain credential-free and non-mutating'
 fi
 
 grep -Fq 'only candidate Terraform delivery tree' README.md || fail 'root README does not identify the canonical Terraform tree'

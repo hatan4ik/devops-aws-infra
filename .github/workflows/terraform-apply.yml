@@ -1,56 +1,21 @@
-name: Terraform Apply
+name: Delivery preflight
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'roots/**'
+  workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write # Required for OIDC AWS Authentication
 
 jobs:
-  terraform-apply:
-    name: Terraform Apply
-    runs-on: ubuntu-latest
+  delivery_not_enabled:
+    name: Delivery not enabled
+    runs-on: ubuntu-24.04
     steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-
-      - name: Configure AWS Credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::448871779014:role/github-actions-terraform-role # Update with actual role
-          aws-region: us-east-2
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.0
-
-      - name: Determine Root Directory
-        id: dir
+      - name: Explain the delivery gate
+        shell: bash
         run: |
-          # A real CI setup would use a matrix or terramate to find changed roots. 
-          # For this example, we assume execution in a specific root.
-          echo "root_dir=roots/shared-services/us-east-2/prod" >> $GITHUB_ENV
-
-      - name: Terraform Init
-        working-directory: ${{ env.root_dir }}
-        run: terraform init
-
-      - name: Pre-Flight IAM Check
-        working-directory: ${{ env.root_dir }}
-        run: |
-          if [ -f "required_permissions.txt" ]; then
-            ACTIONS=$(cat required_permissions.txt | tr '\n' ' ')
-            ../../../../scripts/preflight-iam-check.sh $ACTIONS
-          else
-            echo "No required_permissions.txt found. Skipping pre-flight."
-          fi
-
-      - name: Terraform Apply
-        working-directory: ${{ env.root_dir }}
-        run: terraform apply -auto-approve
+          set -euo pipefail
+          echo "AWS delivery is intentionally disabled in this source repository."
+          echo "ADR 0012 requires a protected environment, approved backend, and scoped GitHub OIDC role in the target delivery repository."
+          echo "Use automation/terraform-pipelines only after those prerequisites have been verified."
+          exit 1
