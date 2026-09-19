@@ -71,7 +71,9 @@ resource "aws_s3_bucket_public_access_block" "state" {
 
 # Enable Object Lock as required by the brief (forces retention on versions)
 resource "aws_s3_bucket_object_lock_configuration" "state" {
-  bucket = aws_s3_bucket.state.id
+  bucket              = aws_s3_bucket.state.id
+  object_lock_enabled = "Enabled"
+  depends_on          = [aws_s3_bucket_versioning.state]
 
   rule {
     default_retention {
