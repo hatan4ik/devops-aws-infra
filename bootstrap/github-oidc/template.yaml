@@ -1,0 +1,167 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  One-time IAM bootstrap for GitHub Actions OIDC. Roles created by this stack
+  have no identity policies and therefore cannot mutate AWS until a separate,
+  reviewed least-privilege policy is attached.
+
+Parameters:
+  GitHubSubjectPrefix:
+    Type: String
+    Description: >-
+      Immutable GitHub OIDC repository subject prefix, without the final
+      :pull_request or :environment:<name> segment.
+    AllowedPattern: '^repo:[^:]+$'
+  RoleNamePrefix:
+    Type: String
+    Description: Stable role-name prefix for this target AWS account.
+    AllowedPattern: '^[A-Za-z0-9+=,.@_-]{1,40}$'
+
+Resources:
+  GitHubActionsOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      Tags:
+        - Key: ManagedBy
+          Value: devops-aws-infra
+        - Key: Purpose
+          Value: github-actions-oidc
+
+  GitHubActionsPlanRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${RoleNamePrefix}-plan'
+      Path: /github-actions/
+      Description: OIDC plan role. No permissions until a reviewed root policy is attached.
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !Ref GitHubActionsOidcProvider
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:pull_request'
+
+  GitHubActionsDevApplyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${RoleNamePrefix}-dev-apply'
+      Path: /github-actions/
+      Description: OIDC dev apply/proof role. No permissions until a reviewed root policy is attached.
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !Ref GitHubActionsOidcProvider
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:environment:dev'
+
+  GitHubActionsStagingApplyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${RoleNamePrefix}-staging-apply'
+      Path: /github-actions/
+      Description: OIDC staging apply role. No permissions until a reviewed root policy is attached.
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !Ref GitHubActionsOidcProvider
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:environment:staging'
+
+  GitHubActionsProdApplyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${RoleNamePrefix}-prod-apply'
+      Path: /github-actions/
+      Description: OIDC prod apply role. No permissions until a reviewed root policy is attached.
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !Ref GitHubActionsOidcProvider
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:environment:prod'
+
+  GitHubActionsDriftRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${RoleNamePrefix}-drift'
+      Path: /github-actions/
+      Description: OIDC drift role. No permissions until a reviewed root policy is attached.
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !Ref GitHubActionsOidcProvider
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:environment:dev'
+
+  GitHubActionsLandingZoneRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${RoleNamePrefix}-landing-zone'
+      Path: /github-actions/
+      Description: OIDC landing-zone role. No permissions until a reviewed control-plane policy is attached.
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !Ref GitHubActionsOidcProvider
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:environment:landing-zone'
+
+Outputs:
+  OidcProviderArn:
+    Description: GitHub Actions OIDC provider ARN.
+    Value: !Ref GitHubActionsOidcProvider
+  PlanRoleArn:
+    Description: Pull-request plan role ARN.
+    Value: !GetAtt GitHubActionsPlanRole.Arn
+  DevApplyRoleArn:
+    Description: Development apply/proof role ARN.
+    Value: !GetAtt GitHubActionsDevApplyRole.Arn
+  StagingApplyRoleArn:
+    Description: Staging apply role ARN.
+    Value: !GetAtt GitHubActionsStagingApplyRole.Arn
+  ProdApplyRoleArn:
+    Description: Production apply role ARN.
+    Value: !GetAtt GitHubActionsProdApplyRole.Arn
+  DriftRoleArn:
+    Description: Drift role ARN.
+    Value: !GetAtt GitHubActionsDriftRole.Arn
+  LandingZoneRoleArn:
+    Description: Landing-zone role ARN.
+    Value: !GetAtt GitHubActionsLandingZoneRole.Arn

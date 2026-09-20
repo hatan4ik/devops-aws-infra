@@ -1,6 +1,11 @@
 # Phase 4 repository and module strategy
 
-**Status:** Stakeholder-approved Phase 4 design. The credential-free source has been published to `hatan4ik/devops-aws-infra`; no target platform repository family, branch rule, GitHub environment, release tag, or AWS OIDC role has been configured. ADR 0015 records a single observed legacy state bootstrap; it does not establish a deployed platform repository or delivery path.
+**Status:** `hatan4ik/devops-aws-infra` is the selected initial GitOps control
+repository under ADR 0017. It starts as a single repository so the landing-zone
+bootstrap, pipeline controls, canonical Terraform source, and operator
+documentation have one review boundary. A future split remains an option, not
+the current delivery path. ADR 0015 records a single observed legacy state
+bootstrap; it does not establish a deployed application platform.
 
 ## Naming contract
 
@@ -12,11 +17,14 @@ Names are lowercase, hyphenated, and registry-compatible. `<org>` is intentional
 | Live platform configuration | `<org>-aws-platform-<layer>` | Composition and deployment roots for an account, Region, and environment. |
 | Workload configuration | `<org>-aws-platform-workload-<app>` | The live composition for one application, created after its app slug and owners are known. |
 | Documentation | `<org>-aws-platform-docs` | Architecture, ADRs, runbooks, source references, and traceability. |
-| Reusable workflows | `<org>-terraform-pipelines` | Pinned, reviewed GitHub Actions reusable workflows. |
+| Reusable workflows | `<org>-terraform-pipelines` | Optional future repository for pinned, reviewed GitHub Actions reusable workflows; the initial source remains in this repository. |
 
-## Proposed final repository set
+## Long-term repository split option
 
-The following is a target inventory, not a command to create it. `terraform-aws-*` names omit `<org>` so consumers use consistent Terraform registry-style source names; organization ownership still scopes the remote repository.
+The following is a future target inventory, not a command to create it.
+`terraform-aws-*` names omit `<org>` so consumers use consistent Terraform
+registry-style source names; organization ownership still scopes the remote
+repository. It is superseded as the *initial* delivery topology by ADR 0017.
 
 | Repository | Purpose | Lifecycle decision |
 |---|---|---|
@@ -96,4 +104,7 @@ The shallow clones in `reference/github/` are review evidence only. They must no
 4. Apply the planned rulesets, CODEOWNERS, environments, release/tag controls, and OIDC trust constraints described in [GitHub repository controls](github-repository-controls.md).
 5. Verify the controls through GitHub API/UI evidence before any pipeline receives AWS role access.
 
-The source repository is already published. Creating any further repository or enabling its AWS delivery path still requires the target organization and account-specific prerequisite data.
+The source repository is already published. Creating any further repository
+requires a new ADR and migration plan; the initial GitOps path remains in this
+repository. Enabling AWS delivery still requires target-account prerequisite
+data and root-specific least-privilege roles.

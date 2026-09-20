@@ -29,6 +29,7 @@ Architecture Decision Records (ADRs) capture the context, options considered, qu
 | [0014](../adr/0014-canonical-architecture-and-iac-boundary.md) | Canonical architecture and IaC boundary | Accepted | One authoritative ADR sequence and `terraform/` as the only candidate delivery tree; root-level prototypes are disabled |
 | [0015](../adr/0015-adopt-legacy-state-bootstrap.md) | Legacy state-bootstrap adoption | Proposed — specialist approval pending | Transitional canonical root and an explicitly gated state-address migration; no live resource mutation |
 | [0016](../adr/0016-terraform-state-lock-transition.md) | Terraform state lock transition | Proposed | Keep DynamoDB locking until S3 lockfile migration evidence and specialist approvals authorize retirement |
+| [0017](../adr/0017-github-oidc-bootstrap-proof.md) | GitHub OIDC bootstrap proof | Accepted | Permissionless GitHub OIDC trust proof before any Terraform delivery role receives AWS permissions |
 
 The duplicate-number ADR files retained under `docs/adr/` are historical only
 and are superseded by ADR 0014. Consult the [ADR index](../adr/README.md) for

@@ -1,0 +1,37 @@
+name: Verify sandbox OIDC
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  verify_sandbox_oidc:
+    name: Verify sandbox OIDC trust
+    runs-on: ubuntu-24.04
+    environment: dev
+    concurrency:
+      group: verify-sandbox-oidc
+      cancel-in-progress: false
+    steps:
+      - name: Require the dev environment role variable
+        env:
+          AWS_OIDC_PROOF_ROLE_ARN: ${{ vars.AWS_OIDC_PROOF_ROLE_ARN }}
+        run: |
+          set -euo pipefail
+          test -n "$AWS_OIDC_PROOF_ROLE_ARN"
+
+      - name: Exchange the GitHub OIDC token for a short-lived AWS session
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.0
+        with:
+          role-to-assume: ${{ vars.AWS_OIDC_PROOF_ROLE_ARN }}
+          role-session-name: oidc-proof-${{ github.run_id }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+
+      - name: Verify the assumed role without exposing credentials
+        run: |
+          set -euo pipefail
+          aws sts get-caller-identity --query '{Account:Account,Arn:Arn}' --output json

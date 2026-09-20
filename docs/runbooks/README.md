@@ -10,9 +10,15 @@ These runbooks are execution gates, not evidence that a resource already exists.
 | [Regional failover](regional-failover.md) | Operate a controlled application regional failover. | Health signal, traffic shift, auth/API/data validation, incident timeline, and controlled failback. |
 | [Break-glass access](break-glass-access.md) | Resolve a critical incident requiring exceptional access. | Approval, MFA/session evidence, CloudTrail review, privilege removal, and post-incident review. |
 | [AWS access bootstrap](bootstrap-aws-access.md) | Establish approved human access before any operational action. | IAM Identity Center session, account identity evidence, and no standing credentials. |
+| [GitHub OIDC bootstrap](github-oidc-bootstrap.md) | Establish GitHub-to-AWS short-lived credential trust without granting infrastructure permissions. | Protected GitHub controls, immutable OIDC subject/audience, and a successful no-permission proof session. |
 | [Legacy state-backend adoption](adopt-legacy-state-backend.md) | Re-address the observed bootstrap state into the canonical transitional root. | Preflight, protected state backup, active-lock check, no-resource-change plans, reviewers, and cost owner. |
 | [Terraform state restore](state-restore.md) | Recover state metadata after a confirmed corruption/change incident. | Approved S3 version, rollback copy, refresh-only plan, CloudTrail, and incident review. |
 | [Planned regional evacuation](regional-evacuation.md) | Withdraw a Region after workload/data migration. | Data/identity/traffic/route evidence, rollback decision, and approved decommission. |
 | [Account decommission](account-decommission.md) | Retire a migrated or unused governed account. | Retention, dependency, route/DNS, state, billing, and closure evidence. |
 
-No runbook permits changing AWS. The published root quality workflow remains credential-free; AWS delivery requires the remote-control and apply gates in the architecture and pipeline documentation.
+Except for explicitly approved bootstrap runbooks, no runbook permits changing
+AWS. The GitHub OIDC bootstrap is the narrow exception: it creates only the IAM
+OIDC provider and permissionless roles from an IAM Identity Center session.
+The published root quality workflow remains credential-free; infrastructure
+delivery still requires the remote-control and apply gates in the architecture
+and pipeline documentation.
