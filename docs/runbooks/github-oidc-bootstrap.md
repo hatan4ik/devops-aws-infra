@@ -70,6 +70,12 @@ For each canonical Terraform root, a separate reviewed pull request must:
 Do not attach `AdministratorAccess`, reuse a role across accounts or
 environments, or use GitHub repository secrets for AWS credentials.
 
+The first approved exception is the isolated sandbox network in
+[ADR 0018](../adr/0018-sandbox-network-gitops-delivery.md). Follow its
+[delivery runbook](sandbox-network-delivery.md) exactly; it supplies the
+root-specific policy, dedicated state key, and manual apply control. It does
+not authorize any other root or the landing-zone control plane.
+
 ## Current limitations
 
 Control Tower/Account Factory provisioning remains deliberately outside this

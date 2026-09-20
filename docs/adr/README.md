@@ -23,6 +23,7 @@ one of these files.
 | 0015 | [Adopt the legacy Terraform state bootstrap](0015-adopt-legacy-state-bootstrap.md) |
 | 0016 | [Terraform state lock transition](0016-terraform-state-lock-transition.md) |
 | 0017 | [GitHub OIDC bootstrap proof](0017-github-oidc-bootstrap-proof.md) |
+| 0018 | [Sandbox network GitOps delivery](0018-sandbox-network-gitops-delivery.md) |
 
 ## Historical superseded records
 

@@ -1,4 +1,4 @@
-# First delivery slice: foundation readiness and one sandbox-network plan
+# First delivery slice: foundation readiness and isolated sandbox-network delivery
 
 **Status:** selected delivery sequence; execution gated.
 
@@ -21,28 +21,27 @@ production identity, data-plane, or multi-Region traffic deployment.
    only after its state backup, inactive-lock, no-resource-change-plan,
    specialist-approval, and cost-owner gates are met. This is a state-address
    migration, not a rebuild or hardening apply.
-3. **Prove delivery controls without mutation.** In a dedicated approved
-   pipeline repository, create separate environment-scoped GitHub OIDC plan,
-   apply, and drift roles. Run the credential-free quality workflow first, then
-   a sandbox **plan-only** workflow. The sources in
-   [`automation/terraform-pipelines/`](../../automation/terraform-pipelines/README.md)
-   are templates until that repository and its protections exist.
-4. **Produce one sandbox network-root plan.** With approved account ID, Region,
-   CIDR/IPAM allocation, ASN/prefix plan, and required endpoint/DNS inputs,
-   generate and review an authoritative backend plan for a single sandbox
-   network root. A plan is an acceptance artifact, not permission to apply.
+3. **Activate the reviewed isolated-network delivery lane.** ADR 0017's
+   GitHub OIDC trust is live. Bootstrap only ADR 0018's root-specific policy
+   with the versioned CloudFormation template, configure non-secret role ARNs,
+   then produce the first authoritative sandbox-network plan.
+4. **Deliver the approved sandbox network.** With approved sandbox account,
+   Region, CIDR, availability-zone, and state-key inputs now recorded, run the
+   manual protected `dev` apply after review. The VPC remains private and
+   isolated; this does not authorize a TGW, VPN/BGP, endpoint, workload, or
+   landing-zone deployment.
 
 ## Explicit non-goals
 
 - No AWS Organizations, Control Tower, account-vending, Transit Gateway, VPN,
-  workload VPC, ECS, Cognito, DynamoDB, edge, production network, or
-  multi-Region deployment is created by this slice.
+  workload, ECS, Cognito, DynamoDB, edge, production network, or multi-Region
+  deployment is created by this slice.
 - No remote Terraform state is edited manually. Do not use `state mv`,
   `state rm`, or `import` outside the approved declarative adoption procedure.
-- No Terraform delivery permission, backend configuration, account ID, CIDR,
-  ASN, or production value is committed to this repository. ADR 0017's
-  permissionless OIDC trust and protected GitHub environments are a completed
-  prerequisite, not authorization for Terraform delivery.
+- No credential, production value, Control Tower configuration, or shared
+  network input is committed. ADR 0018 is the narrow exception that commits a
+  sandbox-only account/Region/CIDR and non-secret dedicated backend key as
+  immutable deployment configuration.
 
 ## Required evidence and acceptance criteria
 
@@ -51,7 +50,7 @@ production identity, data-plane, or multi-Region traffic deployment.
 | Landing-zone evidence package | Every external-checklist row has a named owner, approved value, and change-record attachment. | Any account, Region, CIDR/ASN, governance, security, DNS, quota, or budget input is unresolved. |
 | Legacy state adoption | Protected backup digest/version ID; inactive lock check; approved no-change plan; declarative migration; refresh-only plan; restore drill; Cloud Architecture, Security, SRE, and FinOps records. | Active lock, resource-changing plan, missing approval, or failed backup/restore validation. |
 | Pipeline control proof | Repository rules, GitHub environments, SHA-pinned workflow source, isolated plan/apply/drift OIDC role evidence, and a sandbox plan-only run. | Any shared role, unprotected environment, mutable action reference, or apply permission in the plan job. |
-| Sandbox network plan | Approved account/Region/CIDR/ASN inputs, authoritative backend, policy/security scan, cost diff, reviewed plan, rollback and stop condition. | Plan differs from the approved scope or lacks cost/security/rollback evidence. |
+| Sandbox network delivery | Approved account/Region/CIDR/state key, authoritative backend, policy/security scan, reviewed plan, protected manual apply, and weekday drift detection. | Plan differs from the isolated scope or lacks policy/security/rollback evidence. |
 
 ## Safe local verification
 
@@ -65,7 +64,7 @@ scripts/verify-adr-boundary.sh
 
 ## Transition to the next slice
 
-The platform may proceed only after all four acceptance rows are complete and
-the change record is approved. The next decision is then whether to authorize
-the reviewed sandbox network apply. It requires a separate approval; it is not
-implied by this document or by a successful plan.
+The platform may proceed to a separately reviewed shared-network or landing-zone
+decision only after the sandbox delivery evidence is complete. The sandbox
+approval never implies a production, TGW, VPN/BGP, application, or multi-Region
+apply.

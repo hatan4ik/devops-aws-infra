@@ -4,8 +4,10 @@
 version control; this repository is **not** proof of a deployed application
 platform. The sandbox account contains the permissionless GitHub OIDC provider
 and trust roles established by ADR 0017, plus the observed legacy state
-bootstrap. Neither is an application, network, identity, or data-plane
-deployment. The state bootstrap adoption remains gated and unexecuted.
+bootstrap. ADR 0018 now supplies the approved isolated sandbox-network source,
+dedicated state key configuration, and least-privilege policy bootstrap source;
+its CloudFormation policy stack, GitHub role variables, Terraform plan, and
+Terraform apply are not yet evidence until their runs are recorded.
 
 ## Start here
 
@@ -24,48 +26,43 @@ review snapshot, or Terraform directory.
 
 ## Current delivery decision
 
-**Selected milestone:** adopt the observed legacy S3/KMS/DynamoDB Terraform
-state bootstrap into the transitional canonical root, then harden or replace it
-under separate approved changes. This is the decision in
-[ADR 0015](adr/0015-adopt-legacy-state-bootstrap.md); retirement is not the
-selected path.
+**Selected milestone:** deliver the isolated sandbox-network root under
+[ADR 0018](adr/0018-sandbox-network-gitops-delivery.md), while the broader
+legacy state adoption in [ADR 0015](adr/0015-adopt-legacy-state-bootstrap.md)
+remains independently gated. This scope is limited to sandbox account
+`448871779014`, `us-east-2`, `10.64.0.0/16`, and a newly dedicated state key.
 
-This decision does **not** authorize a Terraform apply, a state move, import,
-or any other AWS mutation. Execution remains blocked until the adoption
-runbook's preconditions are evidenced: protected state backup, no active lock,
-a reviewed no-resource-change plan, named Cloud Architecture/Security/SRE
-approvals, and named cost ownership. GitHub has successfully proven its
-permissionless sandbox OIDC session, but there is no Terraform delivery role
-policy, backend configuration, remote plan, or apply pipeline.
+ADR 0018 authorizes only its versioned policy bootstrap and protected GitHub
+workflow. It does **not** authorize a local Terraform apply, manual state
+change, Control Tower launch, TGW/VPN/BGP, endpoint, workload, identity, data,
+production, or multi-Region deployment. Do not claim the sandbox network exists
+until the reviewed GitHub plan and apply runs have succeeded.
 
 ## Delivery lanes
 
 | Lane | Role | Do not treat it as |
 |---|---|---|
-| [`terraform/`](../terraform/README.md) | Candidate canonical Terraform delivery source. | An initialized backend or permission to apply. |
+| [`terraform/`](../terraform/README.md) | Candidate canonical Terraform delivery source; ADR 0018 is its one initialized-backend exception. | Proof that any AWS resource exists before the GitHub run evidence. |
 | [`docs/`](README.md) | Current decisions, prerequisites, runbooks, and delivery contracts. | Evidence that AWS services are deployed. |
-| [`automation/terraform-pipelines/`](../automation/terraform-pipelines/README.md) | Reviewed workflow source for this repository's future root-specific delivery callers. | Active Terraform plan/apply/drift delivery. |
+| [`automation/terraform-pipelines/`](../automation/terraform-pipelines/README.md) | Reviewed reusable workflow source for future roots. | The active ADR 0018 root-specific delivery workflows. |
 | Root [`modules/`](../modules/README.md) and [`roots/`](../roots/README.md) | Disabled historical prototypes retained as forensic input. | A deployment path. |
 | [`docs/book/`](book/README.md) | Explanatory design reference. | Status, approval, or implementation authority. |
 | [`docs/reviews/archive/`](reviews/archive/README.md) | Historical point-in-time assessments. | A current backlog or current repository state. |
 
 ## Next milestone and stop conditions
 
-1. Record the completed GitHub OIDC proof and protect it with periodic review;
-   do not attach AWS permissions before a root-specific policy change.
-2. Complete the [first delivery slice](delivery/first-delivery-slice.md):
-   establish the external evidence package and prepare the adoption change
-   record.
-3. Execute the legacy state-address adoption only after every stated gate has
-   passed; record the no-change and restore evidence.
-4. Only then prepare one sandbox network-root plan. Do not expand to production
-   networking, application, identity, or multi-Region deployment before that
-   bounded plan is reviewed.
+1. Deploy the ADR 0018 policy stack using the documented sandbox SSO session
+   and configure only its non-secret role-ARN GitHub variables.
+2. Run and inspect the authoritative sandbox-network GitHub plan, then run the
+   protected manual `dev` apply if it stays within the ADR 0018 resource list.
+3. Preserve apply, CloudTrail, dedicated-state, and weekday-drift evidence.
+4. Keep legacy state adoption, landing-zone launch, production networking,
+   application, identity, and multi-Region work separately gated.
 
-Stop immediately if the backend lock is active, a plan changes resources, an
-approval/evidence item is absent, or the required organization/network/CIDR
-inputs are unresolved. Escalate the exception through the approved change
-record; do not work around it with manual state commands.
+Stop immediately if the backend lock is active, a plan includes any resource
+outside ADR 0018, the caller is not the sandbox account, a policy/bootstrap
+value differs from source, or required run evidence is absent. Do not work
+around an exception with manual state commands or console changes.
 
 ## Verified local evidence
 
@@ -76,5 +73,7 @@ AWS and cannot establish deployment equivalence or authorize an apply.
 
 The [sandbox OIDC proof workflow](../.github/workflows/oidc-sandbox-proof.yml)
 is separately verified remote evidence: it assumed the environment-scoped role
-and called only `sts:GetCallerIdentity`. The role has no inline or attached
-identity policies and cannot provision infrastructure.
+and called only `sts:GetCallerIdentity`. The role had no inline or attached
+identity policies at proof time. ADR 0018 adds source for a later, separately
+recorded root-specific policy bootstrap; do not conflate source with deployment
+evidence.
