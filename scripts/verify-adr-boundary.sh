@@ -129,9 +129,10 @@ if grep -nEi 'terraform[[:space:]]+apply' "$sandbox_network_plan_workflow"; then
 fi
 
 grep -Fq 'workflow_dispatch:' "$sandbox_network_apply_workflow" || fail 'sandbox-network apply must require manual dispatch'
-grep -Fq "inputs.confirm == 'apply'" "$sandbox_network_apply_workflow" || fail 'sandbox-network apply must require explicit confirmation'
+grep -Fq "if: inputs.confirm == 'apply'" "$sandbox_network_apply_workflow" || fail 'sandbox-network apply must require explicit confirmation'
 grep -Fq 'environment: dev' "$sandbox_network_apply_workflow" || fail 'sandbox-network apply must use the protected dev environment'
 grep -Fq 'AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN' "$sandbox_network_apply_workflow" || fail 'sandbox-network apply must use its dedicated role variable'
+grep -Fq 'Require the protected dev environment apply role variable' "$sandbox_network_apply_workflow" || fail 'sandbox-network apply must validate its environment role variable after environment protection applies'
 grep -Fq 'terraform apply' "$sandbox_network_apply_workflow" || fail 'sandbox-network apply workflow is missing its controlled apply step'
 
 terraform_apply_workflows="$(grep -lEi 'terraform[[:space:]]+apply' .github/workflows/*.yml || true)"
@@ -144,6 +145,7 @@ fi
 
 grep -Fq 'schedule:' "$sandbox_network_drift_workflow" || fail 'sandbox-network drift must be scheduled'
 grep -Fq 'AWS_SANDBOX_NETWORK_DRIFT_ROLE_ARN' "$sandbox_network_drift_workflow" || fail 'sandbox-network drift must use its dedicated role variable'
+grep -Fq 'Require the protected dev environment drift role variable' "$sandbox_network_drift_workflow" || fail 'sandbox-network drift must validate its environment role variable after environment protection applies'
 grep -Fq 'terraform plan -detailed-exitcode' "$sandbox_network_drift_workflow" || fail 'sandbox-network drift must report detected changes'
 if grep -nEi 'terraform[[:space:]]+apply' "$sandbox_network_drift_workflow"; then
   fail 'sandbox-network drift workflow must not apply Terraform'

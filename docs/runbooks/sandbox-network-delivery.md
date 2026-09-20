@@ -71,7 +71,10 @@ must use its explicit `--allow-existing-state-key` override.
    workload, data, identity, or unrelated state change.
 3. Dispatch **Apply sandbox network** from protected `main`, select `dev`, and
    type exactly `apply`. The workflow re-plans and applies that one plan with
-   its dedicated OIDC role. Do not run `terraform apply` from a laptop.
+   its dedicated OIDC role. It validates the non-secret role-ARN variable only
+   after the protected environment is entered, so a missing variable fails
+   visibly instead of silently skipping delivery. Do not run `terraform apply`
+   from a laptop.
 4. Preserve the successful GitHub run URL and CloudTrail evidence. Confirm the
    weekday **Sandbox network drift detection** workflow is enabled; it must
    alert by failing on drift and must not repair resources automatically.

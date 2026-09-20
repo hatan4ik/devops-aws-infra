@@ -19,7 +19,7 @@ concurrency:
 jobs:
   apply:
     name: sandbox_network_apply
-    if: inputs.confirm == 'apply' && vars.AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN != ''
+    if: inputs.confirm == 'apply'
     runs-on: ubuntu-24.04
     environment: dev
     defaults:
@@ -28,6 +28,13 @@ jobs:
     steps:
       - name: Check out protected main source
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
+
+      - name: Require the protected dev environment apply role variable
+        env:
+          AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN: ${{ vars.AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN }}
+        run: |
+          set -euo pipefail
+          test -n "$AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN"
 
       - name: Read the repository Terraform version
         id: terraform-version
