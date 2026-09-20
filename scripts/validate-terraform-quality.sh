@@ -46,7 +46,7 @@ for directory in "${modules[@]}"; do
   # Terraform cannot standalone-validate a child module that requires caller
   # provider aliases. A mock-backed test is a stronger, configured plan for
   # that contract; ordinary modules receive both validate and test coverage.
-  if rg -q 'configuration_aliases' "$directory/versions.tf"; then
+  if grep -q 'configuration_aliases' "$directory/versions.tf"; then
     terraform -chdir="$directory" test -no-color
   else
     terraform -chdir="$directory" validate -no-color
