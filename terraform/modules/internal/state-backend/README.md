@@ -8,14 +8,14 @@ The S3 backend's native lockfile is also emitted for configuration. DynamoDB loc
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.7.0, < 2.0.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.35.0 |
 
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 6.65.0 |
 | <a name="provider_aws.replica"></a> [aws.replica](#provider\_aws.replica) | 6.65.0 |
 
@@ -26,7 +26,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [aws_dynamodb_table.state_lock](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table) | resource |
 | [aws_iam_role.state_replication](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.state_replication](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
@@ -59,7 +59,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_access_log_bucket_name"></a> [access\_log\_bucket\_name](#input\_access\_log\_bucket\_name) | Pre-existing approved centralized S3 access-log bucket, normally owned by Log Archive; this module does not create the shared log destination. | `string` | n/a | yes |
 | <a name="input_access_log_prefix"></a> [access\_log\_prefix](#input\_access\_log\_prefix) | Approved non-empty access-log prefix inside the centralized log bucket. | `string` | n/a | yes |
 | <a name="input_key_administrator_arns"></a> [key\_administrator\_arns](#input\_key\_administrator\_arns) | Approved IAM role ARNs that administer state KMS keys; they must be distinct from routine state use where possible. | `set(string)` | n/a | yes |
@@ -74,7 +74,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_backend_configuration"></a> [backend\_configuration](#output\_backend\_configuration) | Non-secret S3 backend values for each environment tier. Configure both S3 lockfile and DynamoDB during the documented locking migration period. |
 | <a name="output_state_access_policy_arns"></a> [state\_access\_policy\_arns](#output\_state\_access\_policy\_arns) | State bucket and KMS ARNs to scope the CI and break-glass identity policies. |
 <!-- END_TF_DOCS -->
