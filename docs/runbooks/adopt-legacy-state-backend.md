@@ -66,9 +66,6 @@ terraform -chdir="$root" state mv \
   'module.tf_state_backend.aws_s3_bucket_public_access_block.state' \
   'module.legacy_state_backend.aws_s3_bucket_public_access_block.state'
 terraform -chdir="$root" state mv \
-  'module.tf_state_backend.aws_s3_bucket_ownership_controls.state' \
-  'module.legacy_state_backend.aws_s3_bucket_ownership_controls.state'
-terraform -chdir="$root" state mv \
   'module.tf_state_backend.aws_s3_bucket_versioning.state' \
   'module.legacy_state_backend.aws_s3_bucket_versioning.state'
 terraform -chdir="$root" state mv \
