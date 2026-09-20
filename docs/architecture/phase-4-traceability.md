@@ -2,7 +2,7 @@
 
 | Brief requirement | Evidence | Status |
 |---|---|---|
-| GitHub as the platform | [Repository strategy](repository-strategy.md); [repository controls](github-repository-controls.md). | Credential-free source is published in `hatan4ik/devops-aws-infra`; protection/ruleset, environment, OIDC, and release controls remain unconfigured. |
+| GitHub as the platform | [Repository strategy](repository-strategy.md); [repository controls](github-repository-controls.md); [ADR 0017](../adr/0017-github-oidc-bootstrap-proof.md). | Protected `main`, protected deployment environments, and a permissionless sandbox OIDC proof are configured. No release control or root-specific Terraform delivery permission exists. |
 | Lowercase, hyphenated module/root/docs/pipeline naming | [Naming contract](repository-strategy.md#naming-contract); [assumption A-16](../ASSUMPTIONS.md). | Designed; organization slug awaits confirmation. |
 | Final repository list with one-line purpose | [Proposed final repository set](repository-strategy.md#proposed-final-repository-set). | Designed; workload repositories remain a per-app family until an app is named. |
 | Create module repositories only where lifecycle is independent; otherwise `modules/` in a monorepo | [Split rationale and layout](repository-strategy.md#why-the-split-is-deliberately-small); [ADR 0010](../adr/0010-repository-and-module-topology.md); [A-18](../ASSUMPTIONS.md). | The source repository exists; the dedicated module and live-root repositories are not created. |

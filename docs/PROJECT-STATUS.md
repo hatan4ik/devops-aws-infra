@@ -2,10 +2,10 @@
 
 **Status as of 2026-09-20:** design and candidate Terraform source are under
 version control; this repository is **not** proof of a deployed application
-platform. The only infrastructure observed in the approved AWS account is a
-legacy state bootstrap. Its adoption is selected as the first delivery
-milestone, but its remote state-address migration is still gated and has not
-been executed.
+platform. The sandbox account contains the permissionless GitHub OIDC provider
+and trust roles established by ADR 0017, plus the observed legacy state
+bootstrap. Neither is an application, network, identity, or data-plane
+deployment. The state bootstrap adoption remains gated and unexecuted.
 
 ## Start here
 
@@ -34,8 +34,9 @@ This decision does **not** authorize a Terraform apply, a state move, import,
 or any other AWS mutation. Execution remains blocked until the adoption
 runbook's preconditions are evidenced: protected state backup, no active lock,
 a reviewed no-resource-change plan, named Cloud Architecture/Security/SRE
-approvals, and named cost ownership. The current repository has no active
-OIDC delivery identity or remote plan/apply pipeline.
+approvals, and named cost ownership. GitHub has successfully proven its
+permissionless sandbox OIDC session, but there is no Terraform delivery role
+policy, backend configuration, remote plan, or apply pipeline.
 
 ## Delivery lanes
 
@@ -43,19 +44,21 @@ OIDC delivery identity or remote plan/apply pipeline.
 |---|---|---|
 | [`terraform/`](../terraform/README.md) | Candidate canonical Terraform delivery source. | An initialized backend or permission to apply. |
 | [`docs/`](README.md) | Current decisions, prerequisites, runbooks, and delivery contracts. | Evidence that AWS services are deployed. |
-| [`automation/terraform-pipelines/`](../automation/terraform-pipelines/README.md) | Reviewed templates for a future, dedicated pipeline repository. | Active CI/CD delivery. |
+| [`automation/terraform-pipelines/`](../automation/terraform-pipelines/README.md) | Reviewed workflow source for this repository's future root-specific delivery callers. | Active Terraform plan/apply/drift delivery. |
 | Root [`modules/`](../modules/README.md) and [`roots/`](../roots/README.md) | Disabled historical prototypes retained as forensic input. | A deployment path. |
 | [`docs/book/`](book/README.md) | Explanatory design reference. | Status, approval, or implementation authority. |
 | [`docs/reviews/archive/`](reviews/archive/README.md) | Historical point-in-time assessments. | A current backlog or current repository state. |
 
 ## Next milestone and stop conditions
 
-1. Complete the [first delivery slice](delivery/first-delivery-slice.md):
+1. Record the completed GitHub OIDC proof and protect it with periodic review;
+   do not attach AWS permissions before a root-specific policy change.
+2. Complete the [first delivery slice](delivery/first-delivery-slice.md):
    establish the external evidence package and prepare the adoption change
    record.
-2. Execute the legacy state-address adoption only after every stated gate has
+3. Execute the legacy state-address adoption only after every stated gate has
    passed; record the no-change and restore evidence.
-3. Only then prepare one sandbox network-root plan. Do not expand to production
+4. Only then prepare one sandbox network-root plan. Do not expand to production
    networking, application, identity, or multi-Region deployment before that
    bounded plan is reviewed.
 
@@ -70,3 +73,8 @@ The credential-free quality workflow is the repository's current automated
 evidence for formatting, validation, mocked Terraform tests, policy scans, and
 workflow checks. It validates source quality only; it does not authenticate to
 AWS and cannot establish deployment equivalence or authorize an apply.
+
+The [sandbox OIDC proof workflow](../.github/workflows/oidc-sandbox-proof.yml)
+is separately verified remote evidence: it assumed the environment-scoped role
+and called only `sts:GetCallerIdentity`. The role has no inline or attached
+identity policies and cannot provision infrastructure.
