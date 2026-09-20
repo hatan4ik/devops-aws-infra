@@ -71,8 +71,10 @@ Resources:
             Effect: Allow
             Action:
               - ec2:Describe*
+              - ec2:GetVpcResourcesBlockingEncryptionEnforcement
               - iam:GetRole
               - iam:GetRolePolicy
+              - iam:ListAttachedRolePolicies
               - iam:ListRolePolicies
               - kms:DescribeKey
               - kms:GetKeyPolicy
@@ -128,8 +130,10 @@ Resources:
             Effect: Allow
             Action:
               - ec2:Describe*
+              - ec2:GetVpcResourcesBlockingEncryptionEnforcement
               - iam:GetRole
               - iam:GetRolePolicy
+              - iam:ListAttachedRolePolicies
               - iam:ListRolePolicies
               - kms:DescribeKey
               - kms:GetKeyPolicy
@@ -185,12 +189,12 @@ Resources:
           - Sid: ManageOnlyTheDedicatedSandboxNetworkFlowLogAlias
             Effect: Allow
             Action:
-              - kms:CreateAlias
               - kms:DeleteAlias
             Resource: !Sub 'arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:alias/sandbox-network-dev-flow-logs'
           - Sid: ManageDedicatedSandboxNetworkFlowLogKey
             Effect: Allow
             Action:
+              - kms:CreateAlias
               - kms:DescribeKey
               - kms:EnableKeyRotation
               - kms:GetKeyPolicy
@@ -215,6 +219,7 @@ Resources:
               - iam:PutRolePolicy
               - iam:DeleteRolePolicy
               - iam:GetRolePolicy
+              - iam:ListAttachedRolePolicies
               - iam:ListRolePolicies
               - iam:TagRole
               - iam:UntagRole

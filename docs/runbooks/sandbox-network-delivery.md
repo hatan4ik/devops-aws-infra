@@ -89,3 +89,8 @@ Do not delete the state key or use the AWS console to “undo” a resource. For
 post-apply problem, open a dedicated rollback pull request that changes this
 root, inspect its plan, and use the same protected manual apply workflow. A
 future destroy procedure needs its own explicit approval and backup evidence.
+
+If an apply partially creates resources and stops on an IAM denial, do not
+delete the partial resources manually. Add only the failed action to the
+versioned root-specific policy template, review and deploy that policy update,
+then let the same Terraform root reconcile the recorded remote state.

@@ -6,8 +6,11 @@ platform. The sandbox account contains the permissionless GitHub OIDC provider
 and trust roles established by ADR 0017, plus the observed legacy state
 bootstrap. ADR 0018 now supplies the approved isolated sandbox-network source,
 dedicated state key configuration, and least-privilege policy bootstrap source;
-its CloudFormation policy stack, GitHub role variables, Terraform plan, and
-Terraform apply are not yet evidence until their runs are recorded.
+its CloudFormation policy stack, GitHub role variables, and Terraform plan are
+recorded. The first apply created a partial sandbox-network state and then
+stopped on explicit least-privilege IAM denials; it is not a completed network
+delivery until the corrective policy change is reviewed and Terraform
+reconciles the same state.
 
 ## Start here
 
@@ -35,8 +38,19 @@ remains independently gated. This scope is limited to sandbox account
 ADR 0018 authorizes only its versioned policy bootstrap and protected GitHub
 workflow. It does **not** authorize a local Terraform apply, manual state
 change, Control Tower launch, TGW/VPN/BGP, endpoint, workload, identity, data,
-production, or multi-Region deployment. Do not claim the sandbox network exists
-until the reviewed GitHub plan and apply runs have succeeded.
+production, or multi-Region deployment. Do not claim the sandbox-network
+delivery is complete until the reviewed GitHub plan and apply runs have
+succeeded.
+
+### Sandbox-network reconciliation record
+
+The first GitHub apply created the private VPC, two private subnets, empty
+route tables and associations, deny-all default security group, dedicated flow
+log KMS key, encrypted CloudWatch Log Group, and flow-log IAM role. It then
+stopped before VPC encryption control, KMS alias, flow-log role policy, and VPC
+Flow Log because the apply role lacked three explicit actions. The remediation
+must be a reviewed update to the versioned root-specific policy followed by a
+GitHub re-apply; no console deletion or manual state edit is permitted.
 
 ## Delivery lanes
 
