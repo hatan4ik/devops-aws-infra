@@ -1,16 +1,12 @@
 # Project status and delivery authority
 
-**Status as of 2026-09-20:** design and candidate Terraform source are under
-version control; this repository is **not** proof of a deployed application
-platform. The sandbox account contains the permissionless GitHub OIDC provider
-and trust roles established by ADR 0017, plus the observed legacy state
-bootstrap. ADR 0018 now supplies the approved isolated sandbox-network source,
-dedicated state key configuration, and least-privilege policy bootstrap source;
-its CloudFormation policy stack, GitHub role variables, and Terraform plan are
-recorded. The first apply created a partial sandbox-network state and then
-stopped on explicit least-privilege IAM denials; it is not a completed network
-delivery until the corrective policy change is reviewed and Terraform
-reconciles the same state.
+**Status as of 2026-09-20:** the isolated ADR 0018 sandbox network has been
+delivered through the protected GitHub OIDC workflow and verified read-only in
+AWS. This repository is still **not** proof of a deployed application platform:
+Control Tower, TGW/VPN/BGP, workloads, identity, data, production, and
+multi-Region delivery remain separately gated. The sandbox account contains
+the permissionless GitHub OIDC provider and trust roles established by ADR
+0017, plus the observed legacy state bootstrap.
 
 ## Start here
 
@@ -38,22 +34,36 @@ remains independently gated. This scope is limited to sandbox account
 ADR 0018 authorizes only its versioned policy bootstrap and protected GitHub
 workflow. It does **not** authorize a local Terraform apply, manual state
 change, Control Tower launch, TGW/VPN/BGP, endpoint, workload, identity, data,
-production, or multi-Region deployment. Do not claim the sandbox-network
-delivery is complete until the reviewed GitHub plan and apply runs have
-succeeded.
+production, or multi-Region deployment. The sandbox-network delivery is the
+only completed infrastructure slice under this authority.
 
 ### Sandbox-network reconciliation record
 
-The first GitHub apply created the private VPC, two private subnets, empty
-route tables and associations, deny-all default security group, dedicated flow
-log KMS key, encrypted CloudWatch Log Group, and flow-log IAM role. It then
-stopped on explicit least-privilege IAM denials. The first reviewed remediation
-allowed the VPC encryption control to reach `enforce` successfully, but
-Terraform then needed the role-specific instance-profile read while replacing
-the tainted flow-log role and the exact alias ARN in addition to the tagged KMS
-key for `kms:CreateAlias`. The next remediation must grant only those exact
-actions/scopes and re-run Terraform against the same remote state; no console
-deletion or manual state edit is permitted.
+The first GitHub apply stopped on explicit least-privilege IAM denials after
+creating partial state. Two reviewed, root-specific CloudFormation policy
+updates then let Terraform reconcile that same remote state. The final
+[protected apply run](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35515450999)
+succeeded, and the immediate manual
+[drift check](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35515764460)
+reported no changes. No console deletion, manual state edit, or ad hoc AWS
+resource creation was used.
+
+### Verified sandbox-network resources
+
+Read-only AWS inspection after the successful apply confirmed:
+
+- VPC `vpc-0073d0ec58988246b`, CIDR `10.64.0.0/16`, state `available`;
+- VPC encryption control `enforce` and `available`;
+- two private, non-public subnets: `10.64.0.0/20` in `us-east-2a` and
+  `10.64.16.0/20` in `us-east-2b`;
+- only local route targets, no endpoints, and a deny-all default security
+  group;
+- an `ACTIVE` all-traffic VPC Flow Log to the dedicated KMS-encrypted,
+  365-day CloudWatch Log Group; and
+- the dedicated KMS alias and Flow Log delivery role/policy.
+
+The read-only evidence helper is
+[`scripts/inspect-sandbox-network.sh`](../scripts/inspect-sandbox-network.sh).
 
 ## Delivery lanes
 
@@ -68,12 +78,9 @@ deletion or manual state edit is permitted.
 
 ## Next milestone and stop conditions
 
-1. Deploy the ADR 0018 policy stack using the documented sandbox SSO session
-   and configure only its non-secret role-ARN GitHub variables.
-2. Run and inspect the authoritative sandbox-network GitHub plan, then run the
-   protected manual `dev` apply if it stays within the ADR 0018 resource list.
-3. Preserve apply, CloudTrail, dedicated-state, and weekday-drift evidence.
-4. Keep legacy state adoption, landing-zone launch, production networking,
+1. Preserve the apply, CloudTrail, dedicated-state, and weekday-drift evidence
+   for the completed sandbox network.
+2. Keep legacy state adoption, landing-zone launch, production networking,
    application, identity, and multi-Region work separately gated.
 
 Stop immediately if the backend lock is active, a plan includes any resource
