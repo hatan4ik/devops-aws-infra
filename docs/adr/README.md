@@ -22,6 +22,7 @@ one of these files.
 | 0014 | [Canonical architecture and IaC boundary](0014-canonical-architecture-and-iac-boundary.md) |
 | 0015 | [Adopt the legacy Terraform state bootstrap](0015-adopt-legacy-state-bootstrap.md) |
 | 0016 | [Terraform state lock transition](0016-terraform-state-lock-transition.md) |
+| 0017 | [GitHub OIDC bootstrap proof](0017-github-oidc-bootstrap-proof.md) |
 
 ## Historical superseded records
 

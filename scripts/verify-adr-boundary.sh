@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Verifies the ADR/IaC boundary established by ADR 0014 without AWS access.
+# Verifies the ADR/IaC boundary established by ADRs 0014 and 0017 without AWS access.
 set -euo pipefail
 
 repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -22,6 +22,7 @@ active_adrs=(
   docs/adr/0014-canonical-architecture-and-iac-boundary.md
   docs/adr/0015-adopt-legacy-state-bootstrap.md
   docs/adr/0016-terraform-state-lock-transition.md
+  docs/adr/0017-github-oidc-bootstrap-proof.md
 )
 
 superseded_adrs=(
@@ -93,8 +94,24 @@ fi
 
 delivery_workflow=.github/workflows/terraform-apply.yml
 [[ -f "$delivery_workflow" ]] || fail "missing delivery preflight workflow: $delivery_workflow"
-if grep -R -nEi 'id-token:[[:space:]]*write|configure-aws-credentials|terraform[[:space:]]+apply' .github/workflows; then
-  fail 'root workflows must remain credential-free and non-mutating'
+oidc_proof_workflow=.github/workflows/oidc-sandbox-proof.yml
+credentialed_workflows="$(grep -lEi 'id-token:[[:space:]]*write|configure-aws-credentials' .github/workflows/*.yml || true)"
+if [[ -n "$credentialed_workflows" ]]; then
+  while IFS= read -r workflow; do
+    [[ -n "$workflow" ]] || continue
+    [[ "$workflow" == "$oidc_proof_workflow" ]] || fail "unexpected credentialed root workflow: $workflow"
+  done <<< "$credentialed_workflows"
+fi
+
+[[ -f "$oidc_proof_workflow" ]] || fail "missing approved OIDC proof workflow: $oidc_proof_workflow"
+grep -Fq 'workflow_dispatch:' "$oidc_proof_workflow" || fail 'OIDC proof must be manual-dispatch only'
+grep -Fq 'aws sts get-caller-identity' "$oidc_proof_workflow" || fail 'OIDC proof must verify only its STS identity'
+if grep -nEi 'terraform|cloudformation|aws[[:space:]].*[[:space:]](create|delete|put|update|attach|detach|run-instances)([[:space:]]|$)' "$oidc_proof_workflow"; then
+  fail 'OIDC proof workflow must not include an infrastructure mutation'
+fi
+
+if grep -R -nEi --exclude='oidc-sandbox-proof.yml' 'terraform[[:space:]]+apply' .github/workflows; then
+  fail 'root workflows must not apply Terraform'
 fi
 
 if grep -R -nE --include='*.yml' --include='*.yaml' '[0-9]{12}' .github/workflows; then

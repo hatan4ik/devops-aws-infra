@@ -1,6 +1,11 @@
 # Terraform pipeline templates — not active CI/CD
 
-This directory is the reviewed source for the future `<org>-terraform-pipelines` repository defined in the [repository strategy](../../docs/architecture/repository-strategy.md). It is deliberately not an active GitHub Actions directory in this repository: GitHub only discovers workflows in a repository's top-level `.github/workflows/` directory.
+This directory is the reviewed reusable-workflow source for the initial
+`hatan4ik/devops-aws-infra` GitOps repository under
+[ADR 0017](../../docs/adr/0017-github-oidc-bootstrap-proof.md). It is not an
+active GitHub Actions directory by itself because GitHub discovers workflows
+only in a repository's top-level `.github/workflows/` directory. A future
+pipeline-repository split requires a separate ADR and migration record.
 
 No plan/apply/drift/release workflow from this staging area is active, no AWS identity is configured, and no release can be created from this staging area. The root credential-free Terraform quality workflow validates this source, but copying these reusable workflows to a newly approved pipeline repository and enabling callers remain separate remote-change gates.
 
@@ -35,7 +40,7 @@ For an AWS plan caller, use only the ordinary `pull_request` event, pass the bas
 
 1. Confirm the GitHub organization, team slugs, deployment-environment reviewers, repository visibility, and ruleset capabilities.
 2. Create the pipeline repository and its protected default branch; require the quality workflow, CODEOWNERS, signed commits/tags, and SHA-pinned third-party actions.
-3. Create separate AWS IAM OIDC roles for `plan`, `apply`, and `drift`. Their trust policies must constrain organization, repository, branch or environment subject, audience `sts.amazonaws.com`, and the exact workflow reference. Their permissions must be resource-scoped and separate from break-glass roles.
+3. Create separate AWS IAM OIDC roles for `plan`, `apply`, and `drift`. Their trust policies must constrain the immutable repository plus branch/environment subject available in `sub` and the audience `sts.amazonaws.com`. AWS cannot enforce a GitHub workflow-file claim; protect workflow provenance with the repository ruleset, CODEOWNERS, protected environments, and SHA-pinned actions. Their permissions must be resource-scoped and separate from break-glass roles.
 4. Configure protected GitHub environments (`dev`, `staging`, `prod`, and `module-release`) with the required reviewers. Store the encrypted backend configuration and any `TF_VAR_*` secrets only at the minimum environment scope.
 5. Dry-run the quality workflow first, then a sandbox plan with no apply permission. Record the OIDC subject, CloudTrail events, state-lock behavior, lint/security results, and cost-diff behavior before allowing an apply workflow.
 
