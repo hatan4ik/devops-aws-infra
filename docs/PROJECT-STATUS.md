@@ -47,10 +47,13 @@ succeeded.
 The first GitHub apply created the private VPC, two private subnets, empty
 route tables and associations, deny-all default security group, dedicated flow
 log KMS key, encrypted CloudWatch Log Group, and flow-log IAM role. It then
-stopped before VPC encryption control, KMS alias, flow-log role policy, and VPC
-Flow Log because the apply role lacked three explicit actions. The remediation
-must be a reviewed update to the versioned root-specific policy followed by a
-GitHub re-apply; no console deletion or manual state edit is permitted.
+stopped on explicit least-privilege IAM denials. The first reviewed remediation
+allowed the VPC encryption control to reach `enforce` successfully, but
+Terraform then needed the role-specific instance-profile read while replacing
+the tainted flow-log role and the exact alias ARN in addition to the tagged KMS
+key for `kms:CreateAlias`. The next remediation must grant only those exact
+actions/scopes and re-run Terraform against the same remote state; no console
+deletion or manual state edit is permitted.
 
 ## Delivery lanes
 

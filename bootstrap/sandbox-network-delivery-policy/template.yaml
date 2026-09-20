@@ -75,6 +75,7 @@ Resources:
               - iam:GetRole
               - iam:GetRolePolicy
               - iam:ListAttachedRolePolicies
+              - iam:ListInstanceProfilesForRole
               - iam:ListRolePolicies
               - kms:DescribeKey
               - kms:GetKeyPolicy
@@ -134,6 +135,7 @@ Resources:
               - iam:GetRole
               - iam:GetRolePolicy
               - iam:ListAttachedRolePolicies
+              - iam:ListInstanceProfilesForRole
               - iam:ListRolePolicies
               - kms:DescribeKey
               - kms:GetKeyPolicy
@@ -189,6 +191,7 @@ Resources:
           - Sid: ManageOnlyTheDedicatedSandboxNetworkFlowLogAlias
             Effect: Allow
             Action:
+              - kms:CreateAlias
               - kms:DeleteAlias
             Resource: !Sub 'arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:alias/sandbox-network-dev-flow-logs'
           - Sid: ManageDedicatedSandboxNetworkFlowLogKey
@@ -220,6 +223,7 @@ Resources:
               - iam:DeleteRolePolicy
               - iam:GetRolePolicy
               - iam:ListAttachedRolePolicies
+              - iam:ListInstanceProfilesForRole
               - iam:ListRolePolicies
               - iam:TagRole
               - iam:UntagRole
