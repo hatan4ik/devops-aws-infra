@@ -37,6 +37,11 @@ if [[ ! "$required_approvals" =~ ^[0-9]+$ ]]; then
 fi
 
 reviewer_id="$(gh api user --jq .id)"
+owner_type="$(gh api "repos/$repository" --jq .owner.type)"
+case "$owner_type" in
+  Organization|User) ;;
+  *) printf 'unsupported GitHub repository owner type: %s\n' "$owner_type" >&2; exit 65 ;;
+esac
 
 put_environment() {
   local environment_name="$1"
@@ -63,20 +68,38 @@ if (( required_approvals > 0 )); then
   code_owner_reviews=true
 fi
 
-protection_payload="$(jq -cn \
-  --argjson required_approvals "$required_approvals" \
-  --argjson code_owner_reviews "$code_owner_reviews" \
-  '{
-    required_status_checks: {strict: true, contexts: ["terraform_quality", "GitOps policy checks"]},
-    enforce_admins: true,
-    required_pull_request_reviews: {
+if [[ "$owner_type" == "Organization" ]]; then
+  review_policy="$(jq -cn \
+    --argjson required_approvals "$required_approvals" \
+    --argjson code_owner_reviews "$code_owner_reviews" \
+    '{
       dismissal_restrictions: {users: [], teams: [], apps: []},
       dismiss_stale_reviews: true,
       require_code_owner_reviews: $code_owner_reviews,
       required_approving_review_count: $required_approvals,
       require_last_push_approval: false,
       bypass_pull_request_allowances: {users: [], teams: [], apps: []}
-    },
+    }')"
+else
+  # GitHub's branch-protection API rejects user/team restriction fields on a
+  # personal repository, including empty arrays.
+  review_policy="$(jq -cn \
+    --argjson required_approvals "$required_approvals" \
+    --argjson code_owner_reviews "$code_owner_reviews" \
+    '{
+      dismiss_stale_reviews: true,
+      require_code_owner_reviews: $code_owner_reviews,
+      required_approving_review_count: $required_approvals,
+      require_last_push_approval: false
+    }')"
+fi
+
+protection_payload="$(jq -cn \
+  --argjson review_policy "$review_policy" \
+  '{
+    required_status_checks: {strict: true, contexts: ["terraform_quality", "GitOps policy checks"]},
+    enforce_admins: true,
+    required_pull_request_reviews: $review_policy,
     restrictions: null,
     required_linear_history: true,
     allow_force_pushes: false,
