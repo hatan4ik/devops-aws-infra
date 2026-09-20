@@ -79,6 +79,7 @@ run "plans_one_encrypted_versioned_backend_per_tier" {
       length(aws_s3_bucket.state_replica) == 3 &&
       length(aws_kms_replica_key.state) == 3 &&
       length(aws_s3_bucket_replication_configuration.state) == 3 &&
+      length(aws_iam_role.state_replication) == 3 &&
       length(aws_s3_bucket_logging.state) == 3 &&
       length(aws_s3_bucket_notification.state) == 3
     )
@@ -86,23 +87,13 @@ run "plans_one_encrypted_versioned_backend_per_tier" {
   }
 }
 
-run "rejects_missing_environment_tier" {
+run "plans_custom_tier_without_replication" {
   command = plan
 
   variables {
     state_tiers = {
-      dev = {
-        bucket_name                                  = "test-platform-dev-tfstate"
-        replica_bucket_name                          = "test-platform-dev-tfstate-replica"
-        noncurrent_version_expiration_in_days        = 30
-        abort_incomplete_multipart_upload_after_days = 7
-        object_lock = {
-          enabled = false
-        }
-      }
-      prod = {
-        bucket_name                                  = "test-platform-prod-tfstate"
-        replica_bucket_name                          = "test-platform-prod-tfstate-replica"
+      residency-bound = {
+        bucket_name                                  = "test-platform-residency-bound-tfstate"
         noncurrent_version_expiration_in_days        = 30
         abort_incomplete_multipart_upload_after_days = 7
         object_lock = {
@@ -112,7 +103,10 @@ run "rejects_missing_environment_tier" {
     }
   }
 
-  expect_failures = [var.state_tiers]
+  assert {
+    condition     = length(aws_s3_bucket.state) == 1 && length(aws_s3_bucket.state_replica) == 0 && length(aws_s3_bucket_replication_configuration.state) == 0 && length(aws_iam_role.state_replication) == 0
+    error_message = "A valid state tier must be able to opt out of cross-Region replication."
+  }
 }
 
 run "rejects_same_primary_and_replica_region" {

@@ -21,6 +21,7 @@ one of these files.
 | 0013 | [Layered verification and no automatic fault injection](0013-layered-verification-no-automatic-fault-injection.md) |
 | 0014 | [Canonical architecture and IaC boundary](0014-canonical-architecture-and-iac-boundary.md) |
 | 0015 | [Adopt the legacy Terraform state bootstrap](0015-adopt-legacy-state-bootstrap.md) |
+| 0016 | [Terraform state lock transition](0016-terraform-state-lock-transition.md) |
 
 ## Historical superseded records
 

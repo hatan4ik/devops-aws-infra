@@ -50,7 +50,7 @@ variable "state_backend" {
     access_log_prefix      = string
     state_tiers = map(object({
       bucket_name                                  = string
-      replica_bucket_name                          = string
+      replica_bucket_name                          = optional(string)
       noncurrent_version_expiration_in_days        = number
       abort_incomplete_multipart_upload_after_days = number
       object_lock = object({

@@ -19,9 +19,9 @@ A full O'Reilly-style engineering reference is available in [`docs/book/`](docs/
 | Directory | Contents |
 |---|---|
 | [`docs/architecture`](docs/architecture/README.md) | Architecture, threat/security controls, costs, prerequisites, and traceability. |
-| [`docs/adr`](docs/adr/) | Accepted architecture decisions and their rejected alternatives. |
+| [`docs/adr`](docs/adr/) | Active and proposed architecture decisions, their gates, and rejected alternatives. |
 | [`docs/runbooks`](docs/runbooks/README.md) | Account vending, Region expansion, hybrid VPN/BGP, failover, and break-glass operations. |
-| [`terraform`](terraform/README.md) | Candidate reusable modules, internal composition, and ten backend-disabled roots. |
+| [`terraform`](terraform/README.md) | Candidate reusable modules, internal composition, and ten backend-externalized roots. |
 | [`automation/terraform-pipelines`](automation/terraform-pipelines/README.md) | SHA-pinned quality/plan/apply/drift/release pipeline source and caller templates. |
 | [`tests`](tests/README.md) | Mocked module, read-only AWS, public synthetic, and AuthN/AuthZ test contracts. |
 

@@ -2,12 +2,22 @@ variable "aws_region" {
   description = "Approved AWS Region for this root. region-b is only a directory placeholder."
   type        = string
   nullable    = false
+
+  validation {
+    condition     = can(regex("^[a-z]{2}(-gov)?-[a-z]+-[0-9]+$", var.aws_region))
+    error_message = "aws_region must be a valid AWS Region identifier."
+  }
 }
 
 variable "aws_account_id" {
   description = "Vended dev workload account ID allowed by this root's provider."
   type        = string
   nullable    = false
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "aws_account_id must be a 12-digit AWS account ID."
+  }
 }
 
 variable "environment" {

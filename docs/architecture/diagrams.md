@@ -10,7 +10,7 @@ flowchart TD
         Route53 --> CF[CloudFront + WAF]
     end
     
-    subgraph Region 1 [Primary Region - us-east-2]
+    subgraph RegionA [Region A - approved at deployment time]
         CF --> ALB1[Application Load Balancer]
         
         subgraph Workload VPC
@@ -32,7 +32,7 @@ flowchart TD
         Workload VPC --> TGW1
     end
 
-    subgraph Region 2 [Secondary Region - eu-west-1]
+    subgraph RegionB [Region B - approved at deployment time]
         CF --> ALB2[Application Load Balancer]
         
         subgraph Workload VPC 2
@@ -70,4 +70,3 @@ flowchart TD
     ECS1 -.-> CloudWatch
     ECS2 -.-> CloudWatch
 ```
-

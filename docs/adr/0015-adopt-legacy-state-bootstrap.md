@@ -1,6 +1,7 @@
 # ADR 0015: Adopt the legacy Terraform state bootstrap as a transitional canonical foundation
 
-**Status:** Accepted for source and migration planning; live state mutation remains separately gated.
+**Status:** Proposed — source is ready for review; no specialist quorum has
+approved a remote-state mutation.
 **Decision date:** 2026-09-19
 
 ## Context
@@ -44,8 +45,9 @@ role policies, replication, and a recovery Region.
 | Platform/DevOps Lead | Owns the runbook, GitOps source, change record, and cost-allocation evidence. |
 | Network Engineer | No routing change; informed, with no required approval for the adoption-only change. |
 
-No dissent was reported. Missing named specialist approvals are a live-change
-gate, not evidence that they have already approved a state mutation.
+Only the Platform Owner position is recorded. The other four specialist
+positions above are open gates, not approvals. There is therefore no recorded
+quorum or dissent result for a state mutation.
 
 ## Decision
 
@@ -66,7 +68,8 @@ gate, not evidence that they have already approved a state mutation.
    `Project=platform-aws-platform`, `Environment=shared`, and
    `Layer=shared-services`. A Cost Explorer/CUR line item and owner must be
    recorded in the state-change evidence before the first post-adoption
-   hardening apply.
+   hardening apply. The transitional-backend cost record is maintained in the
+   [cost model](../architecture/cost-estimate.md#transitional-state-backend).
 5. The bootstrap is a transitional foundation, not the final state design. A
    later, separately approved migration must supply a Log Archive destination,
    TLS-and-principal-restricted bucket/key policies, DynamoDB deletion
@@ -86,3 +89,18 @@ gate, not evidence that they have already approved a state mutation.
 - The source remains credential-free and no GitHub workflow is authorized to
   apply it. Human operators use short-lived IAM Identity Center credentials;
   CI remains blocked until ADR 0012 prerequisites are met.
+
+## Delivery incident and transition exit criteria
+
+During repository review, a root apply workflow was found on `origin/main`.
+It has been converted to a manual preflight that exits before Terraform or AWS
+credential configuration. This ADR records no evidence that the old workflow
+changed an AWS resource. It is not authorization to retry delivery.
+
+The transition is complete only when all of the following evidence is attached
+to an approved change record: the protected state backup digest and S3 version
+ID, no-resource-change plan, successful declarative state-address apply,
+post-apply refresh-only plan, state-restore drill, a Cost Explorer/CUR baseline
+with a named FinOps owner, and recorded approvals from Cloud Architecture,
+Security, and SRE. Until then, the bootstrap root remains an adoption source,
+not a platform delivery backend.

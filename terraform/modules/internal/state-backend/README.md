@@ -1,6 +1,14 @@
 # Internal state-backend composition module
 
-Creates exactly one primary S3 state bucket, multi-Region KMS key, and DynamoDB lock table for each of `dev`, `staging`, and `prod`, plus a same-tier replica bucket and replica KMS key in a distinct Region. State replication is KMS-encrypted; both copies are versioned, private, owner-enforced, TLS-only, lifecycle-managed, resource-policy-restricted to the approved CI, recovery, and replication roles, logged to a pre-existing centralized access-log bucket, and configured to publish S3 events to EventBridge. Object Lock is an explicit per-tier decision and is applied consistently to both copies.
+Creates one primary S3 state bucket, multi-Region KMS key, and DynamoDB lock
+table for every caller-defined state tier. A tier can opt into a same-tier
+replica bucket and replica KMS key in a distinct Region; replication uses an
+IAM role scoped to that tier only. Every created bucket is versioned, private,
+owner-enforced, TLS-only, lifecycle-managed, resource-policy-restricted to the
+approved CI/recovery/replication roles, logged to a pre-existing centralized
+access-log bucket, and configured to publish S3 events to EventBridge. Object
+Lock is an explicit per-tier decision and is applied consistently to both copies
+when replication is enabled.
 
 The S3 backend's native lockfile is also emitted for configuration. DynamoDB locking remains present only because the task requires it; HashiCorp documents it as deprecated, so a later ADR must define the migration/retirement plan. The central access-log bucket is deliberately an input: it must be created and protected by the Log Archive design, not circularly created by this module. This module is bootstrapped from a specially approved local root and must never attempt to use the backend it is creating.
 
@@ -10,7 +18,7 @@ The S3 backend's native lockfile is also emitted for configuration. DynamoDB loc
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.7.0, < 2.0.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.35.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.35.0, < 7.0.0 |
 
 ## Providers
 
@@ -68,7 +76,7 @@ No modules.
 | <a name="input_primary_region"></a> [primary\_region](#input\_primary\_region) | Approved AWS Region containing the primary state buckets and KMS multi-Region primary keys. | `string` | n/a | yes |
 | <a name="input_replica_region"></a> [replica\_region](#input\_replica\_region) | Approved, distinct AWS Region containing the state-bucket replicas and KMS replica keys. | `string` | n/a | yes |
 | <a name="input_state_access_principal_arns"></a> [state\_access\_principal\_arns](#input\_state\_access\_principal\_arns) | Only CI deployment roles and the approved break-glass role allowed to read or write state objects and locks. | `set(string)` | n/a | yes |
-| <a name="input_state_tiers"></a> [state\_tiers](#input\_state\_tiers) | Exactly one state bucket and lock table configuration for each approved environment tier. Object Lock is optional only when a retention decision explicitly disables it. | <pre>map(object({<br/>    bucket_name                                  = string<br/>    replica_bucket_name                          = string<br/>    noncurrent_version_expiration_in_days        = number<br/>    abort_incomplete_multipart_upload_after_days = number<br/>    object_lock = object({<br/>      enabled        = bool<br/>      retention_mode = optional(string)<br/>      retention_days = optional(number)<br/>    })<br/>  }))</pre> | n/a | yes |
+| <a name="input_state_tiers"></a> [state\_tiers](#input\_state\_tiers) | One or more isolated state tier configurations. Cross-Region replication is optional per tier; Object Lock is optional only when a retention decision explicitly disables it. | <pre>map(object({<br/>    bucket_name                                  = string<br/>    replica_bucket_name                          = optional(string)<br/>    noncurrent_version_expiration_in_days        = number<br/>    abort_incomplete_multipart_upload_after_days = number<br/>    object_lock = object({<br/>      enabled        = bool<br/>      retention_mode = optional(string)<br/>      retention_days = optional(number)<br/>    })<br/>  }))</pre> | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Additional required allocation and ownership tags. Name and Component tags are computed by the module. | `map(string)` | `{}` | no |
 
 ## Outputs

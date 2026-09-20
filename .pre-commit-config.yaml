@@ -1,0 +1,20 @@
+minimum_pre_commit_version: "3.0.0"
+
+repos:
+  - repo: local
+    hooks:
+      - id: terraform-format
+        name: terraform format
+        entry: terraform fmt -check -recursive -no-color terraform
+        language: system
+        pass_filenames: false
+      - id: terraform-quality
+        name: credential-free Terraform quality
+        entry: scripts/validate-terraform-quality.sh
+        language: system
+        pass_filenames: false
+      - id: adr-boundary
+        name: ADR and delivery boundary
+        entry: scripts/verify-adr-boundary.sh
+        language: system
+        pass_filenames: false

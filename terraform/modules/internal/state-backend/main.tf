@@ -19,7 +19,7 @@ resource "aws_kms_key" "state" {
 
 resource "aws_kms_replica_key" "state" {
   provider = aws.replica
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   description             = "Terraform state replica encryption key for ${each.key} in ${var.replica_region}"
   primary_key_arn         = aws_kms_key.state[each.key].arn
@@ -46,7 +46,7 @@ resource "aws_kms_alias" "state" {
 
 resource "aws_kms_alias" "state_replica" {
   provider = aws.replica
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   name          = "alias/${var.name_prefix}-${each.key}-terraform-state"
   target_key_id = aws_kms_replica_key.state[each.key].key_id
@@ -67,7 +67,7 @@ resource "aws_s3_bucket" "state" {
     prevent_destroy = true
 
     precondition {
-      condition     = var.replica_region != var.primary_region
+      condition     = length(local.replication_tiers) == 0 || var.replica_region != var.primary_region
       error_message = "replica_region must be distinct from primary_region for cross-Region state replication."
     }
   }
@@ -75,7 +75,7 @@ resource "aws_s3_bucket" "state" {
 
 resource "aws_s3_bucket" "state_replica" {
   provider = aws.replica
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   bucket              = each.value.replica_bucket_name
   object_lock_enabled = each.value.object_lock.enabled
@@ -103,7 +103,7 @@ resource "aws_s3_bucket_public_access_block" "state" {
 
 resource "aws_s3_bucket_public_access_block" "state_replica" {
   provider = aws.replica
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   bucket                  = aws_s3_bucket.state_replica[each.key].id
   block_public_acls       = true
@@ -124,7 +124,7 @@ resource "aws_s3_bucket_ownership_controls" "state" {
 
 resource "aws_s3_bucket_ownership_controls" "state_replica" {
   provider = aws.replica
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   bucket = aws_s3_bucket.state_replica[each.key].id
 
@@ -145,7 +145,7 @@ resource "aws_s3_bucket_versioning" "state" {
 
 resource "aws_s3_bucket_versioning" "state_replica" {
   provider = aws.replica
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   bucket = aws_s3_bucket.state_replica[each.key].id
 
@@ -171,7 +171,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "state_replica" {
   provider = aws.replica
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   bucket = aws_s3_bucket.state_replica[each.key].id
 
@@ -210,7 +210,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "state" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "state_replica" {
   provider = aws.replica
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   bucket = aws_s3_bucket.state_replica[each.key].id
 
@@ -253,7 +253,7 @@ resource "aws_s3_bucket_object_lock_configuration" "state" {
 resource "aws_s3_bucket_object_lock_configuration" "state_replica" {
   provider = aws.replica
   for_each = {
-    for tier, configuration in var.state_tiers : tier => configuration
+    for tier, configuration in local.replication_tiers : tier => configuration
     if configuration.object_lock.enabled
   }
 
@@ -279,7 +279,7 @@ resource "aws_s3_bucket_logging" "state" {
 
 resource "aws_s3_bucket_logging" "state_replica" {
   provider = aws.replica
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   bucket        = aws_s3_bucket.state_replica[each.key].id
   target_bucket = var.access_log_bucket_name
@@ -295,7 +295,7 @@ resource "aws_s3_bucket_notification" "state" {
 
 resource "aws_s3_bucket_notification" "state_replica" {
   provider = aws.replica
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   bucket      = aws_s3_bucket.state_replica[each.key].id
   eventbridge = true
@@ -312,7 +312,7 @@ resource "aws_s3_bucket_policy" "state" {
 
 resource "aws_s3_bucket_policy" "state_replica" {
   provider = aws.replica
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   bucket = aws_s3_bucket.state_replica[each.key].id
   policy = local.state_replica_bucket_policies[each.key]
@@ -321,7 +321,9 @@ resource "aws_s3_bucket_policy" "state_replica" {
 }
 
 resource "aws_iam_role" "state_replication" {
-  name = "${var.name_prefix}-terraform-state-replication"
+  for_each = local.replication_tiers
+
+  name = "${var.name_prefix}-${each.key}-terraform-state-replication"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -335,21 +337,24 @@ resource "aws_iam_role" "state_replication" {
   })
 
   tags = merge(local.common_tags, {
-    Name = "${var.name_prefix}-terraform-state-replication"
+    Name            = "${var.name_prefix}-${each.key}-terraform-state-replication"
+    EnvironmentTier = each.key
   })
 }
 
 resource "aws_iam_role_policy" "state_replication" {
-  name   = "${var.name_prefix}-terraform-state-replication"
-  role   = aws_iam_role.state_replication.id
-  policy = local.state_replication_policy
+  for_each = local.replication_tiers
+
+  name   = "${var.name_prefix}-${each.key}-terraform-state-replication"
+  role   = aws_iam_role.state_replication[each.key].id
+  policy = local.state_replication_policies[each.key]
 }
 
 resource "aws_s3_bucket_replication_configuration" "state" {
-  for_each = var.state_tiers
+  for_each = local.replication_tiers
 
   bucket = aws_s3_bucket.state[each.key].id
-  role   = aws_iam_role.state_replication.arn
+  role   = aws_iam_role.state_replication[each.key].arn
 
   rule {
     id     = "replicate-state-to-${var.replica_region}"

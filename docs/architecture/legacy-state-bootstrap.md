@@ -9,9 +9,9 @@ but the remote Terraform state has not yet been re-addressed.
 
 | Resource | Observed control state | Current purpose |
 |---|---|---|
-| S3 bucket `platform-tf-state-shared-f3ddb8cc` | Versioning, KMS encryption, all four public-access blocks, and 14-day Compliance Object Lock; one state object; no bucket policy | Legacy Terraform state storage |
-| Customer-managed KMS key `alias/terraform-state-backend` | Enabled; annual rotation | State-bucket encryption |
-| DynamoDB table `platform-tf-lock-table` | Active; pay-per-request billing | Legacy Terraform state locking |
+| State S3 bucket (identifier supplied only through protected adoption tfvars) | Versioning, KMS encryption, all four public-access blocks, and 14-day Compliance Object Lock; one state object; no bucket policy | Legacy Terraform state storage |
+| Customer-managed KMS key (alias supplied only through protected adoption tfvars) | Enabled; annual rotation | State-bucket encryption |
+| DynamoDB lock table (identifier supplied only through protected adoption tfvars) | Active; pay-per-request billing | Legacy Terraform state locking |
 
 The read-only inventory found no `us-east-2` EC2 instances, NAT gateways,
 Transit Gateways, VPN connections, load balancers, ECS/EKS clusters, Lambda
@@ -43,3 +43,8 @@ deletion protection, cross-Region recovery, and a tested restore procedure.
 
 Until that migration completes, the disabled prototype files remain forensic
 evidence only and are not a deployment path.
+
+The names and retention settings used for an individual execution come from an
+approved, uncommitted `terraform.tfvars` file for the `bootstrap-state` root.
+They are passed unchanged to the preflight script; this inventory intentionally
+does not duplicate operational identifiers.

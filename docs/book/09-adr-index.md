@@ -1,8 +1,8 @@
 # Chapter 9 — Architecture Decision Record Index
 
 **Status:** Active architecture record; ADRs 0001–0013 stakeholder-approved
-2026-09-18, ADR 0014 accepted 2026-09-19, and ADR 0015 accepted for
-source/migration planning 2026-09-19.
+2026-09-18, ADR 0014 accepted 2026-09-19, and ADR 0015 is proposed pending a
+specialist quorum for any state mutation.
 **Source:** [`docs/adr/`](../adr/)
 
 Architecture Decision Records (ADRs) capture the context, options considered, quorum review, decision, and consequences for every significant design choice. They are the authoritative record of why the platform is designed the way it is.
@@ -27,7 +27,8 @@ Architecture Decision Records (ADRs) capture the context, options considered, qu
 | [0012](../adr/0012-oidc-gated-terraform-delivery.md) | OIDC-gated Terraform delivery | Accepted | Separate OIDC plan/apply/drift roles, protected environments, SHA-pinned CI, no automatic remediation |
 | [0013](../adr/0013-layered-verification-no-automatic-fault-injection.md) | Layered verification, no automatic fault injection | Accepted | Layered credential-safe verification; controlled game days rather than automatic disruptive tests |
 | [0014](../adr/0014-canonical-architecture-and-iac-boundary.md) | Canonical architecture and IaC boundary | Accepted | One authoritative ADR sequence and `terraform/` as the only candidate delivery tree; root-level prototypes are disabled |
-| [0015](../adr/0015-adopt-legacy-state-bootstrap.md) | Legacy state-bootstrap adoption | Accepted for source/migration planning | Transitional canonical root and an explicitly gated state-address migration; no live resource mutation |
+| [0015](../adr/0015-adopt-legacy-state-bootstrap.md) | Legacy state-bootstrap adoption | Proposed — specialist approval pending | Transitional canonical root and an explicitly gated state-address migration; no live resource mutation |
+| [0016](../adr/0016-terraform-state-lock-transition.md) | Terraform state lock transition | Proposed | Keep DynamoDB locking until S3 lockfile migration evidence and specialist approvals authorize retirement |
 
 The duplicate-number ADR files retained under `docs/adr/` are historical only
 and are superseded by ADR 0014. Consult the [ADR index](../adr/README.md) for

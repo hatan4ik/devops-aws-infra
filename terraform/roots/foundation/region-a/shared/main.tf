@@ -1,3 +1,21 @@
+data "aws_region" "primary" {}
+
+data "aws_region" "replica" {
+  provider = aws.replica
+}
+
+check "provider_region_binding" {
+  assert {
+    condition     = data.aws_region.primary.region == var.aws_region
+    error_message = "The default AWS provider must be configured for aws_region."
+  }
+
+  assert {
+    condition     = data.aws_region.replica.region == var.aws_replica_region
+    error_message = "The aws.replica provider must be configured for aws_replica_region."
+  }
+}
+
 module "state_backend" {
   source = "../../../../modules/internal/state-backend"
 

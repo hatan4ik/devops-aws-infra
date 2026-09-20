@@ -14,7 +14,7 @@ See ADR 0002 and ADR 0006. The Phase 6 module-release workflow checks that the g
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.7.0, < 2.0.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.35.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.35.0, < 7.0.0 |
 
 ## Providers
 

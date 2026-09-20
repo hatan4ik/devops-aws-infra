@@ -230,15 +230,7 @@ sequenceDiagram
 
 ## 2.7 Design assumptions summary
 
-| ID | Assumption | Must be validated by |
-|---|---|---|
-| A-01 | 5M registered users, 1M MAU, 250K peak concurrent sessions | Product analytics |
-| A-02 | 300 UserAuthentication RPS per Region | Load test + Cognito quota purchase |
-| A-03 | 10,000 API RPS globally; either Region carries full load | API benchmark + load test |
-| A-04 | Auth p50 ≤250 ms, p99 ≤600 ms; API p50 ≤100 ms, p99 ≤250 ms | Synthetic tests from user geographies |
-| A-05 | API availability SLO 99.99%; auth journey SLO 99.9% | Contract/SLA review |
-| A-06 | RTO ≤60 min regional failover; RPO ≤5 min DynamoDB; RPO ≤24 h audit logs | Business continuity approval |
-| A-07 | `us-east-2` / `us-west-2` are pricing benchmarks only, not chosen Regions | User geography + data residency review |
-| A-13 | `10.128.0.0/9` is available for IPAM — placeholder only | Enterprise IPAM + on-premises conflict review |
-
-Full assumption register: [docs/ASSUMPTIONS.md](../ASSUMPTIONS.md)
+The single authoritative assumptions register, including IDs A-01 through
+A-21 and their validation owners, is [docs/ASSUMPTIONS.md](../ASSUMPTIONS.md).
+This book intentionally does not copy the table: a design assumption changes
+only through that register and the ADR/cost/runbook updates it requires.

@@ -12,7 +12,7 @@ to move existing state addresses only after an approved state-change record.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.7.0, < 2.0.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.35.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.35.0, < 7.0.0 |
 
 ## Providers
 
@@ -42,11 +42,17 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_config"></a> [config](#input\_config) | Observed, non-secret configuration of the legacy bootstrap state backend. Values must match the approved adoption inventory before state-address migration. | <pre>object({<br/>    bucket_name                          = string<br/>    dynamodb_table_name                  = string<br/>    kms_key_alias                        = string<br/>    kms_key_description                  = string<br/>    kms_key_deletion_window_in_days      = number<br/>    object_lock_retention_mode           = string<br/>    object_lock_retention_days           = number<br/>    dynamodb_deletion_protection_enabled = bool<br/>    tags                                 = map(string)<br/>  })</pre> | n/a | yes |
+| <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Observed S3 bucket name for the one legacy state backend being adopted. | `string` | n/a | yes |
+| <a name="input_dynamodb_table_name"></a> [dynamodb\_table\_name](#input\_dynamodb\_table\_name) | Observed DynamoDB lock-table name for the legacy state backend. | `string` | n/a | yes |
+| <a name="input_kms_key_alias"></a> [kms\_key\_alias](#input\_kms\_key\_alias) | Observed KMS alias used by the legacy state backend. | `string` | n/a | yes |
+| <a name="input_kms_key_description"></a> [kms\_key\_description](#input\_kms\_key\_description) | Observed non-secret description of the legacy state KMS key. | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Observed ownership and allocation tags. Resource tags are explicit; the root does not use provider default\_tags. | `map(string)` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
+| <a name="output_backend_configuration"></a> [backend\_configuration](#output\_backend\_configuration) | Compatibility-shaped backend configuration for the one transitional legacy tier. Replica fields are null until the separately approved hardening migration creates them. |
 | <a name="output_backend_identity"></a> [backend\_identity](#output\_backend\_identity) | Non-secret identifiers used only by the approved canonical state-migration runbook. |
+| <a name="output_state_access_policy_arns"></a> [state\_access\_policy\_arns](#output\_state\_access\_policy\_arns) | Compatibility-shaped ARNs for the transitional legacy tier's future least-privilege policy. |
 <!-- END_TF_DOCS -->

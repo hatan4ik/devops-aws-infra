@@ -13,52 +13,58 @@ for required_command in terraform tflint; do
   }
 done
 
-modules=(
-  terraform/modules/terraform-aws-vpc-workload
-  terraform/modules/terraform-aws-tgw-hub
-  terraform/modules/terraform-aws-cognito-userpool
-  terraform/modules/internal/state-backend
-  terraform/modules/internal/legacy-state-backend-adoption
-  terraform/modules/internal/network-regional
-  terraform/modules/internal/tgw-vpc-attachment
-  terraform/modules/internal/workload-regional
-)
+command -v shellcheck >/dev/null 2>&1 || {
+  echo "required command is not available: shellcheck" >&2
+  exit 69
+}
 
-roots=(
-  terraform/roots/foundation/region-a/shared
-  terraform/roots/foundation/region-a/bootstrap-state
-  terraform/roots/network/region-a/shared
-  terraform/roots/network/region-b/shared
-  terraform/roots/workload-dev/region-a/dev
-  terraform/roots/workload-dev/region-b/dev
-  terraform/roots/workload-staging/region-a/staging
-  terraform/roots/workload-staging/region-b/staging
-  terraform/roots/workload-prod/region-a/prod
-  terraform/roots/workload-prod/region-b/prod
-)
+while IFS= read -r -d '' shell_file; do
+  shellcheck "$shell_file"
+done < <(find scripts automation -type f -name '*.sh' -print0)
+
+modules=()
+while IFS= read -r directory; do
+  modules+=("$directory")
+done < <(find terraform/modules -name versions.tf -exec dirname {} \; | sort)
+
+roots=()
+while IFS= read -r directory; do
+  roots+=("$directory")
+done < <(find terraform/roots -name main.tf -exec dirname {} \; | sort)
 
 terraform fmt -check -recursive -no-color terraform
 
 for directory in "${modules[@]}"; do
-  terraform -chdir="$directory" init -backend=false -input=false -no-color
-
-  # This child module intentionally requires the aws.replica configuration
-  # alias. A root supplies that configuration; standalone `validate` cannot.
-  # Its mock-backed test and the foundation-root validation below exercise
-  # both the module contract and the real provider mapping.
-  if [[ "$directory" != "terraform/modules/internal/state-backend" ]]; then
-    terraform -chdir="$directory" validate -no-color
+  test_file="$directory/tests"
+  if [[ ! -d "$test_file" ]] || ! compgen -G "$test_file/*.tftest.hcl" >/dev/null; then
+    echo "module has no Terraform test file: $directory" >&2
+    exit 1
   fi
 
-  terraform -chdir="$directory" test -no-color
+  terraform -chdir="$directory" init -backend=false -input=false -lockfile=readonly -no-color
+
+  # Terraform cannot standalone-validate a child module that requires caller
+  # provider aliases. A mock-backed test is a stronger, configured plan for
+  # that contract; ordinary modules receive both validate and test coverage.
+  if rg -q 'configuration_aliases' "$directory/versions.tf"; then
+    terraform -chdir="$directory" test -no-color
+  else
+    terraform -chdir="$directory" validate -no-color
+    terraform -chdir="$directory" test -no-color
+  fi
+
   tflint --chdir="$directory" --init
   tflint --chdir="$directory"
   printf 'PASS: module quality %s\n' "$directory"
 done
 
 for directory in "${roots[@]}"; do
-  terraform -chdir="$directory" init -backend=false -input=false -no-color
+  terraform -chdir="$directory" init -backend=false -input=false -lockfile=readonly -no-color
   terraform -chdir="$directory" validate -no-color
+
+  if [[ -d "$directory/tests" ]] && compgen -G "$directory/tests/*.tftest.hcl" >/dev/null; then
+    terraform -chdir="$directory" test -no-color
+  fi
   tflint --chdir="$directory" --init
   tflint --chdir="$directory"
   printf 'PASS: root quality %s\n' "$directory"

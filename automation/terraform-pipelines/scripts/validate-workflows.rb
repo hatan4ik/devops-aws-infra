@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
-# Syntax-level guard for the staged workflow files. actionlint is additionally
-# run by CI; this catches malformed YAML without relying on a network install.
+# Syntax-level guard for the staged workflow files. The repository quality
+# workflow also runs actionlint; this catches malformed YAML without relying
+# on a network install.
 require "yaml"
 
 paths = Dir.glob(".github/workflows/*.{yml,yaml}").sort

@@ -1,40 +1,54 @@
-variable "config" {
-  description = "Observed, non-secret configuration of the legacy bootstrap state backend. Values must match the approved adoption inventory before state-address migration."
-  type = object({
-    bucket_name                          = string
-    dynamodb_table_name                  = string
-    kms_key_alias                        = string
-    kms_key_description                  = string
-    kms_key_deletion_window_in_days      = number
-    object_lock_retention_mode           = string
-    object_lock_retention_days           = number
-    dynamodb_deletion_protection_enabled = bool
-    tags                                 = map(string)
-  })
-  nullable = false
+variable "bucket_name" {
+  description = "Observed S3 bucket name for the one legacy state backend being adopted."
+  type        = string
+  nullable    = false
 
   validation {
-    condition     = can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", var.config.bucket_name))
-    error_message = "config.bucket_name must be a valid S3 bucket name."
+    condition     = can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", var.bucket_name))
+    error_message = "bucket_name must be a valid S3 bucket name."
   }
+}
+
+variable "dynamodb_table_name" {
+  description = "Observed DynamoDB lock-table name for the legacy state backend."
+  type        = string
+  nullable    = false
 
   validation {
-    condition     = can(regex("^[A-Za-z0-9_.-]{3,255}$", var.config.dynamodb_table_name))
-    error_message = "config.dynamodb_table_name must be a valid DynamoDB table name."
+    condition     = can(regex("^[A-Za-z0-9_.-]{3,255}$", var.dynamodb_table_name))
+    error_message = "dynamodb_table_name must be a valid DynamoDB table name."
   }
+}
+
+variable "kms_key_alias" {
+  description = "Observed KMS alias used by the legacy state backend."
+  type        = string
+  nullable    = false
 
   validation {
-    condition     = can(regex("^alias/[A-Za-z0-9/_-]+$", var.config.kms_key_alias))
-    error_message = "config.kms_key_alias must be a KMS alias beginning with alias/."
+    condition     = can(regex("^alias/[A-Za-z0-9/_-]+$", var.kms_key_alias))
+    error_message = "kms_key_alias must be a KMS alias beginning with alias/."
   }
+}
+
+variable "kms_key_description" {
+  description = "Observed non-secret description of the legacy state KMS key."
+  type        = string
+  nullable    = false
 
   validation {
-    condition     = var.config.kms_key_deletion_window_in_days >= 7 && var.config.kms_key_deletion_window_in_days <= 30 && floor(var.config.kms_key_deletion_window_in_days) == var.config.kms_key_deletion_window_in_days
-    error_message = "config.kms_key_deletion_window_in_days must be a whole number from 7 through 30."
+    condition     = length(trimspace(var.kms_key_description)) > 0
+    error_message = "kms_key_description must not be empty."
   }
+}
+
+variable "tags" {
+  description = "Observed ownership and allocation tags. Resource tags are explicit; the root does not use provider default_tags."
+  type        = map(string)
+  nullable    = false
 
   validation {
-    condition     = contains(["COMPLIANCE", "GOVERNANCE"], var.config.object_lock_retention_mode) && var.config.object_lock_retention_days > 0 && floor(var.config.object_lock_retention_days) == var.config.object_lock_retention_days
-    error_message = "config object-lock retention requires COMPLIANCE or GOVERNANCE mode and a positive whole-number day count."
+    condition     = length(var.tags) > 0
+    error_message = "tags must contain the approved ownership and allocation tags."
   }
 }

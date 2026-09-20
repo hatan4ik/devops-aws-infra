@@ -21,6 +21,7 @@ active_adrs=(
   docs/adr/0013-layered-verification-no-automatic-fault-injection.md
   docs/adr/0014-canonical-architecture-and-iac-boundary.md
   docs/adr/0015-adopt-legacy-state-bootstrap.md
+  docs/adr/0016-terraform-state-lock-transition.md
 )
 
 superseded_adrs=(
@@ -92,7 +93,7 @@ fi
 
 delivery_workflow=.github/workflows/terraform-apply.yml
 [[ -f "$delivery_workflow" ]] || fail "missing delivery preflight workflow: $delivery_workflow"
-if grep -R -nEi --exclude=terraform-pr.yml 'id-token:[[:space:]]*write|configure-aws-credentials|terraform[[:space:]]+apply' .github/workflows; then
+if grep -R -nEi 'id-token:[[:space:]]*write|configure-aws-credentials|terraform[[:space:]]+apply' .github/workflows; then
   fail 'root workflows must remain credential-free and non-mutating'
 fi
 
@@ -101,5 +102,13 @@ if grep -R -nE --include='*.yml' --include='*.yaml' '[0-9]{12}' .github/workflow
 fi
 
 grep -Fq 'only candidate Terraform delivery tree' README.md || fail 'root README does not identify the canonical Terraform tree'
+
+# Canonical source must not carry mutable plans, state, or ad hoc IAM
+# permission artefacts. The disabled prototype is deliberately not scanned:
+# ADR 0015 retains its historical state artefacts until the approved
+# declarative migration evidence permits quarantine or removal.
+if find terraform -type f \( -name '*.tfstate' -o -name '*.tfstate.*' -o -name '*.tfplan' -o -name 'required_permissions.txt' \) -print -quit | grep -q .; then
+  fail 'canonical Terraform tree contains a state, plan, or ad hoc permission artifact'
+fi
 
 printf 'PASS: ADR and Terraform delivery boundary\n'

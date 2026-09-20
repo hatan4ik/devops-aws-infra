@@ -19,6 +19,17 @@
 | WAF baseline | Two Web ACLs, three AWS-managed rules each, plus requests at `$0.60/million`: dev 10M, staging 100M, prod 1B requests. | $22 / $76 / $616 |
 | KMS and observability allowance | Initial key count, metrics, logs, traces, and security events. Vended-log and archive-storage volume is excluded. | $30 / $60 / $190 |
 
+## Transitional state backend
+
+This is a separately governed legacy bootstrap, not part of the environment
+totals below. Its real cost cannot be estimated honestly from the repository:
+S3 storage/version count, Object Lock retained bytes, KMS request volume,
+DynamoDB on-demand requests, and PITR backup volume have not been supplied.
+
+| Component | Measurement and evidence | Cost owner | Monthly estimate |
+|---|---|---|---:|
+| Legacy state backend: S3 versioned/Object-Lock state, customer KMS key, DynamoDB lock table with PITR | First 30 days of Cost Explorer/CUR line items after an approved adoption, retained with the state-change evidence. | Platform/DevOps Lead until a named FinOps owner accepts it. | Unknown — intentionally not guessed. |
+
 ## Shared network floor
 
 This cost is shared by all environments and is allocated equally in the environment totals below.

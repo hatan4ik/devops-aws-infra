@@ -16,6 +16,11 @@
 | [Hybrid VPN/BGP onboarding](../runbooks/hybrid-vpn-bgp-onboarding.md) | Connect on-premises routing domain to regional TGW | Two healthy tunnels/paths · prefix filters · isolation checks · recorded rollback |
 | [Regional failover](../runbooks/regional-failover.md) | Controlled application regional failover | Health signal · traffic shift · auth/API/data validation · incident timeline · controlled failback |
 | [Break-glass access](../runbooks/break-glass-access.md) | Critical incident requiring exceptional access | Approval · MFA/session evidence · CloudTrail review · privilege removal · post-incident review |
+| [AWS access bootstrap](../runbooks/bootstrap-aws-access.md) | Establish approved human access | IAM Identity Center session · account identity evidence · no standing credentials |
+| [Legacy state-backend adoption](../runbooks/adopt-legacy-state-backend.md) | Re-address the observed state backend | Protected backup · active-lock check · declarative no-change plan · specialist approvals |
+| [Terraform state restore](../runbooks/state-restore.md) | Recover corrupt state metadata | Approved S3 version · rollback copy · refresh-only plan · CloudTrail review |
+| [Planned regional evacuation](../runbooks/regional-evacuation.md) | Withdraw a Region after migration | Data/identity/traffic/route evidence · rollback decision · approved decommission |
+| [Account decommission](../runbooks/account-decommission.md) | Retire a governed account | Retention · dependencies · state · billing · closure evidence |
 
 ---
 

@@ -5,11 +5,12 @@
 
 resource "aws_kms_key" "state" {
   # checkov:skip=CKV2_AWS_64: ADR 0015 adopts the existing key without replacing an unknown key policy; a Security-approved least-privilege policy is required before this bootstrap becomes a delivery backend.
-  description             = var.config.kms_key_description
-  deletion_window_in_days = var.config.kms_key_deletion_window_in_days
+  description = var.kms_key_description
+  # Fixed observed values; changing either is a separately approved hardening migration.
+  deletion_window_in_days = 30
   enable_key_rotation     = true
   multi_region            = false
-  tags                    = var.config.tags
+  tags                    = var.tags
 
   lifecycle {
     prevent_destroy = true
@@ -17,7 +18,7 @@ resource "aws_kms_key" "state" {
 }
 
 resource "aws_kms_alias" "state" {
-  name          = var.config.kms_key_alias
+  name          = var.kms_key_alias
   target_key_id = aws_kms_key.state.key_id
 }
 
@@ -26,9 +27,9 @@ resource "aws_s3_bucket" "state" {
   # checkov:skip=CKV2_AWS_61: ADR 0015 preserves Object Lock/versioned state before a Security-approved lifecycle policy is defined.
   # checkov:skip=CKV2_AWS_62: ADR 0015 does not create an EventBridge integration without the approved event ownership and retention contract.
   # checkov:skip=CKV_AWS_144: ADR 0015 does not create a replica bucket or replication role; cross-Region recovery is a separately approved migration.
-  bucket              = var.config.bucket_name
+  bucket              = var.bucket_name
   object_lock_enabled = true
-  tags                = var.config.tags
+  tags                = var.tags
 
   lifecycle {
     prevent_destroy = true
@@ -77,8 +78,8 @@ resource "aws_s3_bucket_object_lock_configuration" "state" {
 
   rule {
     default_retention {
-      mode = var.config.object_lock_retention_mode
-      days = var.config.object_lock_retention_days
+      mode = "COMPLIANCE"
+      days = 14
     }
   }
 
@@ -86,10 +87,11 @@ resource "aws_s3_bucket_object_lock_configuration" "state" {
 }
 
 resource "aws_dynamodb_table" "state_lock" {
-  name                        = var.config.dynamodb_table_name
-  billing_mode                = "PAY_PER_REQUEST"
-  hash_key                    = "LockID"
-  deletion_protection_enabled = var.config.dynamodb_deletion_protection_enabled
+  name         = var.dynamodb_table_name
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+  # Preserve the observed setting in this no-change adoption. Hardening is separately gated.
+  deletion_protection_enabled = false
 
   attribute {
     name = "LockID"
@@ -105,7 +107,7 @@ resource "aws_dynamodb_table" "state_lock" {
     kms_key_arn = aws_kms_key.state.arn
   }
 
-  tags = var.config.tags
+  tags = var.tags
 
   lifecycle {
     prevent_destroy = true

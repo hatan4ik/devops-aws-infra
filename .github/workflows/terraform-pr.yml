@@ -25,10 +25,5 @@ jobs:
           ruby scripts/check-reusable-contracts.rb
           scripts/check-action-pins.sh .github/workflows
 
-      - name: Assert no root workflow can access AWS before delivery setup
-        run: |
-          set -euo pipefail
-          if rg --hidden -g '!terraform-pr.yml' 'id-token:[[:space:]]*write|configure-aws-credentials|terraform apply|terraform plan' .github/workflows; then
-            echo "Root workflows must remain credential-free until the approved OIDC/backend setup exists." >&2
-            exit 1
-          fi
+      - name: Assert the canonical delivery boundary
+        run: scripts/verify-adr-boundary.sh

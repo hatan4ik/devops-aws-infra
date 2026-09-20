@@ -54,10 +54,10 @@ variable "access_log_prefix" {
 }
 
 variable "state_tiers" {
-  description = "Exactly one state bucket and lock table configuration for each approved environment tier. Object Lock is optional only when a retention decision explicitly disables it."
+  description = "One or more isolated state tier configurations. Cross-Region replication is optional per tier; Object Lock is optional only when a retention decision explicitly disables it."
   type = map(object({
     bucket_name                                  = string
-    replica_bucket_name                          = string
+    replica_bucket_name                          = optional(string)
     noncurrent_version_expiration_in_days        = number
     abort_incomplete_multipart_upload_after_days = number
     object_lock = object({
@@ -69,16 +69,16 @@ variable "state_tiers" {
   nullable = false
 
   validation {
-    condition     = length(var.state_tiers) == 3 && alltrue([for tier in ["dev", "staging", "prod"] : contains(keys(var.state_tiers), tier)])
-    error_message = "state_tiers must contain exactly dev, staging, and prod."
+    condition     = length(var.state_tiers) > 0 && alltrue([for tier in keys(var.state_tiers) : can(regex("^[a-z][a-z0-9-]{1,30}$", tier))])
+    error_message = "state_tiers must contain one or more lowercase, hyphenated tier names."
   }
 
   validation {
     condition = alltrue([
       for tier in values(var.state_tiers) :
-      can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", tier.bucket_name)) && can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", tier.replica_bucket_name)) && tier.bucket_name != tier.replica_bucket_name && tier.noncurrent_version_expiration_in_days > 0 && floor(tier.noncurrent_version_expiration_in_days) == tier.noncurrent_version_expiration_in_days && tier.abort_incomplete_multipart_upload_after_days > 0 && floor(tier.abort_incomplete_multipart_upload_after_days) == tier.abort_incomplete_multipart_upload_after_days
+      can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", tier.bucket_name)) && (tier.replica_bucket_name == null || (can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", tier.replica_bucket_name)) && tier.bucket_name != tier.replica_bucket_name)) && tier.noncurrent_version_expiration_in_days > 0 && floor(tier.noncurrent_version_expiration_in_days) == tier.noncurrent_version_expiration_in_days && tier.abort_incomplete_multipart_upload_after_days > 0 && floor(tier.abort_incomplete_multipart_upload_after_days) == tier.abort_incomplete_multipart_upload_after_days
     ])
-    error_message = "Every tier needs distinct valid primary and replica S3 bucket names and positive whole-number noncurrent-version and incomplete-multipart-upload retention periods."
+    error_message = "Every tier needs a valid primary bucket, an optional distinct valid replica bucket, and positive whole-number lifecycle periods."
   }
 
   validation {

@@ -41,6 +41,24 @@ instead of the reviewed platform source.
    applicable quality/security coverage, and obtaining the normal review and
    delivery approvals.
 
+## Quorum record and promotion gate
+
+The original repository decision recorded `Accepted` but did not preserve
+role-level names, positions, or dissent. That acceptance is therefore limited
+to the source-boundary decision above; it is not a quorum for an AWS mutation.
+
+| Role | Recorded position for this ADR | Required before a promotion or live mutation |
+|---|---|---|
+| Platform owner | Boundary accepted; individual record not preserved in this file. | Approve the specific change record and accountable owner. |
+| Cloud Architect | No role-level historical position recorded. | Confirm ADR/design consistency and migration scope. |
+| Network Engineer | No role-level historical position recorded. | Review routing, DNS, TGW, or hybrid impact when applicable. |
+| Security Engineer | No role-level historical position recorded. | Approve credentials, policy, retention, and control impact. |
+| SRE | No role-level historical position recorded. | Approve observability, rollback, restore, and operational evidence. |
+| Platform/DevOps Lead | No role-level historical position recorded. | Own GitOps delivery, evidence, and rollback implementation. |
+
+Any dissent and its resolution must be added to the change ADR. Missing
+historical names are not backfilled or inferred.
+
 ## Consequences
 
 - ADR references have one unambiguous meaning and the traceability matrix can

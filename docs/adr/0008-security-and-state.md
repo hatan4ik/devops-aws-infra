@@ -36,3 +36,19 @@ Use per-account/per-environment KMS keys and Secrets Manager rotation. Terraform
 - SCP changes are staged in sandbox/non-production and monitored before organization rollout; overly broad deny policies can halt delivery.
 - State backend bootstrap is a separately reviewed root and circular-dependency procedure; no backend bucket is created by a root that already relies on it.
 - Options 1 and 2 are rejected: decentralization fragments evidence and raises credential risk; a third-party primary control plane conflicts with AWS-native-first and adds avoidable operational cost.
+
+## 2026-09-20 state-backend amendment
+
+The original decision defines the target control posture; it does not claim a
+deployed backend. The canonical `internal/state-backend` source now protects
+state buckets, keys, and lock tables from Terraform destruction and emits both
+S3 lockfile and DynamoDB locking configuration during a controlled transition.
+The observed one-bucket legacy backend is represented separately by ADR 0015;
+it is not evidence that the multi-tier target has been applied.
+
+Provider aliases must be bound to their declared primary and replica Regions,
+and each workload root must validate its account and Region inputs before a
+future backend-enabled plan. Final retention, Object Lock, cross-Region
+recovery, state-restore evidence, and lock-table retirement remain separately
+approved obligations; see [ADR 0016](0016-terraform-state-lock-transition.md)
+and [the state-restore runbook](../runbooks/state-restore.md).

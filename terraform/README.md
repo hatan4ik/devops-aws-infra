@@ -5,7 +5,7 @@ This directory holds the stakeholder-approved local Phase 5 source before the ap
 ## Safety boundary
 
 - No directory is initialized against an AWS backend by default. Each root has `backend "s3" {}` with configuration supplied only after account vending and state-backend bootstrap.
-- `terraform.tfvars` files contain no values until a reviewed account-vending record provides account IDs, Regions, CIDRs, principals, and names. Use the committed `terraform.tfvars.example` only as a non-secret shape reference.
+- `terraform.tfvars` is uncommitted and contains only approved deployment values. Use the committed `terraform.tfvars.example` as a non-secret placeholder and shape reference; do not treat placeholder values as deployable configuration.
 - Provider credentials come from a root-level AWS provider and are intended to be short-lived GitHub OIDC credentials. No module contains a provider block, AWS credential, account ID, or remote-state data source.
 - `terraform test` uses provider mocks and `command = plan`; it does not create AWS resources. It requires Terraform 1.7 or later because provider mocking was introduced in that release.
 

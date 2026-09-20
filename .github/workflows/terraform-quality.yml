@@ -2,51 +2,9 @@ name: terraform-quality
 
 on:
   pull_request:
-    paths:
-      - "terraform/**"
-      - "scripts/validate-terraform-quality.sh"
-      - "scripts/verify-adr-boundary.sh"
-      - "docs/adr/**"
-      - "docs/traceability.md"
-      - "docs/walkthrough.md"
-      - "docs/architecture/phase-3-summary.md"
-      - "docs/architecture/phase-4-repositories.md"
-      - "docs/architecture/phase-6-7-traceability.md"
-      - "docs/architecture/legacy-state-bootstrap.md"
-      - "docs/book/12-pre-deployment-checklist.md"
-      - "docs/runbooks/bootstrap-aws-access.md"
-      - "docs/runbooks/adopt-legacy-state-backend.md"
-      - "docs/runbooks/region-failover.md"
-      - "scripts/verify-legacy-state-backend-adoption.sh"
-      - "README.md"
-      - "modules/**"
-      - "roots/**"
-      - ".github/workflows/**"
-      - "automation/terraform-pipelines/**"
   push:
     branches:
       - main
-    paths:
-      - "terraform/**"
-      - "scripts/validate-terraform-quality.sh"
-      - "scripts/verify-adr-boundary.sh"
-      - "docs/adr/**"
-      - "docs/traceability.md"
-      - "docs/walkthrough.md"
-      - "docs/architecture/phase-3-summary.md"
-      - "docs/architecture/phase-4-repositories.md"
-      - "docs/architecture/phase-6-7-traceability.md"
-      - "docs/architecture/legacy-state-bootstrap.md"
-      - "docs/book/12-pre-deployment-checklist.md"
-      - "docs/runbooks/bootstrap-aws-access.md"
-      - "docs/runbooks/adopt-legacy-state-backend.md"
-      - "docs/runbooks/region-failover.md"
-      - "scripts/verify-legacy-state-backend-adoption.sh"
-      - "README.md"
-      - "modules/**"
-      - "roots/**"
-      - ".github/workflows/**"
-      - "automation/terraform-pipelines/**"
   workflow_dispatch:
 
 permissions:
@@ -64,10 +22,14 @@ jobs:
       - name: Check out source
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
 
-      - name: Set up Terraform 1.7.5
+      - name: Read the repository Terraform version
+        id: terraform-version
+        run: echo "version=$(tr -d '[:space:]' < .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
-          terraform_version: 1.7.5
+          terraform_version: ${{ steps.terraform-version.outputs.version }}
           terraform_wrapper: false
 
       - name: Set up TFLint
@@ -78,6 +40,23 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/terraform-plugin-cache"
           echo "TF_PLUGIN_CACHE_DIR=$RUNNER_TEMP/terraform-plugin-cache" >> "$GITHUB_ENV"
+
+      - name: Install ShellCheck
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes shellcheck
+
+      - name: Install actionlint
+        run: |
+          set -euo pipefail
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Lint GitHub Actions workflows
+        run: |
+          set -euo pipefail
+          actionlint .github/workflows/*.yml automation/terraform-pipelines/.github/workflows/*.yml
 
       - name: Validate Terraform modules and roots without cloud credentials
         run: scripts/validate-terraform-quality.sh

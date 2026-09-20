@@ -3,15 +3,24 @@
 # lists state-object keys, reads state contents, or makes an AWS write call.
 set -euo pipefail
 
-bucket_name="platform-tf-state-shared-f3ddb8cc"
-table_name="platform-tf-lock-table"
-key_alias="alias/terraform-state-backend"
 expected_account_id=""
 region=""
+bucket_name=""
+table_name=""
+key_alias=""
+object_lock_retention_mode=""
+object_lock_retention_days=""
 
 usage() {
   cat <<'USAGE'
-Usage: verify-legacy-state-backend-adoption.sh --account-id ACCOUNT_ID --region REGION
+Usage: verify-legacy-state-backend-adoption.sh \
+  --account-id ACCOUNT_ID \
+  --region REGION \
+  --bucket-name BUCKET_NAME \
+  --dynamodb-table-name TABLE_NAME \
+  --kms-key-alias KMS_ALIAS \
+  --object-lock-retention-mode MODE \
+  --object-lock-retention-days DAYS
 
 Uses AWS_PROFILE if it is set. The caller must already have short-lived AWS
 credentials. This command performs read-only verification only.
@@ -33,6 +42,26 @@ while [[ $# -gt 0 ]]; do
       region="${2:-}"
       shift 2
       ;;
+    --bucket-name)
+      bucket_name="${2:-}"
+      shift 2
+      ;;
+    --dynamodb-table-name)
+      table_name="${2:-}"
+      shift 2
+      ;;
+    --kms-key-alias)
+      key_alias="${2:-}"
+      shift 2
+      ;;
+    --object-lock-retention-mode)
+      object_lock_retention_mode="${2:-}"
+      shift 2
+      ;;
+    --object-lock-retention-days)
+      object_lock_retention_days="${2:-}"
+      shift 2
+      ;;
     --help|-h)
       usage
       exit 0
@@ -46,9 +75,14 @@ done
 
 [[ "$expected_account_id" =~ ^[0-9]{12}$ ]] || fail "--account-id must be a 12-digit AWS account ID"
 [[ "$region" =~ ^[a-z]{2}(-gov)?-[a-z]+-[0-9]+$ ]] || fail "--region must be an AWS Region identifier"
+[[ "$bucket_name" =~ ^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$ ]] || fail "--bucket-name must be a valid S3 bucket name"
+[[ "$table_name" =~ ^[A-Za-z0-9_.-]{3,255}$ ]] || fail "--dynamodb-table-name must be a valid DynamoDB table name"
+[[ "$key_alias" =~ ^alias/[A-Za-z0-9/_-]+$ ]] || fail "--kms-key-alias must begin with alias/"
+[[ "$object_lock_retention_mode" == "COMPLIANCE" ]] || fail "--object-lock-retention-mode must be COMPLIANCE for this no-change adoption"
+[[ "$object_lock_retention_days" =~ ^[1-9][0-9]*$ ]] || fail "--object-lock-retention-days must be a positive whole number"
 command -v aws >/dev/null 2>&1 || fail "aws CLI is required"
 
-aws_args=(--region "$region")
+aws_args=(--no-cli-pager --region "$region")
 if [[ -n "${AWS_PROFILE:-}" ]]; then
   aws_args+=(--profile "$AWS_PROFILE")
 fi
@@ -73,7 +107,7 @@ public_access="$(aws_read s3api get-public-access-block --bucket "$bucket_name" 
 [[ "$public_access" == $'True\tTrue\tTrue\tTrue' ]] || fail "S3 public-access block is incomplete"
 
 object_lock="$(aws_read s3api get-object-lock-configuration --bucket "$bucket_name" --query 'ObjectLockConfiguration.Rule.DefaultRetention.[Mode,Days]' --output text)"
-[[ "$object_lock" == $'COMPLIANCE\t14' ]] || fail "S3 Object Lock is not COMPLIANCE for 14 days"
+[[ "$object_lock" == "${object_lock_retention_mode}"$'\t'"${object_lock_retention_days}" ]] || fail "S3 Object Lock does not match the approved adoption inventory"
 
 key_id="$(aws_read kms describe-key --key-id "$key_alias" --query 'KeyMetadata.KeyId' --output text)"
 rotation="$(aws_read kms get-key-rotation-status --key-id "$key_id" --query KeyRotationEnabled --output text)"
