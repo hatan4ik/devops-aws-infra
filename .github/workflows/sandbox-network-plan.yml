@@ -1,0 +1,65 @@
+name: Sandbox network plan
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/sandbox-network-plan.yml
+      - terraform/modules/internal/sandbox-network/**
+      - terraform/roots/sandbox-network/us-east-2/dev/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: sandbox-network-plan-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    name: sandbox_network_plan
+    # Prevent untrusted fork pull requests from requesting AWS credentials.
+    if: >-
+      vars.AWS_SANDBOX_NETWORK_PLAN_ROLE_ARN != '' &&
+      (github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: terraform/roots/sandbox-network/us-east-2/dev
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
+
+      - name: Read the repository Terraform version
+        id: terraform-version
+        working-directory: .
+        run: echo "version=$(tr -d '[:space:]' < .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: ${{ steps.terraform-version.outputs.version }}
+          terraform_wrapper: false
+
+      - name: Exchange GitHub OIDC for the dedicated plan role
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.0
+        with:
+          role-to-assume: ${{ vars.AWS_SANDBOX_NETWORK_PLAN_ROLE_ARN }}
+          role-session-name: sandbox-network-plan-${{ github.run_id }}
+          aws-region: us-east-2
+          mask-aws-account-id: true
+
+      - name: Confirm the short-lived target identity
+        run: |
+          set -euo pipefail
+          aws sts get-caller-identity --query '{Account:Account,Arn:Arn}' --output json
+
+      - name: Initialize the dedicated remote state
+        run: terraform init -input=false -lockfile=readonly -backend-config=backend.hcl
+
+      - name: Produce a non-mutating sandbox-network plan
+        run: terraform plan -input=false -lock-timeout=5m -var-file=terraform.tfvars -out=tfplan

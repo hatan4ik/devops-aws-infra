@@ -14,8 +14,8 @@ and the stop conditions that prevent accidental AWS changes.
 ## Current operating boundary
 
 - The root [Terraform quality workflow](.github/workflows/terraform-quality.yml) is credential-free. It validates and tests Terraform, scans IaC, checks generated documentation, and verifies reusable-workflow policy.
-- The plan, apply, drift, and release workflows are staged under [`automation/terraform-pipelines`](automation/terraform-pipelines/). They remain disabled until each canonical root has a reviewed backend and least-privilege role policy.
-- Protected `main`, the `dev`, `staging`, `prod`, and `landing-zone` GitHub environments, and a sandbox permissionless GitHub OIDC trust proof are live under [ADR 0017](docs/adr/0017-github-oidc-bootstrap-proof.md). No Terraform backend, plan/apply/drift delivery role permission, or release tag is configured.
+- The plan, apply, drift, and release workflows are staged under [`automation/terraform-pipelines`](automation/terraform-pipelines/) for future roots. ADR 0018 adds the only active root-specific workflow source: sandbox-network plan, manual apply, and non-remediating drift.
+- Protected `main`, the `dev`, `staging`, `prod`, and `landing-zone` GitHub environments, and a sandbox permissionless GitHub OIDC trust proof are live under [ADR 0017](docs/adr/0017-github-oidc-bootstrap-proof.md). ADR 0018 supplies reviewed policy/bootstrap source and a new backend key for the isolated sandbox network; neither plan nor apply is evidence until the respective GitHub run succeeds.
 - Cognito MRR is intentionally blocked until it has a provider-backed Terraform lifecycle; see [ADR 0011](docs/adr/0011-cognito-mrr-provider-boundary.md).
 - [`terraform/`](terraform/README.md) is the only candidate Terraform delivery tree. Root-level [`modules/`](modules/README.md) and [`roots/`](roots/README.md) are disabled historical prototypes; see [ADR 0014](docs/adr/0014-canonical-architecture-and-iac-boundary.md).
 
@@ -34,8 +34,9 @@ and the stop conditions that prevent accidental AWS changes.
 1. [`docs/`](docs/README.md) is the operating lane for current status, ADRs,
    prerequisites, delivery contracts, and controlled runbooks.
 2. [`terraform/`](terraform/README.md) is the sole candidate Terraform delivery
-   lane. It remains backend-externalized and unapplied until the stated gates
-   are satisfied.
+   lane. All roots remain backend-externalized and unapplied except the explicit
+   ADR 0018 sandbox-network root, whose GitHub-only execution gates are stated
+   in its runbook.
 
 `automation/` is future-pipeline template source. Root `modules/` and `roots/`
 are disabled prototype/recovery evidence. `reference/`, `docs/book/`, and
@@ -49,7 +50,7 @@ lanes.
 | [`docs/architecture`](docs/architecture/README.md) | Architecture, threat/security controls, costs, prerequisites, and traceability. |
 | [`docs/adr`](docs/adr/) | Active and proposed architecture decisions, their gates, and rejected alternatives. |
 | [`docs/runbooks`](docs/runbooks/README.md) | Account vending, Region expansion, hybrid VPN/BGP, failover, and break-glass operations. |
-| [`terraform`](terraform/README.md) | Candidate reusable modules, internal composition, and ten backend-externalized roots. |
+| [`terraform`](terraform/README.md) | Candidate reusable modules, internal composition, and backend-externalized roots plus the isolated ADR 0018 sandbox-network exception. |
 | [`automation/terraform-pipelines`](automation/terraform-pipelines/README.md) | SHA-pinned quality/plan/apply/drift/release pipeline source and caller templates. |
 | [`tests`](tests/README.md) | Mocked module, read-only AWS, public synthetic, and AuthN/AuthZ test contracts. |
 

@@ -23,6 +23,7 @@ active_adrs=(
   docs/adr/0015-adopt-legacy-state-bootstrap.md
   docs/adr/0016-terraform-state-lock-transition.md
   docs/adr/0017-github-oidc-bootstrap-proof.md
+  docs/adr/0018-sandbox-network-gitops-delivery.md
 )
 
 superseded_adrs=(
@@ -95,11 +96,17 @@ fi
 delivery_workflow=.github/workflows/terraform-apply.yml
 [[ -f "$delivery_workflow" ]] || fail "missing delivery preflight workflow: $delivery_workflow"
 oidc_proof_workflow=.github/workflows/oidc-sandbox-proof.yml
+sandbox_network_plan_workflow=.github/workflows/sandbox-network-plan.yml
+sandbox_network_apply_workflow=.github/workflows/sandbox-network-apply.yml
+sandbox_network_drift_workflow=.github/workflows/sandbox-network-drift.yml
 credentialed_workflows="$(grep -lEi 'id-token:[[:space:]]*write|configure-aws-credentials' .github/workflows/*.yml || true)"
 if [[ -n "$credentialed_workflows" ]]; then
   while IFS= read -r workflow; do
     [[ -n "$workflow" ]] || continue
-    [[ "$workflow" == "$oidc_proof_workflow" ]] || fail "unexpected credentialed root workflow: $workflow"
+    case "$workflow" in
+      "$oidc_proof_workflow"|"$sandbox_network_plan_workflow"|"$sandbox_network_apply_workflow"|"$sandbox_network_drift_workflow") ;;
+      *) fail "unexpected credentialed root workflow: $workflow" ;;
+    esac
   done <<< "$credentialed_workflows"
 fi
 
@@ -110,8 +117,36 @@ if grep -nEi 'terraform|cloudformation|aws[[:space:]].*[[:space:]](create|delete
   fail 'OIDC proof workflow must not include an infrastructure mutation'
 fi
 
-if grep -R -nEi --exclude='oidc-sandbox-proof.yml' 'terraform[[:space:]]+apply' .github/workflows; then
-  fail 'root workflows must not apply Terraform'
+[[ -f "$sandbox_network_plan_workflow" ]] || fail "missing sandbox-network plan workflow"
+[[ -f "$sandbox_network_apply_workflow" ]] || fail "missing sandbox-network apply workflow"
+[[ -f "$sandbox_network_drift_workflow" ]] || fail "missing sandbox-network drift workflow"
+
+grep -Fq 'github.event.pull_request.head.repo.full_name == github.repository' "$sandbox_network_plan_workflow" || fail 'sandbox-network plan must reject fork pull requests'
+grep -Fq 'AWS_SANDBOX_NETWORK_PLAN_ROLE_ARN' "$sandbox_network_plan_workflow" || fail 'sandbox-network plan must use its dedicated role variable'
+grep -Fq 'terraform plan' "$sandbox_network_plan_workflow" || fail 'sandbox-network plan must produce a Terraform plan'
+if grep -nEi 'terraform[[:space:]]+apply' "$sandbox_network_plan_workflow"; then
+  fail 'sandbox-network plan workflow must not apply Terraform'
+fi
+
+grep -Fq 'workflow_dispatch:' "$sandbox_network_apply_workflow" || fail 'sandbox-network apply must require manual dispatch'
+grep -Fq "inputs.confirm == 'apply'" "$sandbox_network_apply_workflow" || fail 'sandbox-network apply must require explicit confirmation'
+grep -Fq 'environment: dev' "$sandbox_network_apply_workflow" || fail 'sandbox-network apply must use the protected dev environment'
+grep -Fq 'AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN' "$sandbox_network_apply_workflow" || fail 'sandbox-network apply must use its dedicated role variable'
+grep -Fq 'terraform apply' "$sandbox_network_apply_workflow" || fail 'sandbox-network apply workflow is missing its controlled apply step'
+
+terraform_apply_workflows="$(grep -lEi 'terraform[[:space:]]+apply' .github/workflows/*.yml || true)"
+if [[ -n "$terraform_apply_workflows" ]]; then
+  while IFS= read -r workflow; do
+    [[ -n "$workflow" ]] || continue
+    [[ "$workflow" == "$sandbox_network_apply_workflow" ]] || fail "unexpected Terraform apply workflow: $workflow"
+  done <<< "$terraform_apply_workflows"
+fi
+
+grep -Fq 'schedule:' "$sandbox_network_drift_workflow" || fail 'sandbox-network drift must be scheduled'
+grep -Fq 'AWS_SANDBOX_NETWORK_DRIFT_ROLE_ARN' "$sandbox_network_drift_workflow" || fail 'sandbox-network drift must use its dedicated role variable'
+grep -Fq 'terraform plan -detailed-exitcode' "$sandbox_network_drift_workflow" || fail 'sandbox-network drift must report detected changes'
+if grep -nEi 'terraform[[:space:]]+apply' "$sandbox_network_drift_workflow"; then
+  fail 'sandbox-network drift workflow must not apply Terraform'
 fi
 
 if grep -R -nE --include='*.yml' --include='*.yaml' '[0-9]{12}' .github/workflows; then

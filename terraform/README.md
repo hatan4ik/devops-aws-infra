@@ -12,8 +12,8 @@ as defined in [the repository strategy](../docs/architecture/repository-strategy
 
 ## Safety boundary
 
-- No directory is initialized against an AWS backend by default. Each root has `backend "s3" {}` with configuration supplied only after account vending and state-backend bootstrap.
-- `terraform.tfvars` is uncommitted and contains only approved deployment values. Use the committed `terraform.tfvars.example` as a non-secret placeholder and shape reference; do not treat placeholder values as deployable configuration.
+- No directory is initialized against an AWS backend by default, except the explicitly approved isolated sandbox-network root in [ADR 0018](../docs/adr/0018-sandbox-network-gitops-delivery.md). Its committed `backend.hcl` is non-secret immutable deployment configuration for a new dedicated state key; GitHub OIDC is the only supported apply path.
+- `terraform.tfvars` is uncommitted and contains only approved deployment values, except the approved sandbox-network root whose non-secret, account/Region/CIDR-pinned `terraform.tfvars` is versioned by ADR 0018. Other roots use committed `terraform.tfvars.example` placeholders and must not treat them as deployable configuration.
 - Provider credentials come from a root-level AWS provider and are intended to be short-lived GitHub OIDC credentials. No module contains a provider block, AWS credential, account ID, or remote-state data source.
 - `terraform test` uses provider mocks and `command = plan`; it does not create AWS resources. It requires Terraform 1.7 or later because provider mocking was introduced in that release.
 
