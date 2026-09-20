@@ -117,4 +117,16 @@ variable "tags" {
   type        = map(string)
   default     = {}
   nullable    = false
+
+  validation {
+    condition = alltrue([
+      for k in keys(var.tags) : can(regex("^[A-Z][A-Za-z0-9]+$", k))
+    ])
+    error_message = "Tag keys must be PascalCase (e.g. Application, CostCenter, Owner)."
+  }
+
+  validation {
+    condition     = alltrue([for v in values(var.tags) : length(trimspace(v)) > 0])
+    error_message = "Tag values must be non-empty strings."
+  }
 }
