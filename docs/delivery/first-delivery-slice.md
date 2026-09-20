@@ -39,8 +39,10 @@ production identity, data-plane, or multi-Region traffic deployment.
   multi-Region deployment is created by this slice.
 - No remote Terraform state is edited manually. Do not use `state mv`,
   `state rm`, or `import` outside the approved declarative adoption procedure.
-- No OIDC trust, GitHub environment, secret, real backend configuration,
-  account ID, CIDR, ASN, or production value is committed to this repository.
+- No Terraform delivery permission, backend configuration, account ID, CIDR,
+  ASN, or production value is committed to this repository. ADR 0017's
+  permissionless OIDC trust and protected GitHub environments are a completed
+  prerequisite, not authorization for Terraform delivery.
 
 ## Required evidence and acceptance criteria
 

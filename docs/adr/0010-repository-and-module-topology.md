@@ -29,7 +29,7 @@ The platform needs clear ownership, independently deployable account/Region/envi
 
 Adopt option 3 and the naming, inventory, lifecycle, and GitHub-control model in [the Phase 4 repository strategy](../architecture/repository-strategy.md) and [planned GitHub controls](../architecture/github-repository-controls.md). Treat only the three named components as initial independent Terraform module repositories. All other initial Terraform modules are internal composition under `modules/` in their owner root repository.
 
-Require a root for each `(account, Region, environment)` deployment tuple, module inputs rather than cross-team remote-state reads, semantic and signed module tags, protected `main`, CODEOWNERS, two approvals including a code owner, required checks, and GitHub OIDC rather than long-lived AWS credentials. The exact GitHub organization name, teams, plan capabilities, repositories, rulesets, and trust policies remain uncreated pending separate approval.
+Require a root for each `(account, Region, environment)` deployment tuple, module inputs rather than cross-team remote-state reads, semantic and signed module tags, protected `main`, CODEOWNERS, two approvals including a code owner, required checks, and GitHub OIDC rather than long-lived AWS credentials. ADR 0017 establishes the initial personal-repository controls and a permissionless sandbox trust proof; root-specific delivery roles, backend configuration, and independent reviewers remain uncreated. The two-approval target cannot be met until independent GitHub reviewers are added.
 
 ## Consequences
 

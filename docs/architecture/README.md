@@ -2,9 +2,10 @@
 
 **Status:** Candidate source package under governance review. ADR 0015 records
 one observed legacy state bootstrap and a transitional canonical source; its
-state-address migration remains unexecuted. No AWS OIDC role, GitHub
-environment, branch rule, or workload deployment is evidenced by this
-repository.
+state-address migration remains unexecuted. ADR 0017 has established protected
+GitHub environments, protected `main`, and a sandbox permissionless AWS OIDC
+proof. No workload deployment, Terraform backend, or Terraform delivery role
+permission is evidenced by this repository.
 
 **Current authority:** This architecture describes the target design. For the
 current execution order and stop conditions, start with

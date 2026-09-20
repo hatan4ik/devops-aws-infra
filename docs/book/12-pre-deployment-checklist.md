@@ -114,7 +114,7 @@
 |---|---|---|
 | Cognito MRR not deployable via Terraform | [ADR 0011](../adr/0011-cognito-mrr-provider-boundary.md) | Wait for Terraform AWS provider support; do not substitute CLI/console steps |
 | No approved platform accounts, Regions, CIDRs, ASNs, IPAM pools, VPN customer gateways, DNS/certificates, identity roles, service quotas, data model, or application image supplied | All ADRs | Complete external verification checklist above. The separate [legacy state bootstrap](../architecture/legacy-state-bootstrap.md) must be adopted or retired before it can be treated as an approved backend. |
-| No remote GitHub organization/repositories/rulesets/environments/secrets/OIDC trust policies exist | [ADR 0012](../adr/0012-oidc-gated-terraform-delivery.md) | Create pipeline repository and verify controls through sandbox before any AWS access |
+| No Terraform backend configuration, root-specific AWS role policy, plan/apply caller, or environment-scoped backend secret exists | [ADR 0012](../adr/0012-oidc-gated-terraform-delivery.md), [ADR 0017](../adr/0017-github-oidc-bootstrap-proof.md) | Protected environments and a permissionless sandbox OIDC proof exist; add root-specific controls and verify a sandbox plan before any apply |
 | No live network/security/authentication/failover assertion has run | [ADR 0013](../adr/0013-layered-verification-no-automatic-fault-injection.md) | Complete staging game day (Chapter 7, section 7.5) |
 
 ---
