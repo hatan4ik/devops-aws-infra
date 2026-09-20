@@ -1,6 +1,15 @@
 # AWS platform GitOps source
 
-This repository is the GitOps source for a proposed AWS-native, multi-account, two-Region platform. It contains reviewed architecture, Terraform module/root source, local pipeline definitions, runbooks, and verification contracts. It does not contain cloud credentials, state, or customer data. A legacy AWS state bootstrap is recorded by a transitional canonical root; its approved adoption boundary and still-gated state-address migration are in the [legacy state bootstrap inventory](docs/architecture/legacy-state-bootstrap.md).
+This repository contains the candidate GitOps source and documentation for a
+proposed AWS-native, multi-account, two-Region platform. It does not contain
+cloud credentials, state, or customer data, and it is not evidence that the
+application platform has been deployed.
+
+## Start here
+
+Read [Project status and delivery authority](docs/PROJECT-STATUS.md) first. It
+names the only current source-of-truth documents, the selected first milestone,
+and the stop conditions that prevent accidental AWS changes.
 
 ## Current operating boundary
 
@@ -10,9 +19,28 @@ This repository is the GitOps source for a proposed AWS-native, multi-account, t
 - Cognito MRR is intentionally blocked until it has a provider-backed Terraform lifecycle; see [ADR 0011](docs/adr/0011-cognito-mrr-provider-boundary.md).
 - [`terraform/`](terraform/README.md) is the only candidate Terraform delivery tree. Root-level [`modules/`](modules/README.md) and [`roots/`](roots/README.md) are disabled historical prototypes; see [ADR 0014](docs/adr/0014-canonical-architecture-and-iac-boundary.md).
 
-## Engineering reference documentation
+## Documentation authority
 
-A full O'Reilly-style engineering reference is available in [`docs/book/`](docs/book/README.md). It covers platform overview, architecture diagrams, network/security design, identity/compute/data, CI/CD pipeline, Terraform module catalog, SRE/observability, cost model, ADR index, runbooks, verification strategy, and the pre-deployment checklist.
+- [Project status](docs/PROJECT-STATUS.md) answers what is current and what
+  happens next.
+- [ADRs](docs/adr/README.md) control architecture and delivery decisions.
+- [First delivery slice](docs/delivery/first-delivery-slice.md) bounds the work
+  before platform expansion.
+- [`docs/book/`](docs/book/README.md) is explanatory reference material only;
+  it is not current status or approval authority.
+
+## Two working lanes
+
+1. [`docs/`](docs/README.md) is the operating lane for current status, ADRs,
+   prerequisites, delivery contracts, and controlled runbooks.
+2. [`terraform/`](terraform/README.md) is the sole candidate Terraform delivery
+   lane. It remains backend-externalized and unapplied until the stated gates
+   are satisfied.
+
+`automation/` is future-pipeline template source. Root `modules/` and `roots/`
+are disabled prototype/recovery evidence. `reference/`, `docs/book/`, and
+`docs/reviews/archive/` are reference or historical material, not delivery
+lanes.
 
 ## Repository map
 

@@ -1,15 +1,19 @@
 # AWS Platform Engineering Reference
 
-**Edition:** 1.0 · **Status:** Architecture Complete — Pre-Deployment  
+**Edition:** 1.0 · **Status:** Design reference — pre-deployment
 **Last reviewed:** 2026-09-18 · **Classification:** Internal Engineering
 
 ---
 
 ## About this documentation
 
-This reference covers the design, architecture, and operational model for a proposed AWS-native, multi-account, active-active multi-Region platform. It is organized as an engineering reference: concept-first, decision-justified, and operationally grounded.
+This reference explains the design, architecture, and operational model for a
+proposed AWS-native, multi-account, active-active multi-Region platform. It is
+secondary explanatory material, not current deployment status, an approval
+record, or implementation authority. Start with
+[Project status](../PROJECT-STATUS.md) and the [ADR index](../adr/README.md).
 
-No application, network, identity, or data-plane infrastructure, Terraform delivery state, or remote GitHub configuration has been created. ADR 0015 separately records an observed legacy state bootstrap and a still-gated canonical adoption path. Every document here otherwise describes reviewed, stakeholder-approved design intent. The [external verification checklist](../architecture/external-verification.md) and [Phase 6–7 traceability](../architecture/phase-6-7-traceability.md) define what must be completed before any deployment begins.
+No application, network, identity, or data-plane infrastructure, Terraform delivery state, or remote GitHub configuration has been created. ADR 0015 separately records an observed legacy state bootstrap and a still-gated canonical adoption path. Every document here otherwise describes design intent. The [external verification checklist](../architecture/external-verification.md) and [Phase 6–7 traceability](../architecture/phase-6-7-traceability.md) define what must be completed before any deployment begins.
 
 ---
 

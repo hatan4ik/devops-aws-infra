@@ -1,6 +1,14 @@
-# Local Terraform delivery staging area
+# Candidate canonical Terraform delivery source
 
-This directory holds the stakeholder-approved local Phase 5 source before the approved repository set exists remotely. It is not a Terraform root itself and has no remote backend. On remote-creation approval, each `modules/terraform-aws-*` directory is moved intact to its corresponding module repository; `roots/` and `modules/internal/` are split into their owning live-configuration repositories as defined in [the repository strategy](../docs/architecture/repository-strategy.md).
+This is the repository's only candidate Terraform delivery tree. It holds the
+stakeholder-approved local Phase 5 source before the approved repository set
+exists remotely. It is not a Terraform root itself and has no remote backend.
+Read [Project status](../docs/PROJECT-STATUS.md) and the
+[first delivery slice](../docs/delivery/first-delivery-slice.md) before using
+any root. On remote-creation approval, each `modules/terraform-aws-*` directory
+is moved intact to its corresponding module repository; `roots/` and
+`modules/internal/` are split into their owning live-configuration repositories
+as defined in [the repository strategy](../docs/architecture/repository-strategy.md).
 
 ## Safety boundary
 

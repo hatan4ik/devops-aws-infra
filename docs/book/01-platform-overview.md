@@ -1,6 +1,6 @@
 # Chapter 1 — Platform Overview & Concept of Operations (ConOps)
 
-**Status:** Stakeholder-approved 2026-09-18 · No AWS resources created
+**Status:** Design reference · No application-platform AWS resources created
 
 ---
 
@@ -13,7 +13,11 @@ This platform provides a production-grade, AWS-native foundation for a low-laten
 - **Secure by default** — no Internet egress from workload subnets, no long-lived credentials, no standing human access
 - **GitOps-delivered** — every infrastructure change is a reviewed pull request, OIDC-authenticated, and pipeline-gated
 
-The platform is architecture-complete. It is not yet deployed. The gap between this document and a running system is defined precisely in [Chapter 12 — Pre-Deployment Checklist](12-pre-deployment-checklist.md).
+The platform design is documented; it is not yet deployed. This chapter is not
+the current delivery authority. The current gap and its delivery order are in
+[Project status](../PROJECT-STATUS.md) and the
+[first delivery slice](../delivery/first-delivery-slice.md); Chapter 12 remains
+supporting reference.
 
 ---
 

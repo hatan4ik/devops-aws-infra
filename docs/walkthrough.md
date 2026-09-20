@@ -1,5 +1,9 @@
 # Delivery walkthrough and state boundary
 
+> **Current entry point:** Read [Project status and delivery authority](PROJECT-STATUS.md)
+> before this historical delivery walkthrough. It gives the current execution
+> order and marks which source is a delivery lane versus reference material.
+
 ## Current status
 
 No canonical Terraform plan or apply is authorized from this repository. The

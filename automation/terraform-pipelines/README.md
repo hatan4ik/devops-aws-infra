@@ -1,4 +1,4 @@
-# Terraform pipeline staging area
+# Terraform pipeline templates — not active CI/CD
 
 This directory is the reviewed source for the future `<org>-terraform-pipelines` repository defined in the [repository strategy](../../docs/architecture/repository-strategy.md). It is deliberately not an active GitHub Actions directory in this repository: GitHub only discovers workflows in a repository's top-level `.github/workflows/` directory.
 

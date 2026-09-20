@@ -48,3 +48,12 @@ The names and retention settings used for an individual execution come from an
 approved, uncommitted `terraform.tfvars` file for the `bootstrap-state` root.
 They are passed unchanged to the preflight script; this inventory intentionally
 does not duplicate operational identifiers.
+
+## Delivery order
+
+This adoption is the selected first delivery milestone, not a standing
+permission to operate the legacy resources. Complete the evidence package and
+the runbook's gates, then produce the no-change state-address adoption evidence.
+Only after the change record accepts that evidence may the team prepare a
+sandbox network-root plan. The delivery contract is recorded in
+[the first delivery slice](../delivery/first-delivery-slice.md).

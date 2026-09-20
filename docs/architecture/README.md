@@ -5,6 +5,11 @@ one observed legacy state bootstrap and a transitional canonical source; its
 state-address migration remains unexecuted. No AWS OIDC role, GitHub
 environment, branch rule, or workload deployment is evidenced by this
 repository.
+
+**Current authority:** This architecture describes the target design. For the
+current execution order and stop conditions, start with
+[Project status](../PROJECT-STATUS.md) and the
+[first delivery slice](../delivery/first-delivery-slice.md).
 **Scope:** AWS-native platform design and GitOps source for a low-latency application serving millions of authenticated users. The repository is not deployment evidence and has not created an application, network, identity, or data-plane deployment.
 
 The design is active-active for stateless application and DynamoDB profile/session traffic across two Regions and two AZs per Region. Cognito is intentionally a native multi-Region **primary/secondary directory**: the secondary is activated for authentication and failover, but user creation, password resets, and profile writes remain primary-Region operations. This distinction is material to the stated RTO/RPO and product experience.

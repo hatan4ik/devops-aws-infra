@@ -76,6 +76,21 @@ quorum or dissent result for a state mutation.
    protection, cross-Region recovery, and a tested restore procedure before
    it is used as the platform-wide delivery backend.
 
+## Delivery milestone selection
+
+The Platform Owner's approved option 1 is the first delivery milestone for this
+repository. It has a strict order: (1) complete the external evidence package,
+(2) perform the approved no-change state-address adoption, and only then (3)
+prepare one sandbox network-root plan. Retirement is not the selected milestone
+because the retained state may be required and no replacement backend or
+migration proof exists.
+
+This ordering is a planning decision, not authorization to mutate AWS. The
+specialist quorum, active-lock check, protected backup, no-resource-change plan,
+and recovery/cost evidence in this ADR and the adoption runbook remain mandatory.
+No application, identity, data-plane, production network, or multi-Region
+platform expansion is authorized before the adoption evidence is accepted.
+
 ## Consequences
 
 - The existing state backend has a canonical source location without pretending

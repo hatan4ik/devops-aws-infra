@@ -6,7 +6,7 @@
 **Path shorthand:** `vpc-workload/`, `tgw-hub/`, and `cognito/` (or `cognito-userpool/`) abbreviate `terraform/modules/terraform-aws-<name>/`; `state-backend/`, `workload-regional/`, `network-regional/`, and `tgw-vpc-attachment/` are under `terraform/modules/internal/`; `*.tftest.hcl` files are in each module's `tests/` directory; `foundation/.../` is `terraform/roots/foundation/region-a/shared/`; `automation/.../` is `automation/terraform-pipelines/`. Files named only in section 5 and 6 are proposals and do not exist yet.
 
 > **Resolution note (2026-09-19):** The ADR fork and root-level prototype
-> boundary findings were resolved by [ADR 0014](../adr/0014-canonical-architecture-and-iac-boundary.md).
+> boundary findings were resolved by [ADR 0014](../../adr/0014-canonical-architecture-and-iac-boundary.md).
 > This review remains a point-in-time historical assessment; its findings and
 > line references must not be read as current implementation status.
 

@@ -6,5 +6,6 @@ profile, and every root contains a guard that makes a normal Terraform plan
 fail.
 
 Use the backend-disabled candidate roots in [`../terraform/roots`](../terraform/roots)
-with the approved OIDC delivery workflow instead. The authoritative rationale
-is [ADR 0014](../docs/adr/0014-canonical-architecture-and-iac-boundary.md).
+only after the approved OIDC delivery workflow and its required evidence exist.
+The authoritative rationale is
+[ADR 0014](../docs/adr/0014-canonical-architecture-and-iac-boundary.md).
