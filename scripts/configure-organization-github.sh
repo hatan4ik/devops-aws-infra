@@ -64,9 +64,13 @@ state_kms_key_arn="$(stack_output StateKmsKeyArn)"
 state_lock_table="$(stack_output StateLockTableName)"
 drift_role_arn="$(aws iam get-role --profile "$profile" --role-name "${role_prefix}-drift" --query 'Role.Arn' --output text)"
 
-# GitHub Environments are intentionally explicit OIDC trust boundaries. The
-# API call does not configure reviewers because plan restrictions vary by plan.
-gh api --method PUT "repos/${repository}/environments/landing-zone" --silent
+# GitHub Environments are explicit OIDC trust boundaries. Permit deployments
+# only from a protected branch; reviewer selection remains repository-owner
+# policy and is therefore never inferred by this script.
+gh api --method PUT "repos/${repository}/environments/landing-zone" \
+  -F 'deployment_branch_policy[protected_branches]=true' \
+  -F 'deployment_branch_policy[custom_branch_policies]=false' \
+  --silent
 
 gh variable set AWS_ORGANIZATION_PLAN_ROLE_ARN --repo "$repository" --body "$plan_role_arn"
 gh variable set AWS_ORGANIZATION_STATE_BUCKET --repo "$repository" --body "$state_bucket"

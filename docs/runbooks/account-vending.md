@@ -43,10 +43,10 @@ scripts/configure-organization-github.sh \
   --profile AWS-hatan4ik-management
 ```
 
-Before any apply, configure required reviewers and deployment-branch
-restrictions on the GitHub `landing-zone` Environment. The setup script creates
-the Environment and stores only role ARNs and backend identifiers; it cannot
-choose reviewers for the organization.
+Before any apply, configure any required reviewers on the GitHub `landing-zone`
+Environment. The setup script permits only protected-branch deployments and
+stores only role ARNs and backend identifiers; it cannot choose reviewers for
+the organization.
 
 ## Vending procedure
 
