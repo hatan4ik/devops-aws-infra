@@ -390,15 +390,23 @@ locals {
     Resource = "*"
   }
 
+  identity_oidc_provider_read_statement = {
+    Sid      = "ReadSandboxGitHubOidcProvider"
+    Effect   = "Allow"
+    Action   = ["iam:GetOpenIDConnectProvider"]
+    Resource = local.github_oidc_provider_arn
+  }
+
   identity_plan_policy = {
     Version   = "2012-10-17"
-    Statement = concat(local.identity_state_statements, [local.identity_read_statement])
+    Statement = concat(local.identity_state_statements, [local.identity_read_statement, local.identity_oidc_provider_read_statement])
   }
 
   identity_dev_apply_policy = {
     Version = "2012-10-17"
     Statement = concat(local.identity_state_statements, [
       local.identity_read_statement,
+      local.identity_oidc_provider_read_statement,
       {
         Sid      = "ManageOnlyTrackedSandboxDeliveryPolicyVersions"
         Effect   = "Allow"
