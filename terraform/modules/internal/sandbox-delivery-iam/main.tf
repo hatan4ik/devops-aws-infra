@@ -9,8 +9,9 @@ locals {
   github_oidc_provider_arn = "arn:${data.aws_partition.current.partition}:iam::${var.aws_account_id}:oidc-provider/token.actions.githubusercontent.com"
 
   github_oidc_tags = {
-    ManagedBy = "devops-aws-infra"
-    Purpose   = "github-actions-oidc"
+    IaCOwnership = "terraform"
+    ManagedBy    = "devops-aws-infra"
+    Purpose      = "github-actions-oidc"
   }
 
   github_role_names = {
