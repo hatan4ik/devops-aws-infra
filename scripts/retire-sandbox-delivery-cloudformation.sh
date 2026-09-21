@@ -56,6 +56,8 @@ command -v terraform >/dev/null || { printf 'Terraform is required.\n' >&2; exit
 (
   export AWS_PROFILE="$profile"
   terraform -chdir="$root_directory" init -input=false -lockfile=readonly -backend-config=backend.hcl >/dev/null
+  state_addresses="$(terraform -chdir="$root_directory" state list)"
+
   for address in \
     'module.sandbox_delivery_iam.aws_iam_openid_connect_provider.github_actions' \
     'module.sandbox_delivery_iam.aws_iam_role.github_actions["plan"]' \
@@ -79,7 +81,7 @@ command -v terraform >/dev/null || { printf 'Terraform is required.\n' >&2; exit
     'module.sandbox_delivery_iam.aws_iam_role_policy_attachment.delivery["identity_plan_to_plan"]' \
     'module.sandbox_delivery_iam.aws_iam_role_policy_attachment.delivery["identity_plan_to_drift"]' \
     'module.sandbox_delivery_iam.aws_iam_role_policy_attachment.delivery["identity_apply_to_dev_apply"]'; do
-    terraform -chdir="$root_directory" state list | grep -Fqx "$address"
+    grep -Fqx "$address" <<<"$state_addresses"
   done
 )
 
@@ -129,13 +131,14 @@ aws cloudformation deploy \
   --tags ManagedBy=devops-aws-infra Purpose=sandbox-platform-gitops IaCOwnership=terraform
 
 for stack_name in devops-aws-infra-github-oidc devops-aws-infra-sandbox-network-delivery-policy devops-aws-infra-sandbox-platform-delivery-policy; do
-  aws cloudformation get-template \
+  stack_template_body="$(aws cloudformation get-template \
     --profile "$profile" \
     --region "$region" \
     --stack-name "$stack_name" \
     --template-stage Original \
     --query TemplateBody \
-    --output text | grep -Eq 'DeletionPolicy[[:space:]]*(:|":)[[:space:]]*"?Retain'
+    --output text)"
+  grep -Eq 'DeletionPolicy[[:space:]]*(:|":)[[:space:]]*"?Retain' <<<"$stack_template_body"
   aws cloudformation delete-stack --profile "$profile" --region "$region" --stack-name "$stack_name"
   aws cloudformation wait stack-delete-complete --profile "$profile" --region "$region" --stack-name "$stack_name"
 done
@@ -165,12 +168,14 @@ done
 assert_attached() {
   local role_name="$1"
   local policy_arn="$2"
+  local attached_policy_arns
 
-  aws iam list-attached-role-policies \
+  attached_policy_arns="$(aws iam list-attached-role-policies \
     --profile "$profile" \
     --role-name "$role_name" \
     --query 'AttachedPolicies[].PolicyArn' \
-    --output text | tr '\t' '\n' | grep -Fqx "$policy_arn"
+    --output text)"
+  tr '\t' '\n' <<<"$attached_policy_arns" | grep -Fqx "$policy_arn"
 }
 
 network_plan_arn="arn:aws:iam::${caller_account_id}:policy/devops-aws-infra-sandbox-sandbox-network-plan"
