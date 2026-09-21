@@ -56,4 +56,9 @@ run "plans_all_sandbox_delivery_policies_and_only_reviewed_attachments" {
     condition     = length(aws_iam_role.github_actions) == 6 && aws_iam_openid_connect_provider.github_actions.url == "https://token.actions.githubusercontent.com"
     error_message = "Terraform must own the GitHub OIDC provider and every sandbox delivery role before CloudFormation is retired."
   }
+
+  assert {
+    condition     = aws_iam_openid_connect_provider.github_actions.tags["IaCOwnership"] == "terraform"
+    error_message = "Terraform must persist its ownership tag after CloudFormation stack retirement."
+  }
 }
