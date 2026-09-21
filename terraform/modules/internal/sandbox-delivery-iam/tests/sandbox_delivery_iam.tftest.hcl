@@ -45,6 +45,14 @@ run "plans_all_sandbox_delivery_policies_and_only_reviewed_attachments" {
   }
 
   assert {
+    condition = anytrue([
+      for statement in jsondecode(aws_iam_policy.identity_plan.policy).Statement :
+      statement.Sid == "ReadSandboxGitHubOidcProvider" ? contains(statement.Action, "iam:GetOpenIDConnectProvider") && statement.Resource == "arn:aws:iam::448871779014:oidc-provider/token.actions.githubusercontent.com" : false
+    ])
+    error_message = "The plan and drift roles must be able to read the tracked GitHub OIDC provider without receiving broad provider access."
+  }
+
+  assert {
     condition     = length(aws_iam_role.github_actions) == 6 && aws_iam_openid_connect_provider.github_actions.url == "https://token.actions.githubusercontent.com"
     error_message = "Terraform must own the GitHub OIDC provider and every sandbox delivery role before CloudFormation is retired."
   }
