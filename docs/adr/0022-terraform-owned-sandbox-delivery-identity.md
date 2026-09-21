@@ -33,8 +33,9 @@ unnecessary and harms repeatability.
    delivery policies. No role receives `AdministratorAccess`.
 4. Policy and resource ARNs are composed from `aws_account_id`, `aws_region`,
    AWS partition, names, and a KMS key UUID. Each root supplies its account ID
-   once. The backend relies on the verified S3 bucket default KMS encryption
-   rather than an account-qualified `kms_key_id` literal.
+   once. The backend names the approved customer-managed key by its stable KMS
+   alias, rather than repeating an account-qualified `kms_key_id` ARN. The
+   bucket default is verified to use that same key.
 5. The three retired CloudFormation templates and their bootstrap scripts live
    only under [`archive/cloudformation-sandbox-bootstrap`](../../archive/cloudformation-sandbox-bootstrap/).
    The controlled handoff sets `Retain` metadata, deletes the stacks, and

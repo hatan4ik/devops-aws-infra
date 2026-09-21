@@ -4,3 +4,4 @@ key            = "gitops/sandbox-delivery/us-east-2/global/terraform.tfstate"
 region         = "us-east-2"
 dynamodb_table = "platform-tf-lock-table"
 encrypt        = true
+kms_key_id     = "alias/terraform-state-backend"
