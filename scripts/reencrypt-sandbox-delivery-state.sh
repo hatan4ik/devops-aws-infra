@@ -17,8 +17,8 @@ usage() {
 Usage: scripts/reencrypt-sandbox-delivery-state.sh [options]
 
 Creates a new version of only the sandbox-delivery Terraform state object using
-the approved customer-managed KMS key. It refuses to run when any Terraform
-lock exists in the shared lock table and never prints state content.
+the approved customer-managed KMS key. It refuses to run when this state object
+has an active Terraform lock and never prints state content.
 
 Options:
   --profile NAME        IAM Identity Center profile (default: AWS-hatan4ik-sandbox)
@@ -66,15 +66,19 @@ bucket_default_kms_key_arn="$(aws s3api get-bucket-encryption \
   exit 1
 }
 
-lock_count="$(aws dynamodb scan \
+state_lock_id="${bucket_name}/${state_key}"
+target_lock_info="$(aws dynamodb get-item \
   --profile "$profile" \
   --region "$region" \
   --table-name "$lock_table_name" \
-  --select COUNT \
-  --query Count \
+  --key "{\"LockID\":{\"S\":\"${state_lock_id}\"}}" \
+  --projection-expression '#info' \
+  --expression-attribute-names '{"#info":"Info"}' \
+  --consistent-read \
+  --query 'Item.Info.S' \
   --output text)"
-[[ "$lock_count" == "0" ]] || {
-  printf 'Refusing state re-encryption: %s Terraform lock record(s) exist in %s.\n' "$lock_count" "$lock_table_name" >&2
+[[ -z "$target_lock_info" || "$target_lock_info" == "None" ]] || {
+  printf 'Refusing state re-encryption: %s has an active Terraform lock.\n' "$state_key" >&2
   exit 1
 }
 
