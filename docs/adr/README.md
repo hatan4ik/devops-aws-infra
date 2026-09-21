@@ -26,6 +26,7 @@ one of these files.
 | 0018 | [Sandbox network GitOps delivery](0018-sandbox-network-gitops-delivery.md) |
 | 0019 | [Direct Organizations account vending; defer Control Tower and VPN](0019-direct-organizations-account-vending.md) |
 | 0020 | [CloudFormation ownership for Cognito MRR lifecycle](0020-cognito-mrr-cloudformation-ownership.md) |
+| 0021 | [Single-account sandbox platform core](0021-sandbox-platform-core-single-account.md) |
 
 ## Historical superseded records
 

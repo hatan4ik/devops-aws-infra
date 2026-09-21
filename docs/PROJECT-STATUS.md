@@ -5,10 +5,10 @@
 GitHub OIDC workflows and verified read-only in AWS. The control plane owns a
 dedicated encrypted state backend, six top-level OUs, two baseline SCPs, and
 12 policy attachments. It has vended **no** account and has not moved an
-existing account. This repository is still **not** proof of a deployed
-application platform: member-account baselines, IPAM/TGW, workloads, identity,
-data, production, and multi-Region delivery remain separately gated. Control
-Tower and VPN/BGP are explicitly out of the current delivery scope.
+existing account. ADR 0021 now supplies the reviewed single-account sandbox
+platform core delivery lane; it is source until its protected GitHub apply and
+read-only verification succeed. It is not a production, multi-account, or
+multi-Region platform. Control Tower and VPN/BGP remain out of current scope.
 
 ## Start here
 
@@ -39,10 +39,10 @@ supplied in reviewed tfvars.
 ADR 0018 authorizes only its versioned policy bootstrap and protected GitHub
 workflow. ADR 0019 additionally authorizes the versioned management-account
 CloudFormation control-plane bootstrap and protected Organization GitOps
-workflow. Neither authorizes a local Terraform apply, manual state change,
-Control Tower launch, VPN/BGP, member-account baseline, endpoint, workload,
-identity, data, production, or multi-Region deployment without a separately
-reviewed root and plan.
+workflow. ADR 0021 authorizes a distinct, single-account sandbox platform
+root. No ADR authorizes a local Terraform apply, manual state change, Control
+Tower launch, VPN/BGP, member-account baseline, public ingress, production, or
+multi-Region deployment without a separately reviewed root and plan.
 
 ### Sandbox-network reconciliation record
 
@@ -106,13 +106,16 @@ Read-only Organization inventory confirmed:
 
 1. Preserve the apply, CloudTrail, dedicated-state, and weekday-drift evidence
    for the completed sandbox network and Organization control plane.
-2. Add explicit Network, Shared Services, Log Archive, Security/Audit, and
+2. Deliver and verify ADR 0021's private sandbox platform core through its
+   dedicated GitHub OIDC workflow.
+3. Supply the container image, approved public domain/Route 53 and ACM owner,
+   OAuth callback/logout URLs, and Cognito email/SMS ownership before public
+   ingress or an ECS service is created.
+4. Add explicit Network, Shared Services, Log Archive, Security/Audit, and
    Production account email/owner/OU contracts; then review the account-vending
    plan. Do not infer aliases.
-3. Obtain the enterprise IPAM supernet/allocation and route-domain matrix before
-   any TGW or workload VPC plan. Keep VPN/BGP deferred.
-4. Obtain domain, Route 53/ACM ownership, workload artifact, Cognito delivery,
-   and cost inputs before edge, identity, or workload deployment.
+5. Obtain an enterprise IPAM supernet and route-domain matrix, including a
+   non-overlapping second-Region CIDR, before TGW or multi-Region delivery.
 
 Stop immediately if the backend lock is active, a plan includes resources
 outside its reviewed ADR/root, the caller is not the intended account, a
