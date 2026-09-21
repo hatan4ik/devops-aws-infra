@@ -69,6 +69,17 @@ bash scripts/retire-sandbox-delivery-cloudformation.sh \
    remaining CloudFormation source is historical evidence under
    [`archive/cloudformation-sandbox-bootstrap`](../../archive/cloudformation-sandbox-bootstrap/).
 
+7. If this root was initialized before its backend KMS alias was introduced,
+   re-encrypt only its versioned state object. The guarded script checks the
+   account, bucket default key, and an empty lock table; it never displays or
+   edits state content.
+
+```bash
+bash scripts/reencrypt-sandbox-delivery-state.sh \
+  --profile AWS-hatan4ik-sandbox \
+  --confirm reencrypt-sandbox-delivery-state
+```
+
 ## Rollback boundary
 
 Before stack retirement, the CloudFormation stacks still own the live policy

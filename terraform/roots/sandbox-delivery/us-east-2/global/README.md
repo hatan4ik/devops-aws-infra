@@ -11,3 +11,7 @@ This root does not create application, VPC, account, or credential resources.
 Its first apply is the documented short-lived IAM Identity Center adoption
 exception; after adoption, protected GitHub Actions is the only Terraform
 apply path and the sandbox contains no active CloudFormation stack.
+
+The backend uses the stable `alias/terraform-state-backend` KMS alias. It
+avoids repeating an account-qualified KMS ARN while requiring customer-managed
+SSE-KMS for the state and lock files.
