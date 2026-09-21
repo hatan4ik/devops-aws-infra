@@ -100,6 +100,8 @@ trap 'rm -f -- "$plan_file"' EXIT
   if [[ "$apply" == true ]]; then
     terraform -chdir="$root_directory" apply -input=false -lock-timeout=5m "$plan_file"
 
+    state_addresses="$(terraform -chdir="$root_directory" state list)"
+
     for address in \
       'module.sandbox_delivery_iam.aws_iam_policy.sandbox_platform_dev_apply' \
       'module.sandbox_delivery_iam.aws_iam_policy.identity_plan' \
@@ -107,7 +109,7 @@ trap 'rm -f -- "$plan_file"' EXIT
       'module.sandbox_delivery_iam.aws_iam_role_policy_attachment.delivery["identity_plan_to_plan"]' \
       'module.sandbox_delivery_iam.aws_iam_role_policy_attachment.delivery["identity_plan_to_drift"]' \
       'module.sandbox_delivery_iam.aws_iam_role_policy_attachment.delivery["identity_apply_to_dev_apply"]'; do
-      terraform -chdir="$root_directory" state list | grep -Fqx "$address"
+      grep -Fqx "$address" <<<"$state_addresses"
     done
   fi
 )
