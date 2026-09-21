@@ -23,6 +23,11 @@ custom claims such as a workflow filename. The controls are therefore split:
 | Who may authorize a deployment | GitHub deployment environment reviewers and branch restrictions |
 | What AWS changes a role may make | Per-root least-privilege IAM policy and state-resource policy |
 
+For this repository, the standard GitHub OIDC subjects are
+`repo:hatan4ik/devops-aws-infra:pull_request` for the plan role and
+`repo:hatan4ik/devops-aws-infra:environment:<name>` for environment roles.
+Do not substitute GitHub numeric IDs for the repository slug.
+
 ## Preconditions
 
 1. Run [`scripts/reconcile-github-controls.sh`](../../scripts/reconcile-github-controls.sh)
@@ -51,7 +56,9 @@ as an AWS access key or create a repository-level credential secret.
 
 Then run **Verify sandbox OIDC** from `main`. A successful run proves GitHub
 can assume the environment-scoped role but cannot alter AWS because the role
-has no attached permissions.
+has no attached permissions. If an earlier stack was bootstrapped with any
+other subject syntax, rerun this same versioned command against that account
+to update the CloudFormation trust policy before attaching a delivery policy.
 
 ## Promotion to Terraform delivery
 

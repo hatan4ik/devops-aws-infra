@@ -22,7 +22,10 @@ profile=""
 region="us-east-2"
 role_prefix=""
 stack_name="devops-aws-infra-github-oidc"
-subject_prefix="${GITHUB_SUBJECT_PREFIX:-repo:hatan4ik@12816536/devops-aws-infra@1375932356}"
+# GitHub's standard OIDC `sub` uses the repository slug, not numeric GitHub
+# IDs. The suffix is added by the CloudFormation template for pull requests or
+# an approved deployment Environment.
+subject_prefix="${GITHUB_SUBJECT_PREFIX:-repo:hatan4ik/devops-aws-infra}"
 
 while (($# > 0)); do
   case "$1" in
@@ -37,6 +40,11 @@ done
 
 if [[ -z "$profile" || -z "$role_prefix" ]]; then
   usage >&2
+  exit 64
+fi
+
+if [[ ! "$subject_prefix" =~ ^repo:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+  printf 'GitHubSubjectPrefix must use the standard repo:OWNER/REPO OIDC subject prefix.\n' >&2
   exit 64
 fi
 
