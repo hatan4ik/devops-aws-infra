@@ -57,8 +57,20 @@ as an AWS access key or create a repository-level credential secret.
 Then run **Verify sandbox OIDC** from `main`. A successful run proves GitHub
 can assume the environment-scoped role but cannot alter AWS because the role
 has no attached permissions. If an earlier stack was bootstrapped with any
-other subject syntax, rerun this same versioned command against that account
-to update the CloudFormation trust policy before attaching a delivery policy.
+other subject syntax and is CloudFormation-owned, rerun this same versioned
+command against that account to update its trust policy before attaching a
+delivery policy. If the provider/roles predate the stack, use the narrow
+reconciliation script instead:
+
+```bash
+scripts/reconcile-github-oidc-trust.sh \
+  --profile AWS-hatan4ik-sandbox \
+  --role-prefix devops-aws-infra-sandbox
+```
+
+It updates only the six assume-role trust documents after verifying the OIDC
+provider and every target role. It neither grants permissions nor creates,
+deletes, or adopts an IAM resource.
 
 ## Promotion to Terraform delivery
 
