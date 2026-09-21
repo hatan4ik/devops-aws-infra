@@ -3,6 +3,9 @@
 # resources itself; Terraform remains the sole owner of the sandbox network.
 set -euo pipefail
 
+printf '%s\n' 'This CloudFormation policy bootstrap is archived. Sandbox delivery IAM is Terraform-owned; do not run this script.' >&2
+exit 78
+
 repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 template_file="$repository_root/bootstrap/sandbox-network-delivery-policy/template.yaml"
 

@@ -1,8 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
-  Root-specific GitHub OIDC delivery policies for the sandbox-platform Terraform
-  root. This stack creates no platform resources; Terraform remains their sole
-  owner and uses an isolated remote-state object.
+  RETIRED historical sandbox-platform delivery policies. This template is used
+  only to set Retain metadata before Terraform adoption deletes the stack.
 
 Parameters:
   RoleNamePrefix:
@@ -28,6 +27,8 @@ Parameters:
 Resources:
   SandboxPlatformPlanPolicy:
     Type: AWS::IAM::ManagedPolicy
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       ManagedPolicyName: !Sub '${RoleNamePrefix}-sandbox-platform-plan'
       Description: Read and state-lock access required to plan or detect drift for the sandbox-platform root.
@@ -103,6 +104,8 @@ Resources:
 
   SandboxPlatformApplyPolicy:
     Type: AWS::IAM::ManagedPolicy
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       ManagedPolicyName: !Sub '${RoleNamePrefix}-sandbox-platform-dev-apply'
       Description: Root-specific platform provisioning and state access for the protected sandbox dev environment.

@@ -1,16 +1,20 @@
 # GitHub OIDC bootstrap and activation
 
-This runbook establishes the one-time trust anchor that lets GitHub Actions
-obtain short-lived AWS credentials. It does **not** launch Control Tower,
+This historical runbook describes the former CloudFormation trust anchor. For
+the sandbox, [ADR 0022](../adr/0022-terraform-owned-sandbox-delivery-identity.md)
+adopts that provider and its roles into Terraform; use the
+[sandbox delivery IAM adoption](sandbox-delivery-iam-adoption.md) runbook
+instead. It does **not** launch Control Tower,
 create accounts, alter Terraform state, or grant permission to modify AWS
 resources.
 
 ## Security model
 
-The initial CloudFormation stack creates the GitHub OIDC provider and separate
-plan, environment-apply, drift, and landing-zone roles. Every role starts with
-**no identity permissions**. It proves authentication only; a future change
-must attach a reviewed, root-specific policy and state-backend access before a
+The historical CloudFormation stack created the GitHub OIDC provider and
+separate plan, environment-apply, drift, and landing-zone roles. Those
+resources now become Terraform-owned in the sandbox. Every role starts with
+**no identity permissions**. A reviewed Terraform policy and state-backend
+access are required before a
 Terraform plan or apply can run.
 
 AWS IAM can verify GitHub's `aud` and `sub` claims. It cannot enforce GitHub
@@ -44,39 +48,13 @@ No feature-branch ref is trusted.
    the legacy IAM key profile.
 4. Confirm the account and role with `aws sts get-caller-identity`.
 
-## One-time AWS bootstrap
+## Historical one-time AWS bootstrap
 
-The repository already uses immutable OIDC subjects. Bootstrap the sandbox
-first; this creates no resource permissions:
-
-```bash
-scripts/bootstrap-github-oidc.sh \
-  --profile AWS-hatan4ik-sandbox \
-  --region us-east-2 \
-  --role-prefix devops-aws-infra-sandbox
-```
-
-Record the `DevApplyRoleArn` output as the `AWS_OIDC_PROOF_ROLE_ARN` **dev
-environment variable** in GitHub. It is an ARN, not a secret. Do not store it
-as an AWS access key or create a repository-level credential secret.
-
-Then run **Verify sandbox OIDC** from `main`. A successful run proves GitHub
-can assume the environment-scoped role but cannot alter AWS because the role
-has no attached permissions. If an earlier stack was bootstrapped with any
-other subject syntax and is CloudFormation-owned, rerun this same versioned
-command against that account to update its trust policy before attaching a
-delivery policy. If the provider/roles predate the stack, use the narrow
-reconciliation script instead:
-
-```bash
-scripts/reconcile-github-oidc-trust.sh \
-  --profile AWS-hatan4ik-sandbox \
-  --role-prefix devops-aws-infra-sandbox
-```
-
-It updates only the six assume-role trust documents after verifying the OIDC
-provider and every target role. It neither grants permissions nor creates,
-deletes, or adopts an IAM resource.
+Do not execute a CloudFormation bootstrap or reconciliation script for the
+sandbox. The former templates and scripts are retained only as audit evidence
+under [`archive/cloudformation-sandbox-bootstrap`](../../archive/cloudformation-sandbox-bootstrap/)
+and intentionally exit without action. Follow
+[sandbox delivery IAM adoption](sandbox-delivery-iam-adoption.md) instead.
 
 ## Promotion to Terraform delivery
 

@@ -22,8 +22,8 @@ production identity, data-plane, or multi-Region traffic deployment.
    specialist-approval, and cost-owner gates are met. This is a state-address
    migration, not a rebuild or hardening apply.
 3. **Activate the reviewed isolated-network delivery lane.** ADR 0017's
-   GitHub OIDC trust is live. Bootstrap only ADR 0018's root-specific policy
-   with the versioned CloudFormation template, configure non-secret role ARNs,
+   GitHub OIDC trust is live. Manage ADR 0018's root-specific policy through
+   the Terraform sandbox-delivery IAM root, configure non-secret role ARNs,
    then produce the first authoritative sandbox-network plan.
 4. **Deliver the approved sandbox network.** With approved sandbox account,
    Region, CIDR, availability-zone, and state-key inputs now recorded, run the

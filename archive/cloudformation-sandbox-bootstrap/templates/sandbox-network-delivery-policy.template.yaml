@@ -1,8 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
-  Least-privilege GitHub OIDC delivery policies for the approved isolated
-  sandbox-network Terraform root. This stack attaches policies only to the
-  permissionless roles created by bootstrap/github-oidc/template.yaml.
+  RETIRED historical sandbox-network delivery policies. This template is used
+  only to set Retain metadata before Terraform adoption deletes the stack.
 
 Parameters:
   RoleNamePrefix:
@@ -28,6 +27,8 @@ Parameters:
 Resources:
   SandboxNetworkPlanPolicy:
     Type: AWS::IAM::ManagedPolicy
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       ManagedPolicyName: !Sub '${RoleNamePrefix}-sandbox-network-plan'
       Description: Read and state-lock access required to plan or detect drift for the sandbox-network root.
@@ -89,6 +90,8 @@ Resources:
 
   SandboxNetworkApplyPolicy:
     Type: AWS::IAM::ManagedPolicy
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       ManagedPolicyName: !Sub '${RoleNamePrefix}-sandbox-network-dev-apply'
       Description: Exact create, update, delete, state, and read access for the sandbox-network root.

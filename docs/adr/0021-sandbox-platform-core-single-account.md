@@ -1,7 +1,8 @@
 # ADR 0021: Deliver a bounded single-account sandbox platform core
 
 **Status:** Accepted — stakeholder requested immediate delivery without new
-AWS accounts or email aliases.
+AWS accounts or email aliases; IAM delivery-policy ownership superseded by ADR
+0022.
 **Decision date:** 2026-09-21
 
 ## Context
@@ -30,12 +31,11 @@ would leave no application foundation running.
    application log group encrypted by a dedicated rotating customer-managed KMS
    key; and a protected Cognito Essentials primary user pool. It creates no
    application task, public endpoint, OAuth callback client, or custom domain.
-4. The versioned CloudFormation policy stack in
-   [`bootstrap/sandbox-platform-delivery-policy`](../../bootstrap/sandbox-platform-delivery-policy/)
-   attaches only root-specific state and service permissions to the existing
-   sandbox GitHub OIDC roles. GitHub uses a pull-request plan, protected manual
-   `dev` apply, and weekday non-remediating drift workflow. No long-lived AWS
-   credential is stored in source or GitHub.
+4. [ADR 0022](0022-terraform-owned-sandbox-delivery-identity.md) adopts the
+   root-specific state and service policies into Terraform together with the
+   sandbox OIDC provider and roles. GitHub uses a pull-request plan, protected
+   manual `dev` apply, and weekday non-remediating drift workflow. No
+   long-lived AWS credential is stored in source or GitHub.
 
 ## Consequences
 

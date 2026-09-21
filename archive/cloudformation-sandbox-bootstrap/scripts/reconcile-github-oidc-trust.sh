@@ -3,6 +3,9 @@
 # It never creates/deletes IAM resources or attaches/detaches permissions.
 set -euo pipefail
 
+printf '%s\n' 'This legacy OIDC reconciliation script is archived. Use the Terraform sandbox-delivery IAM root; do not run this script.' >&2
+exit 78
+
 profile=""
 role_prefix=""
 subject_prefix="${GITHUB_SUBJECT_PREFIX:-repo:hatan4ik@12816536/devops-aws-infra@1375932356}"
