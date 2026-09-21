@@ -3,7 +3,10 @@
 # Terraform has adopted their physical IAM resources and role attachments.
 set -euo pipefail
 
-repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+printf '%s\n' 'This CloudFormation retirement helper is archived. The handoff is complete and Terraform owns the retained IAM resources; do not run this script.' >&2
+exit 78
+
+repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd)"
 root_directory="$repository_root/terraform/roots/sandbox-delivery/us-east-2/global"
 oidc_template="$repository_root/archive/cloudformation-sandbox-bootstrap/templates/github-oidc.template.yaml"
 network_template="$repository_root/archive/cloudformation-sandbox-bootstrap/templates/sandbox-network-delivery-policy.template.yaml"
@@ -15,7 +18,7 @@ confirmation=""
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/retire-sandbox-delivery-cloudformation.sh [options]
+Usage: archive/cloudformation-sandbox-bootstrap/scripts/retire-sandbox-delivery-cloudformation.sh [options]
 
 First records Retain policies in the three historical CloudFormation stacks,
 then deletes the stacks. The OIDC provider, six roles, four managed policies,

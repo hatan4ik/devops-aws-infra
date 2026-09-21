@@ -115,7 +115,7 @@ trap 'rm -f -- "$plan_file"' EXIT
 )
 
 if [[ "$apply" == true ]]; then
-  printf '%s\n' 'Terraform adoption completed. Configure GitHub variables, run the protected OIDC plan, then retire the three archived CloudFormation stacks with scripts/retire-sandbox-delivery-cloudformation.sh.'
+  printf '%s\n' 'Terraform adoption completed. Configure GitHub variables and run the protected OIDC plan. The former CloudFormation handoff is complete and retained only as archive evidence.'
 else
   printf '%s\n' 'Adoption plan completed without an AWS mutation. Re-run with --apply --confirm adopt-sandbox-delivery-iam only after review.'
 fi
