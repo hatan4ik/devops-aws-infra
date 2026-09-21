@@ -66,9 +66,9 @@ bash scripts/configure-sandbox-delivery-iam-github.sh \
    [`archive/cloudformation-sandbox-bootstrap`](../../archive/cloudformation-sandbox-bootstrap/).
 
 7. If this root was initialized before its backend KMS alias was introduced,
-   re-encrypt only its versioned state object. The guarded script checks the
-   account, bucket default key, and an empty lock table; it never displays or
-   edits state content.
+re-encrypt only its versioned state object. The guarded script checks the
+account, bucket default key, and an active lock on that exact state object; it
+never displays or edits state content.
 
 ```bash
 bash scripts/reencrypt-sandbox-delivery-state.sh \
