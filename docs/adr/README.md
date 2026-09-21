@@ -27,6 +27,7 @@ one of these files.
 | 0019 | [Direct Organizations account vending; defer Control Tower and VPN](0019-direct-organizations-account-vending.md) |
 | 0020 | [CloudFormation ownership for Cognito MRR lifecycle](0020-cognito-mrr-cloudformation-ownership.md) |
 | 0021 | [Single-account sandbox platform core](0021-sandbox-platform-core-single-account.md) |
+| 0022 | [Terraform-owned sandbox GitHub delivery identity](0022-terraform-owned-sandbox-delivery-identity.md) |
 
 ## Historical superseded records
 

@@ -3,6 +3,9 @@
 # Center session. This script never reads or writes long-lived credentials.
 set -euo pipefail
 
+printf '%s\n' 'This CloudFormation bootstrap script is archived. Use the Terraform sandbox-delivery IAM root; do not run this script.' >&2
+exit 78
+
 usage() {
   cat <<'EOF'
 Usage:

@@ -1,8 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
-  One-time IAM bootstrap for GitHub Actions OIDC. Roles created by this stack
-  have no identity policies and therefore cannot mutate AWS until a separate,
-  reviewed least-privilege policy is attached.
+  RETIRED historical sandbox GitHub Actions OIDC bootstrap. It is retained only
+  to set Retain metadata before Terraform adoption deletes this stack.
 
 Parameters:
   GitHubSubjectPrefix:
@@ -20,6 +19,8 @@ Parameters:
 Resources:
   GitHubActionsOidcProvider:
     Type: AWS::IAM::OIDCProvider
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       Url: https://token.actions.githubusercontent.com
       ClientIdList:
@@ -32,6 +33,8 @@ Resources:
 
   GitHubActionsPlanRole:
     Type: AWS::IAM::Role
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       RoleName: !Sub '${RoleNamePrefix}-plan'
       Path: /github-actions/
@@ -56,6 +59,8 @@ Resources:
 
   GitHubActionsDevApplyRole:
     Type: AWS::IAM::Role
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       RoleName: !Sub '${RoleNamePrefix}-dev-apply'
       Path: /github-actions/
@@ -75,6 +80,8 @@ Resources:
 
   GitHubActionsStagingApplyRole:
     Type: AWS::IAM::Role
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       RoleName: !Sub '${RoleNamePrefix}-staging-apply'
       Path: /github-actions/
@@ -94,6 +101,8 @@ Resources:
 
   GitHubActionsProdApplyRole:
     Type: AWS::IAM::Role
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       RoleName: !Sub '${RoleNamePrefix}-prod-apply'
       Path: /github-actions/
@@ -113,6 +122,8 @@ Resources:
 
   GitHubActionsDriftRole:
     Type: AWS::IAM::Role
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       RoleName: !Sub '${RoleNamePrefix}-drift'
       Path: /github-actions/
@@ -132,6 +143,8 @@ Resources:
 
   GitHubActionsLandingZoneRole:
     Type: AWS::IAM::Role
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       RoleName: !Sub '${RoleNamePrefix}-landing-zone'
       Path: /github-actions/

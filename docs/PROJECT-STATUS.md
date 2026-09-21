@@ -1,14 +1,17 @@
 # Project status and delivery authority
 
-**Status as of 2026-09-21:** the isolated ADR 0018 sandbox network and the ADR
+**Status as of 2026-09-22:** the isolated ADR 0018 sandbox network and the ADR
 0019 direct Organizations control plane have been delivered through protected
 GitHub OIDC workflows and verified read-only in AWS. The control plane owns a
 dedicated encrypted state backend, six top-level OUs, two baseline SCPs, and
 12 policy attachments. It has vended **no** account and has not moved an
 existing account. ADR 0021 now supplies the reviewed single-account sandbox
 platform core delivery lane; it is source until its protected GitHub apply and
-read-only verification succeed. It is not a production, multi-account, or
-multi-Region platform. Control Tower and VPN/BGP remain out of current scope.
+read-only verification succeed. ADR 0022 source is ready to transfer sandbox
+OIDC/provider/role/policy ownership from the three historical CloudFormation
+stacks into Terraform; that live handoff has not yet been applied. It is not a
+production, multi-account, or multi-Region platform. Control Tower and VPN/BGP
+remain out of current scope.
 
 ## Start here
 
@@ -36,8 +39,8 @@ gated. The Organization root is limited to the management account, top-level
 OUs, baseline SCPs, its dedicated state backend, and account records explicitly
 supplied in reviewed tfvars.
 
-ADR 0018 authorizes only its versioned policy bootstrap and protected GitHub
-workflow. ADR 0019 additionally authorizes the versioned management-account
+ADR 0022 replaces sandbox CloudFormation policy/bootstrap ownership with a
+Terraform-owned identity root. ADR 0019 additionally authorizes the versioned management-account
 CloudFormation control-plane bootstrap and protected Organization GitOps
 workflow. ADR 0021 authorizes a distinct, single-account sandbox platform
 root. No ADR authorizes a local Terraform apply, manual state change, Control
@@ -47,8 +50,9 @@ multi-Region deployment without a separately reviewed root and plan.
 ### Sandbox-network reconciliation record
 
 The first GitHub apply stopped on explicit least-privilege IAM denials after
-creating partial state. Two reviewed, root-specific CloudFormation policy
-updates then let Terraform reconcile that same remote state. The final
+creating partial state. Historical root-specific CloudFormation policy updates
+then let Terraform reconcile that same remote state. ADR 0022 retires that
+ownership after the controlled Terraform import. The final
 [protected apply run](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35515450999)
 succeeded, and the immediate manual
 [drift check](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35515764460)

@@ -1,6 +1,6 @@
 # ADR 0018: Deliver the isolated sandbox network through GitHub OIDC
 
-**Status:** Accepted
+**Status:** Accepted — IAM delivery-policy ownership superseded by ADR 0022
 **Decision date:** 2026-09-20
 
 ## Context
@@ -33,12 +33,10 @@ creation would violate the delivery boundary.
    the narrowly scoped log-delivery role. It creates no Internet Gateway, NAT,
    public subnet, endpoint, Transit Gateway attachment, VPN, workload, or
    identity/data-plane resource.
-4. The versioned CloudFormation template in
-   [`bootstrap/sandbox-network-delivery-policy`](../../bootstrap/sandbox-network-delivery-policy/)
-   is the narrow human bootstrap: it attaches only root-specific state,
-   read, plan, drift, and apply permissions to ADR 0017's existing OIDC roles.
-   The accompanying script verifies the sandbox account before deploying it;
-   it never creates a VPC resource.
+4. [ADR 0022](0022-terraform-owned-sandbox-delivery-identity.md) adopts the
+   root-specific state, read, plan, drift, and apply policies into Terraform
+   and retires the historical CloudFormation stack. Terraform owns the VPC and
+   its delivery policy together after the controlled handoff.
 5. GitHub Actions uses the immutable pull-request subject for plans and the
    protected `dev` environment subject for manual apply and scheduled drift.
    Role ARNs are non-secret GitHub variables configured only by the versioned

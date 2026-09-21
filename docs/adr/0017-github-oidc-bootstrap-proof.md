@@ -1,6 +1,6 @@
 # ADR 0017: Bootstrap GitHub OIDC with a non-mutating proof boundary
 
-**Status:** Accepted
+**Status:** Superseded for sandbox OIDC ownership by ADR 0022
 **Decision date:** 2026-09-20
 
 ## Context
@@ -26,10 +26,11 @@ policy to a particular workflow filename.
    repository. It uses protected `main` and the `dev`, `staging`, `prod`, and
    `landing-zone` GitHub deployment environments. A future repository split
    requires its own ADR and migration record.
-2. A short-lived IAM Identity Center session performs a one-time CloudFormation
-   bootstrap from [`bootstrap/github-oidc/template.yaml`](../../bootstrap/github-oidc/template.yaml).
-   It creates the GitHub OIDC provider and distinct plan, apply, drift, and
-   landing-zone roles, each with no identity permissions.
+2. A short-lived IAM Identity Center session historically performed a one-time
+   CloudFormation bootstrap. The retired template is preserved under
+   [`archive/cloudformation-sandbox-bootstrap`](../../archive/cloudformation-sandbox-bootstrap/).
+   [ADR 0022](0022-terraform-owned-sandbox-delivery-identity.md) now adopts
+   the GitHub OIDC provider and roles into Terraform and retires that stack.
 3. The only credentialed root workflow authorized before a root-specific policy
    and backend exist is
    [`oidc-sandbox-proof.yml`](../../.github/workflows/oidc-sandbox-proof.yml).
@@ -52,8 +53,8 @@ policy to a particular workflow filename.
 
 - The repository gains an end-to-end, auditable proof that GitHub can exchange
   an OIDC token without introducing static AWS credentials or an AWS mutation.
-- The initial human action is explicit, narrow, and reproducible. CloudFormation
-  owns the trust-anchor resources after creation.
+- The historical human action was explicit, narrow, and reproducible. Sandbox
+  trust-anchor ownership now moves to Terraform under ADR 0022.
 - IAM cannot distinguish an apply workflow from a drift workflow that uses the
   same protected environment subject. The roles remain separate and their
   privileges are independently reviewed; GitHub protection controls prevent

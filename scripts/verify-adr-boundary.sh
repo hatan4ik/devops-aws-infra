@@ -27,6 +27,7 @@ active_adrs=(
   docs/adr/0019-direct-organizations-account-vending.md
   docs/adr/0020-cognito-mrr-cloudformation-ownership.md
   docs/adr/0021-sandbox-platform-core-single-account.md
+  docs/adr/0022-terraform-owned-sandbox-delivery-identity.md
 )
 
 superseded_adrs=(
@@ -105,6 +106,9 @@ sandbox_network_drift_workflow=.github/workflows/sandbox-network-drift.yml
 sandbox_platform_plan_workflow=.github/workflows/sandbox-platform-plan.yml
 sandbox_platform_apply_workflow=.github/workflows/sandbox-platform-apply.yml
 sandbox_platform_drift_workflow=.github/workflows/sandbox-platform-drift.yml
+sandbox_delivery_iam_plan_workflow=.github/workflows/sandbox-delivery-iam-plan.yml
+sandbox_delivery_iam_apply_workflow=.github/workflows/sandbox-delivery-iam-apply.yml
+sandbox_delivery_iam_drift_workflow=.github/workflows/sandbox-delivery-iam-drift.yml
 organization_plan_workflow=.github/workflows/organization-plan.yml
 organization_apply_workflow=.github/workflows/organization-apply.yml
 organization_drift_workflow=.github/workflows/organization-drift.yml
@@ -113,7 +117,7 @@ if [[ -n "$credentialed_workflows" ]]; then
   while IFS= read -r workflow; do
     [[ -n "$workflow" ]] || continue
     case "$workflow" in
-      "$oidc_proof_workflow"|"$sandbox_network_plan_workflow"|"$sandbox_network_apply_workflow"|"$sandbox_network_drift_workflow"|"$sandbox_platform_plan_workflow"|"$sandbox_platform_apply_workflow"|"$sandbox_platform_drift_workflow"|"$organization_plan_workflow"|"$organization_apply_workflow"|"$organization_drift_workflow") ;;
+      "$oidc_proof_workflow"|"$sandbox_network_plan_workflow"|"$sandbox_network_apply_workflow"|"$sandbox_network_drift_workflow"|"$sandbox_platform_plan_workflow"|"$sandbox_platform_apply_workflow"|"$sandbox_platform_drift_workflow"|"$sandbox_delivery_iam_plan_workflow"|"$sandbox_delivery_iam_apply_workflow"|"$sandbox_delivery_iam_drift_workflow"|"$organization_plan_workflow"|"$organization_apply_workflow"|"$organization_drift_workflow") ;;
       *) fail "unexpected credentialed root workflow: $workflow" ;;
     esac
   done <<< "$credentialed_workflows"
@@ -132,6 +136,9 @@ fi
 [[ -f "$sandbox_platform_plan_workflow" ]] || fail "missing sandbox-platform plan workflow"
 [[ -f "$sandbox_platform_apply_workflow" ]] || fail "missing sandbox-platform apply workflow"
 [[ -f "$sandbox_platform_drift_workflow" ]] || fail "missing sandbox-platform drift workflow"
+[[ -f "$sandbox_delivery_iam_plan_workflow" ]] || fail "missing sandbox-delivery-iam plan workflow"
+[[ -f "$sandbox_delivery_iam_apply_workflow" ]] || fail "missing sandbox-delivery-iam apply workflow"
+[[ -f "$sandbox_delivery_iam_drift_workflow" ]] || fail "missing sandbox-delivery-iam drift workflow"
 [[ -f "$organization_plan_workflow" ]] || fail "missing organization plan workflow"
 [[ -f "$organization_apply_workflow" ]] || fail "missing organization apply workflow"
 [[ -f "$organization_drift_workflow" ]] || fail "missing organization drift workflow"
@@ -154,7 +161,7 @@ terraform_apply_workflows="$(grep -lEi 'terraform[[:space:]]+apply' .github/work
 if [[ -n "$terraform_apply_workflows" ]]; then
   while IFS= read -r workflow; do
     [[ -n "$workflow" ]] || continue
-    [[ "$workflow" == "$sandbox_network_apply_workflow" || "$workflow" == "$sandbox_platform_apply_workflow" || "$workflow" == "$organization_apply_workflow" ]] || fail "unexpected Terraform apply workflow: $workflow"
+    [[ "$workflow" == "$sandbox_network_apply_workflow" || "$workflow" == "$sandbox_platform_apply_workflow" || "$workflow" == "$sandbox_delivery_iam_apply_workflow" || "$workflow" == "$organization_apply_workflow" ]] || fail "unexpected Terraform apply workflow: $workflow"
   done <<< "$terraform_apply_workflows"
 fi
 

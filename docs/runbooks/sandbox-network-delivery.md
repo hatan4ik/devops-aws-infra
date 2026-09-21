@@ -16,10 +16,9 @@ or ad hoc AWS CLI resource creation.
 | Internet/NAT/public subnets | Not created |
 | Network connection | No TGW, peering, VPN, BGP, endpoint, or external route |
 
-Terraform owns every VPC resource. The only preliminary mutable AWS operation
-is the separately versioned CloudFormation policy stack, which makes the
-existing GitHub OIDC roles capable of running this root. It does not create
-network resources.
+Terraform owns every VPC resource and, after the ADR 0022 handoff, the sandbox
+OIDC roles and delivery policies. Historical CloudFormation source is archive
+evidence only and must not be run.
 
 ## Preconditions
 
@@ -36,28 +35,12 @@ network resources.
 4. Confirm the state key is new. Do not print state data; an object must not be
    copied or renamed from any historical key.
 
-## One-time versioned bootstrap
+## Historical bootstrap replaced by Terraform IAM
 
-Run these commands from the reviewed `main` checkout only. They create/update
-the named CloudFormation policy stack and non-secret GitHub variables; neither
-command runs Terraform or creates VPC resources.
-
-```sh
-scripts/bootstrap-sandbox-network-delivery-policy.sh \
-  --profile AWS-hatan4ik-sandbox \
-  --region us-east-2
-
-scripts/configure-sandbox-network-github.sh \
-  --profile AWS-hatan4ik-sandbox \
-  --repository hatan4ik/devops-aws-infra
-```
-
-Record the CloudFormation stack ARN, its three policy output ARNs, and the
-GitHub variable update as the bootstrap evidence. Treat role ARNs as ordinary
-configuration, never AWS credentials. The bootstrap script refuses its initial
-run if the dedicated state object already exists; that protects this slice from
-accidentally adopting another root's state. A later reviewed policy-only update
-must use its explicit `--allow-existing-state-key` override.
+Follow the [sandbox delivery IAM adoption](sandbox-delivery-iam-adoption.md)
+runbook first. It imports and protects the existing IAM resources in Terraform,
+then configures the non-secret GitHub role-ARN variables. Do not run any script
+under `archive/cloudformation-sandbox-bootstrap`.
 
 ## GitOps execution
 

@@ -52,17 +52,17 @@ Point to real files — don't describe from memory.
 
 ```
 Human (SSO session)
-  → CloudFormation: bootstrap/github-oidc/template.yaml
+  → Terraform: terraform/roots/sandbox-delivery/us-east-2/global
       → Creates IAM OIDC provider
       → Creates 4 roles: plan, apply, drift, landing-zone
           → All start with ZERO permissions (permissionless)
-  → CloudFormation: bootstrap/sandbox-network-delivery-policy/template.yaml
+  → Terraform-owned OIDC role policies in sandbox-delivery root
       → Attaches least-privilege policies to those roles
           → plan role: read + state lock only
           → apply role: exact EC2/KMS/IAM/logs actions, scoped by resource tag
 ```
 
-**Show:** `bootstrap/sandbox-network-delivery-policy/template.yaml`
+**Show:** `terraform/modules/internal/sandbox-delivery-iam/`
 - Point to `ManageOnlyTheSandboxNetworkVpcResources` — exact EC2 actions, no wildcards
 - Point to `CreateDedicatedSandboxNetworkFlowLogKey` — condition on `aws:RequestTag/Root`
 - Point to the IAM role resource scoped to `sandbox-network-dev-vpc-flow-logs` only

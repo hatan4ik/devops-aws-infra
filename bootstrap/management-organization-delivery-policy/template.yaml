@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
   Management-account control plane for the direct AWS Organizations GitOps root.
   It creates the root-specific state backend and least-privilege policies for
-  the permissionless GitHub OIDC roles created by bootstrap/github-oidc.
+  the pre-existing permissionless GitHub OIDC roles in the management account.
 
 Parameters:
   RoleNamePrefix:
