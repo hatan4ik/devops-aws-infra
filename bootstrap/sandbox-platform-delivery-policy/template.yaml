@@ -71,6 +71,7 @@ Resources:
             Effect: Allow
             Action:
               - cognito-idp:DescribeUserPool
+              - cognito-idp:GetUserPoolMfaConfig
               - cognito-idp:ListResourceServers
               - cognito-idp:ListTagsForResource
               - cognito-idp:ListUserPoolClients
@@ -144,6 +145,7 @@ Resources:
             Effect: Allow
             Action:
               - cognito-idp:DescribeUserPool
+              - cognito-idp:GetUserPoolMfaConfig
               - cognito-idp:ListResourceServers
               - cognito-idp:ListTagsForResource
               - cognito-idp:ListUserPoolClients
@@ -228,16 +230,19 @@ Resources:
           - Sid: ManageDedicatedSandboxPlatformDataKey
             Effect: Allow
             Action:
-              - kms:CreateAlias
               - kms:CreateGrant
-              - kms:DeleteAlias
+              - kms:Decrypt
               - kms:DescribeKey
               - kms:EnableKeyRotation
+              - kms:Encrypt
+              - kms:GenerateDataKey
               - kms:GetKeyPolicy
               - kms:GetKeyRotationStatus
               - kms:ListAliases
               - kms:ListResourceTags
               - kms:PutKeyPolicy
+              - kms:ReEncryptFrom
+              - kms:ReEncryptTo
               - kms:ScheduleKeyDeletion
               - kms:TagResource
               - kms:UntagResource
@@ -245,6 +250,12 @@ Resources:
             Condition:
               StringEquals:
                 aws:ResourceTag/Root: sandbox-platform
+          - Sid: ManageDedicatedSandboxPlatformDataAlias
+            Effect: Allow
+            Action:
+              - kms:CreateAlias
+              - kms:DeleteAlias
+            Resource: !Sub 'arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:alias/sandbox-platform-dev-application-data'
           - Sid: ManageSandboxSessionTable
             Effect: Allow
             Action:
@@ -261,6 +272,7 @@ Resources:
             Action:
               - cognito-idp:CreateUserPool
               - cognito-idp:DeleteUserPool
+              - cognito-idp:SetUserPoolMfaConfig
               - cognito-idp:TagResource
               - cognito-idp:UntagResource
               - cognito-idp:UpdateUserPool
