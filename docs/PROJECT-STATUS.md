@@ -3,10 +3,9 @@
 **Status as of 2026-09-21:** the isolated ADR 0018 sandbox network has been
 delivered through the protected GitHub OIDC workflow and verified read-only in
 AWS. The management account now also has the ADR 0019 permissionless GitHub
-OIDC provider and environment-scoped trust roles. A 2026-09-21 verification
-found legacy OIDC trust subjects encoded with GitHub numeric IDs; they must be
-updated to GitHub's standard `repo:OWNER/REPO` subject before another plan or
-apply uses those roles. This repository is still
+OIDC provider and environment-scoped trust roles. This repository uses GitHub's
+immutable owner/repository-ID OIDC subject format; the versioned bootstrap and
+reconciliation scripts enforce that exact trust contract. This repository is still
 **not** proof of a deployed application platform: direct Organizations state
 bootstrap, OU/SCP apply, account vending, TGW, workloads, identity, data,
 production, and multi-Region delivery remain separately gated. Control Tower
@@ -90,8 +89,8 @@ The read-only evidence helper is
 1. Preserve the apply, CloudTrail, dedicated-state, and weekday-drift evidence
    for the completed sandbox network.
 2. Bootstrap the dedicated Organization state backend and configure GitHub's
-   `landing-zone` environment protection; correct and prove the standard OIDC
-   trust subject; then review the OU/SCP-only plan.
+   `landing-zone` environment protection; prove the immutable OIDC trust
+   subject; then review the OU/SCP-only plan.
 3. Keep account email/CIDR-dependent vending, production networking,
    application, identity, and multi-Region work separately gated.
 

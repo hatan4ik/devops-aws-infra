@@ -5,7 +5,7 @@ set -euo pipefail
 
 profile=""
 role_prefix=""
-subject_prefix="${GITHUB_SUBJECT_PREFIX:-repo:hatan4ik/devops-aws-infra}"
+subject_prefix="${GITHUB_SUBJECT_PREFIX:-repo:hatan4ik@12816536/devops-aws-infra@1375932356}"
 
 usage() {
   cat <<'USAGE'
@@ -34,8 +34,8 @@ if [[ -z "$profile" || -z "$role_prefix" ]]; then
   exit 64
 fi
 
-if [[ ! "$subject_prefix" =~ ^repo:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
-  printf 'GITHUB_SUBJECT_PREFIX must use the standard repo:OWNER/REPO OIDC subject prefix.\n' >&2
+if [[ ! "$subject_prefix" =~ ^repo:[A-Za-z0-9_.-]+(@[0-9]+)?/[A-Za-z0-9_.-]+(@[0-9]+)?$ ]]; then
+  printf "%s\n" "GITHUB_SUBJECT_PREFIX must use GitHub's repo:OWNER[@OWNER_ID]/REPO[@REPO_ID] OIDC subject prefix." >&2
   exit 64
 fi
 
