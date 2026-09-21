@@ -7,11 +7,11 @@ dedicated encrypted state backend, six top-level OUs, two baseline SCPs, and
 12 policy attachments. It has vended **no** account and has not moved an
 existing account. ADR 0021 now supplies the reviewed single-account sandbox
 platform core delivery lane; it is source until its protected GitHub apply and
-read-only verification succeed. ADR 0022 source is ready to transfer sandbox
-OIDC/provider/role/policy ownership from the three historical CloudFormation
-stacks into Terraform; that live handoff has not yet been applied. It is not a
-production, multi-account, or multi-Region platform. Control Tower and VPN/BGP
-remain out of current scope.
+read-only verification succeed. ADR 0022 has transferred the sandbox
+OIDC/provider/role/policy ownership into Terraform, and the three historical
+CloudFormation stacks have been retired with retained IAM resources. It is not
+a production, multi-account, or multi-Region platform. Control Tower and
+VPN/BGP remain out of current scope.
 
 ## Start here
 
@@ -32,7 +32,9 @@ review snapshot, or Terraform directory.
 
 **Completed milestones:** the direct Organizations control plane under
 [ADR 0019](adr/0019-direct-organizations-account-vending.md) and the isolated
-sandbox-network root under [ADR 0018](adr/0018-sandbox-network-gitops-delivery.md).
+sandbox-network root under [ADR 0018](adr/0018-sandbox-network-gitops-delivery.md),
+plus the Terraform-owned sandbox delivery identity handoff under
+[ADR 0022](adr/0022-terraform-owned-sandbox-delivery-identity.md).
 The broader legacy-state adoption in
 [ADR 0015](adr/0015-adopt-legacy-state-bootstrap.md) remains independently
 gated. The Organization root is limited to the management account, top-level
@@ -43,9 +45,26 @@ ADR 0022 replaces sandbox CloudFormation policy/bootstrap ownership with a
 Terraform-owned identity root. ADR 0019 additionally authorizes the versioned management-account
 CloudFormation control-plane bootstrap and protected Organization GitOps
 workflow. ADR 0021 authorizes a distinct, single-account sandbox platform
-root. No ADR authorizes a local Terraform apply, manual state change, Control
-Tower launch, VPN/BGP, member-account baseline, public ingress, production, or
-multi-Region deployment without a separately reviewed root and plan.
+root. No ADR authorizes an unreviewed local Terraform apply, manual state
+change, Control Tower launch, VPN/BGP, member-account baseline, public
+ingress, production, or
+multi-Region deployment without a separately reviewed root and plan. The sole
+historical exception is ADR 0022's explicitly confirmed, short-lived IAM
+Identity Center adoption of its own Terraform state; all later delivery is
+through GitHub OIDC.
+
+### Sandbox delivery identity handoff record
+
+The ADR 0022 root imported the existing GitHub OIDC provider, six scoped roles,
+four delivery policies, and six existing attachments. It added two bounded
+identity-delivery policies and their three reviewed attachments. The three
+historical CloudFormation stacks were then updated with `Retain` metadata and
+deleted; the archive remains evidence only. The protected
+[OIDC plan](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35661197443)
+reported **no changes**, and the protected
+[detailed-exitcode drift run](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35661534659)
+also reported no change. The active state is the encrypted object at
+`gitops/sandbox-delivery/us-east-2/global/terraform.tfstate`.
 
 ### Sandbox-network reconciliation record
 
