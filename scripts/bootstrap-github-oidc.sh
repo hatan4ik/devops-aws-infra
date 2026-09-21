@@ -57,6 +57,23 @@ if [[ ! -f "$template" ]]; then
 fi
 
 caller_account="$(aws sts get-caller-identity --profile "$profile" --query Account --output text)"
+
+stack_exists=false
+if aws cloudformation describe-stacks \
+  --profile "$profile" \
+  --region "$region" \
+  --stack-name "$stack_name" >/dev/null 2>&1; then
+  stack_exists=true
+fi
+
+oidc_provider_arn="arn:aws:iam::${caller_account}:oidc-provider/token.actions.githubusercontent.com"
+if [[ "$stack_exists" != true ]] && aws iam get-open-id-connect-provider \
+  --profile "$profile" \
+  --open-id-connect-provider-arn "$oidc_provider_arn" >/dev/null 2>&1; then
+  printf 'A legacy GitHub OIDC provider already exists in AWS account %s without the expected CloudFormation stack. Refusing to create duplicate resources. Run scripts/reconcile-github-oidc-trust.sh to repair only the existing role trust policies.\n' "$caller_account" >&2
+  exit 65
+fi
+
 printf 'Bootstrapping GitHub OIDC in AWS account %s, region %s, stack %s.\n' \
   "$caller_account" "$region" "$stack_name"
 
