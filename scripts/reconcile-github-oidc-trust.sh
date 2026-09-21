@@ -66,23 +66,47 @@ for role_suffix in "${role_suffixes[@]}"; do
 
   aws iam get-role --profile "$profile" --role-name "$role_name" --query 'Role.Arn' --output text >/dev/null
 
-  jq -n \
-    --arg provider_arn "$provider_arn" \
-    --arg subject "$subject" \
-    '{
-      Version: "2012-10-17",
-      Statement: [{
-        Effect: "Allow",
-        Principal: {Federated: $provider_arn},
-        Action: "sts:AssumeRoleWithWebIdentity",
-        Condition: {
-          StringEquals: {
-            "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-            "token.actions.githubusercontent.com:sub": $subject
+  if [[ "$role_name" == "${role_prefix}-plan" ]]; then
+    jq -n \
+      --arg provider_arn "$provider_arn" \
+      --arg pull_request_subject "${subject_prefix}:pull_request" \
+      --arg protected_main_subject "${subject_prefix}:ref:refs/heads/main" \
+      '{
+        Version: "2012-10-17",
+        Statement: [{
+          Effect: "Allow",
+          Principal: {Federated: $provider_arn},
+          Action: "sts:AssumeRoleWithWebIdentity",
+          Condition: {
+            StringEquals: {
+              "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+            },
+            "ForAnyValue:StringEquals": {
+              "token.actions.githubusercontent.com:sub": [$pull_request_subject, $protected_main_subject]
+            }
           }
-        }
-      }]
-    }' >"$trust_file"
+        }]
+      }' >"$trust_file"
+    subject="${subject_prefix}:pull_request or ${subject_prefix}:ref:refs/heads/main"
+  else
+    jq -n \
+      --arg provider_arn "$provider_arn" \
+      --arg subject "$subject" \
+      '{
+        Version: "2012-10-17",
+        Statement: [{
+          Effect: "Allow",
+          Principal: {Federated: $provider_arn},
+          Action: "sts:AssumeRoleWithWebIdentity",
+          Condition: {
+            StringEquals: {
+              "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+              "token.actions.githubusercontent.com:sub": $subject
+            }
+          }
+        }]
+      }' >"$trust_file"
+  fi
 
   aws iam update-assume-role-policy \
     --profile "$profile" \

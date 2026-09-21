@@ -47,7 +47,12 @@ Resources:
             Condition:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
-                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:pull_request'
+              ForAnyValue:StringEquals:
+                token.actions.githubusercontent.com:sub:
+                  - !Sub '${GitHubSubjectPrefix}:pull_request'
+                  # Supports the explicitly manual plan workflow only when it
+                  # is dispatched from the protected default branch.
+                  - !Sub '${GitHubSubjectPrefix}:ref:refs/heads/main'
 
   GitHubActionsDevApplyRole:
     Type: AWS::IAM::Role

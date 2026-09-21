@@ -28,6 +28,11 @@ For this repository, the standard GitHub OIDC subjects are
 `repo:hatan4ik/devops-aws-infra:environment:<name>` for environment roles.
 Do not substitute GitHub numeric IDs for the repository slug.
 
+The plan role also allows
+`repo:hatan4ik/devops-aws-infra:ref:refs/heads/main` so the explicitly manual,
+read-only plan workflow can run from protected `main`. No feature-branch ref is
+trusted.
+
 ## Preconditions
 
 1. Run [`scripts/reconcile-github-controls.sh`](../../scripts/reconcile-github-controls.sh)
