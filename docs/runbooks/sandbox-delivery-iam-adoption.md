@@ -54,15 +54,11 @@ bash scripts/configure-sandbox-delivery-iam-github.sh \
   --repository hatan4ik/devops-aws-infra
 ```
 
-5. Only after that protected OIDC plan is clean, retire the three historical
-   stacks. The script first records `Retain` metadata, verifies Terraform
-   state, deletes the stacks, and confirms the physical resources remain.
-
-```bash
-bash scripts/retire-sandbox-delivery-cloudformation.sh \
-  --profile AWS-hatan4ik-sandbox \
-  --confirm retire-sandbox-delivery-cloudformation
-```
+5. The historical CloudFormation retirement has already completed. The three
+   stack records are deleted; retained IAM resources are Terraform-owned. Its
+   source and the retired helper are audit-only under
+   [`archive/cloudformation-sandbox-bootstrap`](../../archive/cloudformation-sandbox-bootstrap/)
+   and must not be run.
 
 6. Dispatch the protected **Sandbox delivery IAM plan** and **Sandbox delivery
    IAM drift detection** workflows. Both must report no change. The only
@@ -82,8 +78,6 @@ bash scripts/reencrypt-sandbox-delivery-state.sh \
 
 ## Rollback boundary
 
-Before stack retirement, the CloudFormation stacks still own the live policy
-objects and can be left unchanged if the import plan differs. After retirement,
-Terraform is the sole owner; roll forward with a reviewed Terraform policy
-revision. Do not recreate an archived CloudFormation stack or detach a policy
-manually.
+The CloudFormation handoff is complete and Terraform is the sole owner. Roll
+forward with a reviewed Terraform policy revision. Do not recreate an archived
+CloudFormation stack or detach a policy manually.
