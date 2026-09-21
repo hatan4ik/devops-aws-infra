@@ -4,7 +4,7 @@ These runbooks are execution gates, not evidence that a resource already exists.
 
 | Runbook | Use | Non-negotiable completion evidence |
 |---|---|---|
-| [Account vending](account-vending.md) | Create a new governed AWS account through Control Tower/AFT. | Account in approved OU, baseline controls/logging active, no standing credentials, approved owner access. |
+| [Account vending](account-vending.md) | Create a new governed AWS account through direct Organizations GitOps. | Account in approved OU, baseline controls/logging active, no standing credentials, approved owner access. |
 | [Adding a Region](adding-region.md) | Extend a platform/environment into a second approved AWS Region. | Quotas, IPAM/TGW/DNS/data/identity checks, post-deploy tests, and a staging game day. |
 | [Hybrid VPN/BGP onboarding](hybrid-vpn-bgp-onboarding.md) | Connect an on-premises routing domain to a regional TGW. | Two healthy tunnels/paths, prefix filters, isolation checks, and recorded rollback. |
 | [Regional failover](regional-failover.md) | Operate a controlled application regional failover. | Health signal, traffic shift, auth/API/data validation, incident timeline, and controlled failback. |

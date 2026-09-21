@@ -1,12 +1,13 @@
 # Project status and delivery authority
 
-**Status as of 2026-09-20:** the isolated ADR 0018 sandbox network has been
+**Status as of 2026-09-21:** the isolated ADR 0018 sandbox network has been
 delivered through the protected GitHub OIDC workflow and verified read-only in
-AWS. This repository is still **not** proof of a deployed application platform:
-Control Tower, TGW/VPN/BGP, workloads, identity, data, production, and
-multi-Region delivery remain separately gated. The sandbox account contains
-the permissionless GitHub OIDC provider and trust roles established by ADR
-0017, plus the observed legacy state bootstrap.
+AWS. The management account now also has the ADR 0019 permissionless GitHub
+OIDC provider and environment-scoped trust roles. This repository is still
+**not** proof of a deployed application platform: direct Organizations state
+bootstrap, OU/SCP apply, account vending, TGW, workloads, identity, data,
+production, and multi-Region delivery remain separately gated. Control Tower
+and VPN/BGP are explicitly out of the current delivery scope.
 
 ## Start here
 
@@ -25,17 +26,22 @@ review snapshot, or Terraform directory.
 
 ## Current delivery decision
 
-**Selected milestone:** deliver the isolated sandbox-network root under
-[ADR 0018](adr/0018-sandbox-network-gitops-delivery.md), while the broader
-legacy state adoption in [ADR 0015](adr/0015-adopt-legacy-state-bootstrap.md)
-remains independently gated. This scope is limited to sandbox account
-`448871779014`, `us-east-2`, `10.64.0.0/16`, and a newly dedicated state key.
+**Selected milestone:** deliver the direct Organizations control plane under
+[ADR 0019](adr/0019-direct-organizations-account-vending.md), while preserving
+the completed isolated sandbox-network root under
+[ADR 0018](adr/0018-sandbox-network-gitops-delivery.md). The broader legacy
+state adoption in [ADR 0015](adr/0015-adopt-legacy-state-bootstrap.md) remains
+independently gated. The new root is limited to the management account,
+top-level OUs, baseline SCPs, its dedicated state backend, and account records
+explicitly supplied in reviewed tfvars.
 
 ADR 0018 authorizes only its versioned policy bootstrap and protected GitHub
-workflow. It does **not** authorize a local Terraform apply, manual state
-change, Control Tower launch, TGW/VPN/BGP, endpoint, workload, identity, data,
-production, or multi-Region deployment. The sandbox-network delivery is the
-only completed infrastructure slice under this authority.
+workflow. ADR 0019 additionally authorizes the versioned management-account
+CloudFormation control-plane bootstrap and the protected Organization GitOps
+workflow. Neither authorizes a local Terraform apply, manual state change,
+Control Tower launch, VPN/BGP, endpoint, workload, identity, data, production,
+or multi-Region deployment. The sandbox-network delivery remains the only
+completed Terraform infrastructure slice under this authority.
 
 ### Sandbox-network reconciliation record
 
@@ -69,9 +75,9 @@ The read-only evidence helper is
 
 | Lane | Role | Do not treat it as |
 |---|---|---|
-| [`terraform/`](../terraform/README.md) | Candidate canonical Terraform delivery source; ADR 0018 is its one initialized-backend exception. | Proof that any AWS resource exists before the GitHub run evidence. |
+| [`terraform/`](../terraform/README.md) | Candidate canonical Terraform delivery source; ADRs 0018 and 0019 are its initialized-backend exceptions. | Proof that any AWS resource exists before the GitHub run evidence. |
 | [`docs/`](README.md) | Current decisions, prerequisites, runbooks, and delivery contracts. | Evidence that AWS services are deployed. |
-| [`automation/terraform-pipelines/`](../automation/terraform-pipelines/README.md) | Reviewed reusable workflow source for future roots. | The active ADR 0018 root-specific delivery workflows. |
+| [`automation/terraform-pipelines/`](../automation/terraform-pipelines/README.md) | Reviewed reusable workflow source for future roots. | The active ADR 0018 and ADR 0019 root-specific delivery workflows. |
 | Root [`modules/`](../modules/README.md) and [`roots/`](../roots/README.md) | Disabled historical prototypes retained as forensic input. | A deployment path. |
 | [`docs/book/`](book/README.md) | Explanatory design reference. | Status, approval, or implementation authority. |
 | [`docs/reviews/archive/`](reviews/archive/README.md) | Historical point-in-time assessments. | A current backlog or current repository state. |
@@ -80,7 +86,9 @@ The read-only evidence helper is
 
 1. Preserve the apply, CloudTrail, dedicated-state, and weekday-drift evidence
    for the completed sandbox network.
-2. Keep legacy state adoption, landing-zone launch, production networking,
+2. Bootstrap the dedicated Organization state backend and configure GitHub's
+   `landing-zone` environment protection; then review the OU/SCP-only plan.
+3. Keep account email/CIDR-dependent vending, production networking,
    application, identity, and multi-Region work separately gated.
 
 Stop immediately if the backend lock is active, a plan includes any resource

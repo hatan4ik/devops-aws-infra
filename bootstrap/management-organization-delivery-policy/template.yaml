@@ -1,0 +1,266 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Management-account control plane for the direct AWS Organizations GitOps root.
+  It creates the root-specific state backend and least-privilege policies for
+  the permissionless GitHub OIDC roles created by bootstrap/github-oidc.
+
+Parameters:
+  RoleNamePrefix:
+    Type: String
+    Description: Existing GitHub OIDC role-name prefix in the management account.
+    AllowedPattern: '^[A-Za-z0-9+=,.@_-]{1,40}$'
+  StateBucketName:
+    Type: String
+    Description: Globally unique S3 bucket name for only the organization root state.
+    AllowedPattern: '^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$'
+  StateKeyPrefix:
+    Type: String
+    Description: State-object prefix reserved solely for the organization root.
+    Default: gitops/organization/global/
+    AllowedPattern: '^[A-Za-z0-9!_.*''()/\-]+/$'
+  StateLockTableName:
+    Type: String
+    Description: DynamoDB state-lock table name.
+    Default: devops-aws-infra-organization-lock
+    AllowedPattern: '^[A-Za-z0-9_.-]{3,255}$'
+  StateKeyAlias:
+    Type: String
+    Description: Alias for the customer-managed state encryption key.
+    Default: alias/devops-aws-infra-organization-state
+    AllowedPattern: '^alias/[A-Za-z0-9/_-]+$'
+
+Resources:
+  StateKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Encrypts the direct AWS Organizations Terraform state and lock table.
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnableAccountIamPolicies
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:root'
+            Action: kms:*
+            Resource: '*'
+      Tags:
+        - Key: ManagedBy
+          Value: devops-aws-infra
+        - Key: Root
+          Value: organization
+
+  StateKeyAliasResource:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Ref StateKeyAlias
+      TargetKeyId: !Ref StateKey
+
+  StateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref StateBucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !GetAtt StateKey.Arn
+            BucketKeyEnabled: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      ObjectLockEnabled: true
+      ObjectLockConfiguration:
+        ObjectLockEnabled: Enabled
+        Rule:
+          DefaultRetention:
+            Mode: GOVERNANCE
+            Days: 14
+      Tags:
+        - Key: ManagedBy
+          Value: devops-aws-infra
+        - Key: Root
+          Value: organization
+
+  StateBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StateBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource:
+              - !GetAtt StateBucket.Arn
+              - !Sub '${StateBucket.Arn}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+          - Sid: DenyUnencryptedStateWrites
+            Effect: Deny
+            Principal: '*'
+            Action: s3:PutObject
+            Resource: !Sub '${StateBucket.Arn}/${StateKeyPrefix}*'
+            Condition:
+              StringNotEquals:
+                s3:x-amz-server-side-encryption: aws:kms
+
+  StateLockTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref StateLockTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: LockID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: LockID
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        KMSMasterKeyId: !GetAtt StateKey.Arn
+        SSEEnabled: true
+        SSEType: KMS
+      Tags:
+        - Key: ManagedBy
+          Value: devops-aws-infra
+        - Key: Root
+          Value: organization
+
+  OrganizationPlanPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub '${RoleNamePrefix}-organization-plan'
+      Description: Read and state access for organization-root planning and drift detection.
+      Roles:
+        - !Sub '${RoleNamePrefix}-plan'
+        - !Sub '${RoleNamePrefix}-drift'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ListOnlyTheOrganizationStatePrefix
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: !GetAtt StateBucket.Arn
+            Condition:
+              StringLike:
+                s3:prefix: !Sub '${StateKeyPrefix}*'
+          - Sid: ReadAndWriteOnlyTheOrganizationStateObject
+            Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+            Resource: !Sub '${StateBucket.Arn}/${StateKeyPrefix}*'
+          - Sid: LockOnlyTheOrganizationStateTable
+            Effect: Allow
+            Action:
+              - dynamodb:DeleteItem
+              - dynamodb:DescribeTable
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+            Resource: !GetAtt StateLockTable.Arn
+          - Sid: UseOnlyTheOrganizationStateKey
+            Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:DescribeKey
+              - kms:Encrypt
+              - kms:GenerateDataKey
+            Resource: !GetAtt StateKey.Arn
+          - Sid: ReadOrganizationControlPlane
+            Effect: Allow
+            Action:
+              - organizations:Describe*
+              - organizations:List*
+            Resource: '*'
+
+  OrganizationApplyPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub '${RoleNamePrefix}-organization-landing-zone-apply'
+      Description: Direct Organizations GitOps provisioning. It intentionally excludes Control Tower, StackSets, and member-account access.
+      Roles:
+        - !Sub '${RoleNamePrefix}-landing-zone'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ListOnlyTheOrganizationStatePrefix
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: !GetAtt StateBucket.Arn
+            Condition:
+              StringLike:
+                s3:prefix: !Sub '${StateKeyPrefix}*'
+          - Sid: ReadAndWriteOnlyTheOrganizationStateObject
+            Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+            Resource: !Sub '${StateBucket.Arn}/${StateKeyPrefix}*'
+          - Sid: LockOnlyTheOrganizationStateTable
+            Effect: Allow
+            Action:
+              - dynamodb:DeleteItem
+              - dynamodb:DescribeTable
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+            Resource: !GetAtt StateLockTable.Arn
+          - Sid: UseOnlyTheOrganizationStateKey
+            Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:DescribeKey
+              - kms:Encrypt
+              - kms:GenerateDataKey
+            Resource: !GetAtt StateKey.Arn
+          - Sid: ManageApprovedOrganizationResources
+            Effect: Allow
+            Action:
+              - organizations:AttachPolicy
+              - organizations:CreateAccount
+              - organizations:CreateOrganizationalUnit
+              - organizations:CreatePolicy
+              - organizations:DeleteOrganizationalUnit
+              - organizations:DeletePolicy
+              - organizations:Describe*
+              - organizations:DetachPolicy
+              - organizations:List*
+              - organizations:MoveAccount
+              - organizations:TagResource
+              - organizations:UntagResource
+              - organizations:UpdateOrganizationalUnit
+              - organizations:UpdatePolicy
+            Resource: '*'
+
+Outputs:
+  StateBucketName:
+    Description: Terraform backend bucket for the organization root.
+    Value: !Ref StateBucket
+  StateKeyPrefix:
+    Description: Terraform backend state prefix reserved for the organization root.
+    Value: !Ref StateKeyPrefix
+  StateKmsKeyArn:
+    Description: Customer-managed key used by the organization state backend.
+    Value: !GetAtt StateKey.Arn
+  StateLockTableName:
+    Description: Terraform backend DynamoDB lock table.
+    Value: !Ref StateLockTable
+  PlanRoleArn:
+    Description: Pull-request plan role that may read Organization state and inventory.
+    Value: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/github-actions/${RoleNamePrefix}-plan'
+  LandingZoneRoleArn:
+    Description: Protected landing-zone apply role for the Organization root.
+    Value: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/github-actions/${RoleNamePrefix}-landing-zone'
