@@ -22,10 +22,11 @@ profile=""
 region="us-east-2"
 role_prefix=""
 stack_name="devops-aws-infra-github-oidc"
-# GitHub's standard OIDC `sub` uses the repository slug, not numeric GitHub
-# IDs. The suffix is added by the CloudFormation template for pull requests or
-# an approved deployment Environment.
-subject_prefix="${GITHUB_SUBJECT_PREFIX:-repo:hatan4ik/devops-aws-infra}"
+# This repository uses GitHub's immutable OIDC subject format. The owner and
+# repository IDs prevent a renamed/recycled repository from inheriting trust.
+# The suffix is added by the CloudFormation template for pull requests, the
+# protected main branch, or an approved deployment Environment.
+subject_prefix="${GITHUB_SUBJECT_PREFIX:-repo:hatan4ik@12816536/devops-aws-infra@1375932356}"
 
 while (($# > 0)); do
   case "$1" in
@@ -43,8 +44,8 @@ if [[ -z "$profile" || -z "$role_prefix" ]]; then
   exit 64
 fi
 
-if [[ ! "$subject_prefix" =~ ^repo:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
-  printf 'GitHubSubjectPrefix must use the standard repo:OWNER/REPO OIDC subject prefix.\n' >&2
+if [[ ! "$subject_prefix" =~ ^repo:[A-Za-z0-9_.-]+(@[0-9]+)?/[A-Za-z0-9_.-]+(@[0-9]+)?$ ]]; then
+  printf "%s\n" "GitHubSubjectPrefix must use GitHub's repo:OWNER[@OWNER_ID]/REPO[@REPO_ID] OIDC subject prefix." >&2
   exit 64
 fi
 

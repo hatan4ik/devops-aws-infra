@@ -23,15 +23,16 @@ custom claims such as a workflow filename. The controls are therefore split:
 | Who may authorize a deployment | GitHub deployment environment reviewers and branch restrictions |
 | What AWS changes a role may make | Per-root least-privilege IAM policy and state-resource policy |
 
-For this repository, the standard GitHub OIDC subjects are
-`repo:hatan4ik/devops-aws-infra:pull_request` for the plan role and
-`repo:hatan4ik/devops-aws-infra:environment:<name>` for environment roles.
-Do not substitute GitHub numeric IDs for the repository slug.
+This repository uses GitHub's immutable OIDC subject format, as confirmed by
+the repository OIDC settings on 2026-09-21. Its plan subject is
+`repo:hatan4ik@12816536/devops-aws-infra@1375932356:pull_request`; environment
+roles use the same immutable prefix plus `:environment:<name>`. Do not replace
+the owner/repository IDs with the legacy slug-only subject.
 
 The plan role also allows
-`repo:hatan4ik/devops-aws-infra:ref:refs/heads/main` so the explicitly manual,
-read-only plan workflow can run from protected `main`. No feature-branch ref is
-trusted.
+`repo:hatan4ik@12816536/devops-aws-infra@1375932356:ref:refs/heads/main` so
+the explicitly manual, read-only plan workflow can run from protected `main`.
+No feature-branch ref is trusted.
 
 ## Preconditions
 

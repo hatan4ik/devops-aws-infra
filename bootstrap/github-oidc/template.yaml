@@ -8,10 +8,10 @@ Parameters:
   GitHubSubjectPrefix:
     Type: String
     Description: >-
-      Immutable standard GitHub OIDC repository subject prefix in the form
-      repo:OWNER/REPO, without the final :pull_request or
-      :environment:<name> segment.
-    AllowedPattern: '^repo:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$'
+      GitHub OIDC repository subject prefix in the form
+      repo:OWNER[@OWNER_ID]/REPO[@REPO_ID], without the final
+      :pull_request, :ref, or :environment:<name> segment.
+    AllowedPattern: '^repo:[A-Za-z0-9_.-]+(@[0-9]+)?/[A-Za-z0-9_.-]+(@[0-9]+)?$'
   RoleNamePrefix:
     Type: String
     Description: Stable role-name prefix for this target AWS account.
