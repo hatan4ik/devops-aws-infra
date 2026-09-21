@@ -24,6 +24,8 @@ active_adrs=(
   docs/adr/0016-terraform-state-lock-transition.md
   docs/adr/0017-github-oidc-bootstrap-proof.md
   docs/adr/0018-sandbox-network-gitops-delivery.md
+  docs/adr/0019-direct-organizations-account-vending.md
+  docs/adr/0020-cognito-mrr-cloudformation-ownership.md
 )
 
 superseded_adrs=(
@@ -99,12 +101,15 @@ oidc_proof_workflow=.github/workflows/oidc-sandbox-proof.yml
 sandbox_network_plan_workflow=.github/workflows/sandbox-network-plan.yml
 sandbox_network_apply_workflow=.github/workflows/sandbox-network-apply.yml
 sandbox_network_drift_workflow=.github/workflows/sandbox-network-drift.yml
+organization_plan_workflow=.github/workflows/organization-plan.yml
+organization_apply_workflow=.github/workflows/organization-apply.yml
+organization_drift_workflow=.github/workflows/organization-drift.yml
 credentialed_workflows="$(grep -lEi 'id-token:[[:space:]]*write|configure-aws-credentials' .github/workflows/*.yml || true)"
 if [[ -n "$credentialed_workflows" ]]; then
   while IFS= read -r workflow; do
     [[ -n "$workflow" ]] || continue
     case "$workflow" in
-      "$oidc_proof_workflow"|"$sandbox_network_plan_workflow"|"$sandbox_network_apply_workflow"|"$sandbox_network_drift_workflow") ;;
+      "$oidc_proof_workflow"|"$sandbox_network_plan_workflow"|"$sandbox_network_apply_workflow"|"$sandbox_network_drift_workflow"|"$organization_plan_workflow"|"$organization_apply_workflow"|"$organization_drift_workflow") ;;
       *) fail "unexpected credentialed root workflow: $workflow" ;;
     esac
   done <<< "$credentialed_workflows"
@@ -120,6 +125,9 @@ fi
 [[ -f "$sandbox_network_plan_workflow" ]] || fail "missing sandbox-network plan workflow"
 [[ -f "$sandbox_network_apply_workflow" ]] || fail "missing sandbox-network apply workflow"
 [[ -f "$sandbox_network_drift_workflow" ]] || fail "missing sandbox-network drift workflow"
+[[ -f "$organization_plan_workflow" ]] || fail "missing organization plan workflow"
+[[ -f "$organization_apply_workflow" ]] || fail "missing organization apply workflow"
+[[ -f "$organization_drift_workflow" ]] || fail "missing organization drift workflow"
 
 grep -Fq 'github.event.pull_request.head.repo.full_name == github.repository' "$sandbox_network_plan_workflow" || fail 'sandbox-network plan must reject fork pull requests'
 grep -Fq 'AWS_SANDBOX_NETWORK_PLAN_ROLE_ARN' "$sandbox_network_plan_workflow" || fail 'sandbox-network plan must use its dedicated role variable'
@@ -139,7 +147,7 @@ terraform_apply_workflows="$(grep -lEi 'terraform[[:space:]]+apply' .github/work
 if [[ -n "$terraform_apply_workflows" ]]; then
   while IFS= read -r workflow; do
     [[ -n "$workflow" ]] || continue
-    [[ "$workflow" == "$sandbox_network_apply_workflow" ]] || fail "unexpected Terraform apply workflow: $workflow"
+    [[ "$workflow" == "$sandbox_network_apply_workflow" || "$workflow" == "$organization_apply_workflow" ]] || fail "unexpected Terraform apply workflow: $workflow"
   done <<< "$terraform_apply_workflows"
 fi
 
@@ -149,6 +157,27 @@ grep -Fq 'Require the protected dev environment drift role variable' "$sandbox_n
 grep -Fq 'terraform plan -detailed-exitcode' "$sandbox_network_drift_workflow" || fail 'sandbox-network drift must report detected changes'
 if grep -nEi 'terraform[[:space:]]+apply' "$sandbox_network_drift_workflow"; then
   fail 'sandbox-network drift workflow must not apply Terraform'
+fi
+
+grep -Fq 'github.event.pull_request.head.repo.full_name == github.repository' "$organization_plan_workflow" || fail 'organization plan must reject fork pull requests'
+grep -Fq 'AWS_ORGANIZATION_PLAN_ROLE_ARN' "$organization_plan_workflow" || fail 'organization plan must use its dedicated role variable'
+grep -Fq 'terraform plan' "$organization_plan_workflow" || fail 'organization plan must produce a Terraform plan'
+if grep -nEi 'terraform[[:space:]]+apply' "$organization_plan_workflow"; then
+  fail 'organization plan workflow must not apply Terraform'
+fi
+
+grep -Fq 'workflow_dispatch:' "$organization_apply_workflow" || fail 'organization apply must require manual dispatch'
+grep -Fq "if: inputs.confirm == 'apply'" "$organization_apply_workflow" || fail 'organization apply must require explicit confirmation'
+grep -Fq 'environment: landing-zone' "$organization_apply_workflow" || fail 'organization apply must use the protected landing-zone environment'
+grep -Fq 'AWS_ORGANIZATION_LANDING_ZONE_ROLE_ARN' "$organization_apply_workflow" || fail 'organization apply must use its dedicated role variable'
+grep -Fq 'github.event.repository.default_branch' "$organization_apply_workflow" || fail 'organization apply must check out protected default-branch source'
+grep -Fq 'terraform apply' "$organization_apply_workflow" || fail 'organization apply workflow is missing its controlled apply step'
+
+grep -Fq 'schedule:' "$organization_drift_workflow" || fail 'organization drift must be scheduled'
+grep -Fq 'AWS_ORGANIZATION_DRIFT_ROLE_ARN' "$organization_drift_workflow" || fail 'organization drift must use its dedicated role variable'
+grep -Fq 'terraform plan -detailed-exitcode' "$organization_drift_workflow" || fail 'organization drift must report detected changes'
+if grep -nEi 'terraform[[:space:]]+apply' "$organization_drift_workflow"; then
+  fail 'organization drift workflow must not apply Terraform'
 fi
 
 if grep -R -nE --include='*.yml' --include='*.yaml' '[0-9]{12}' .github/workflows; then

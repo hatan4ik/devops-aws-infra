@@ -1,55 +1,73 @@
-# Runbook: account vending
-# Runbook: Account Vending
+# Runbook: direct AWS Organizations account vending
 
-## Trigger and scope
-## Purpose
-Automated procedure for provisioning a new AWS account under the target Organizational Unit (OU).
+## Purpose and boundary
 
-Use this runbook only for an approved new platform, security, shared-service, network, or workload account. The management account is never a routine deployment target. Account creation is an external AWS mutation and requires the separate remote/apply authorization, an approved change record, and the Control Tower/AFT owner.
-## Prerequisites
-- Identity Center (SSO) permissions for the root Management Account.
-- Access to the `platform-aws-platform-roots/org` repository.
+Use this runbook to vend an approved Network, Shared Services, Log Archive,
+Security/Audit, or workload account through the canonical Terraform root. It
+implements [ADR 0019](../adr/0019-direct-organizations-account-vending.md): no
+Control Tower, AFT, console-created account, long-lived access key, or VPN/BGP
+resource is used.
 
-## Preflight
-## Procedure
-1. Open the `platform-aws-platform-roots` repository.
-2. Navigate to `org/accounts.tf`.
-3. Add a new `aws_organizations_account` resource (or append to the local map if using a map-driven approach):
-   ```hcl
-   module "new_account" {
-     source = "../../modules/aws-account-vending"
-     email  = "aws-admin+newaccount@platform.com"
-     name   = "platform-newaccount-dev"
-     ou_id  = data.aws_organizations_organizational_unit.workload_dev.id
-   }
-   ```
-4. Commit the change and open a Pull Request.
-5. The `Terraform PR Checks` workflow will validate the change. Ensure no existing accounts are modified in the plan output.
-6. Merge the PR. The `Terraform Apply` workflow will provision the account.
-7. Upon completion, log into AWS Identity Center. The new account will be available, and the default permission sets (AdministratorAccess, ViewOnlyAccess) will be automatically pushed if they target the OU.
+The management account is the Organizations control plane only. This runbook
+does not authorize moving an existing account, closing an account, changing
+the management account, enabling Control Tower, or deploying workloads.
 
-1. Record the account purpose, business owner, technical owner, environment, proposed OU, data classification, budget/cost center, target Regions, and required service quotas.
-2. Obtain security approval for SCP baseline, log retention, KMS/Secrets ownership, exception process, break-glass role, and whether Macie applies. Obtain network approval for IPAM allocation, TGW route domain, DNS, endpoints, egress, and on-premises reachability.
-3. Confirm the account name/email, GitHub OIDC repository/environment subject, least-privilege plan/apply/drift roles, and IAM Identity Center permission sets. Do not create IAM users or long-lived access keys.
-4. Confirm no CIDR, ASN, DNS, Region, or account identifier is being inferred from the source placeholders.
+## Required reviewed inputs
 
-## Controlled execution
+Before editing `terraform/roots/organization/global/terraform.tfvars`, record:
 
-1. Submit the Account Factory for Terraform request through the approved AFT root and approved pipeline; use the vending parameters reviewed in preflight.
-2. Wait for the vending workflow, Control Tower baseline, SCP attachment, and account moves to reach their terminal success states. Do not start workload Terraform while any baseline is pending or failed.
-3. Apply only the approved account customizations: organization logging/Config/GuardDuty/Security Hub delegation, account-level encryption and S3 public-access controls, IAM Identity Center assignments, and the scoped OIDC roles.
-4. Add the account to the correct centralized observability/log/archive relationships. Grant no direct cross-environment state access.
+1. unique AWS account email and account name;
+2. target OU, business owner, technical owner, cost center, data class, and
+   approved Regions;
+3. IPAM allocation and TGW route-domain decision for accounts that will host a
+   VPC;
+4. member-account baseline plan: CloudTrail/Config, GuardDuty/Security Hub,
+   log archive destination, KMS/Secrets ownership, IAM Identity Center access,
+   GitHub OIDC trust/policies, and break-glass procedure; and
+5. budget/alert owner and service quotas.
 
-## Acceptance evidence
+Do not infer email aliases or CIDRs. Empty `accounts = {}` is intentional and
+must remain until every item above has an approved value.
 
-- Account ID/name, OU placement, change record, and AFT/Control Tower execution identifiers.
-- SCP and permission-boundary inventory; IAM Identity Center group/permission-set mapping; OIDC trust-policy subject and role-policy review.
-- CloudTrail organization trail, Config recorder, GuardDuty, Security Hub, Inspector/Access Analyzer where applicable, central log delivery, KMS key ownership, and S3 Block Public Access evidence.
-- A passing [`verify_security_read_only.sh`](../../tests/post_deploy/verify_security_read_only.sh) execution in the delegated Security/Audit account and a security-owner sign-off.
-- No static AWS access key, Terraform backend credential, production secret, or customer data in the repository, state, or evidence bundle.
+## One-time control-plane bootstrap
 
-## Abort and rollback
+This is the sole local mutation in the runbook. It runs a versioned
+CloudFormation template using a short-lived IAM Identity Center profile; it
+does not create or move a member account.
 
-If the baseline, OU, controls, logging, or OIDC boundary is incomplete, stop before deploying workloads. Remove unapproved role assignments and access grants, preserve CloudTrail/AFT evidence, and escalate through the change process. Account closure is a separately authorized, high-impact action; this runbook does not authorize it.
-## Rollback
-If the apply fails, do **not** run `terraform destroy`. Fix the Terraform error in a forward-fix PR. Deleting an `aws_organizations_account` removes it from the Org but does not close it (requires root email manual login).
+```bash
+scripts/bootstrap-management-organization-control-plane.sh \
+  --profile AWS-hatan4ik-management
+
+scripts/configure-organization-github.sh \
+  --profile AWS-hatan4ik-management
+```
+
+Before any apply, configure required reviewers and deployment-branch
+restrictions on the GitHub `landing-zone` Environment. The setup script creates
+the Environment and stores only role ARNs and backend identifiers; it cannot
+choose reviewers for the organization.
+
+## Vending procedure
+
+1. Add only the approved account records to the `accounts` map in the root
+   tfvars file. Do not modify an existing account's email.
+2. Open a pull request. The Organization plan workflow must show only the
+   planned OUs/SCPs/accounts. Stop if it includes an existing-account move,
+   SCP detach, policy replacement, or resource outside the root.
+3. Merge only after platform and security review. Dispatch **Apply Organization
+   control plane** from the default branch, select `landing-zone`, and type
+   `apply`.
+4. Confirm the account creation request reaches `SUCCEEDED`, record account
+   ID/OU/CloudTrail evidence, then deliver its member-account baseline through
+   a separate root and OIDC policy. Do not put workloads into the account first.
+5. Keep scheduled drift detection enabled. It reports drift and never repairs
+   it automatically.
+
+## Abort and recovery
+
+Stop before member-account configuration if account creation, baseline, logging,
+SCP attachment, or Identity Center access is incomplete. Never use
+`terraform destroy` for an account: account closure has legal, billing,
+retention, and root-contact consequences and requires the separate account
+decommission runbook.
