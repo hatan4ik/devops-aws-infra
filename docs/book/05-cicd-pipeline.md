@@ -1,8 +1,8 @@
 # Chapter 5 — CI/CD Pipeline Design
 
-**Status:** Architecture reference. Current active-root workflow status is in [Project status](../PROJECT-STATUS.md); this chapter describes template source for a future pipeline-repository split.
+**Status:** Architecture reference. Current active-root workflow status is in [Project status](../PROJECT-STATUS.md); reusable workflows are published separately.
 **ADRs:** [0012](../adr/0012-oidc-gated-terraform-delivery.md) · [0013](../adr/0013-layered-verification-no-automatic-fault-injection.md)  
-**Source:** [`tooling/pipeline-templates/`](../../tooling/pipeline-templates/)
+**Source:** [terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines)
 
 ---
 
@@ -151,4 +151,4 @@ Before any pipeline receives AWS access:
 5. Dry-run quality workflow first; then sandbox plan with no apply permission; record OIDC subject, CloudTrail events, state-lock behavior, lint/security results, and cost-diff behavior
 6. Only after step 5 passes: enable apply workflow for dev environment
 
-Full remote setup requirements: [tooling/pipeline-templates/README.md](../../tooling/pipeline-templates/README.md)
+Full remote setup requirements: [terraform-pipelines README](https://github.com/hatan4ik/terraform-pipelines/blob/838da070a7e33ed2911ad3768ba3d00cccc9a5d9/README.md)

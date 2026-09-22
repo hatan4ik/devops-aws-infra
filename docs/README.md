@@ -15,6 +15,8 @@ separates current truth from design reference and historical material.
   runbook is not automatic authorization to execute an AWS change.
 - [GitHub Actions Terraform delivery](runbooks/github-actions-delivery.md) —
   active workflow ownership, triggers, OIDC roles, and apply gates.
+- [Platform ConOps](operations/conops.md) — operating model for the current
+  sandbox and the controlled path to private application services.
 - [Versioned module repositories](MODULE-REPOSITORIES.md) — the reusable
   `aws.modules.*` implementations, their immutable release commits, and the
   consumer-source rule.

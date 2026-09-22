@@ -17,5 +17,5 @@ jobs:
           set -euo pipefail
           echo "AWS delivery is intentionally disabled in this source repository."
           echo "ADR 0012 requires a protected environment, approved backend, and scoped GitHub OIDC role in the target delivery repository."
-          echo "Use tooling/pipeline-templates only after those prerequisites have been verified."
+          echo "Use the released hatan4ik/terraform-pipelines repository only after those prerequisites have been verified."
           exit 1

@@ -56,6 +56,12 @@ reviewed root and plan. A narrowly reviewed platform state recovery included an
 encrypted pre-change backup, active-lock inspection, and zero-taint verification;
 it is not a general local delivery path. Normal delivery is through GitHub OIDC.
 
+The private `sandbox-workload` root is source and delivery contract only until
+its delivery-IAM policy release is applied, the protected workload role
+variables are configured, and an application owner supplies an immutable image
+digest and typed runtime contract. Its committed `applications = {}` map creates
+no task, service, OAuth client, public endpoint, or customer data resource.
+
 ### Sandbox delivery identity handoff record
 
 The ADR 0022 root imported the existing GitHub OIDC provider, six scoped roles,
@@ -149,7 +155,8 @@ Read-only Organization inventory confirmed:
 | [`infra/candidates/`](../infra/README.md#candidates) | Future foundation, network, TGW, and workload source. | A deployment path. |
 | [Versioned module repositories](MODULE-REPOSITORIES.md) | Reusable `aws.modules.*` implementation, released independently and selected by immutable source commit. | A root, an AWS apply record, or permission to upgrade a consumer. |
 | [`docs/`](README.md) | Current decisions, prerequisites, runbooks, and delivery contracts. | Evidence that AWS services are deployed. |
-| [`tooling/pipeline-templates/`](../tooling/pipeline-templates/README.md) | Reviewed reusable workflow source for a future pipeline-repository split. | The active root-specific delivery workflows. |
+| [terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines) | Released reusable Terraform workflow library; consumers pin its immutable release commit. | The active root-specific delivery workflows or an AWS identity provider. |
+| [`archive/pipeline-templates-bootstrap/`](../archive/pipeline-templates-bootstrap/) | Historical pre-release copy of the reusable workflow source. | A consumer source or active workflow. |
 | [`bootstrap/`](../bootstrap/README.md) | One-time, reviewed Organization prerequisite template. | An active Terraform root or recurring deployment lane. |
 | [`reference/`](../reference/README.md) | Read-only review inputs retained for traceability. | A dependency of Terraform, workflows, or an apply. |
 | [`archive/prototypes/`](../archive/prototypes/) | Disabled historical modules and roots retained as forensic input. | A deployment path. |

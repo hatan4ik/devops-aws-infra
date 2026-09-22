@@ -7,7 +7,7 @@ Read [Project status](../docs/PROJECT-STATUS.md) before using any root.
 ## Active
 
 `active/` is the only executable Terraform delivery tree. The repository's
-root GitHub Actions workflows reference only its four roots. Each reusable
+root GitHub Actions workflows reference only its five roots. Each reusable
 implementation is an immutable, commit-pinned `aws.modules.*` Git source; this
 repository deliberately contains no duplicate active module implementation.
 It contains the delivered Organizations and sandbox-network roots plus the
@@ -28,7 +28,7 @@ workflow, and reviewed plan.
   active root after its documented approval gate.
 - Most deployment values belong in ignored `terraform.tfvars`; committed
   `terraform.tfvars.example` files are placeholders, not deployable values.
-  The four active roots are the narrow exception: their reviewed, non-secret
+  The five active roots are the narrow exception: their reviewed, non-secret
   account/Region/CIDR contracts are versioned for their GitHub workflows.
 - `active/root-context.yaml` is the reviewed, non-secret repository and
   allocation-tag context shared by active roots. It derives names and tags;
@@ -42,7 +42,7 @@ workflow, and reviewed plan.
 ## Layout
 
 ```text
-active/roots/         Four roots referenced by root GitHub Actions workflows.
+active/roots/         Five roots referenced by root GitHub Actions workflows.
 active/root-context.yaml  Shared static naming and tagging context for active roots.
 candidates/modules/   Future root-composition modules only; implementations are external.
 candidates/roots/     Future foundation, regional network, and workload roots.

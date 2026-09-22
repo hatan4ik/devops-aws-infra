@@ -56,7 +56,7 @@ jobs:
       - name: Lint GitHub Actions workflows
         run: |
           set -euo pipefail
-          actionlint .github/workflows/*.yml tooling/pipeline-templates/.github/workflows/*.yml
+          actionlint .github/workflows/*.yml
 
       - name: Validate Terraform modules and roots without cloud credentials
         run: scripts/validate-terraform-quality.sh
@@ -91,8 +91,5 @@ jobs:
       - name: Verify reusable-pipeline source boundaries
         run: |
           set -euo pipefail
-          tooling/pipeline-templates/scripts/check-action-pins.sh .github/workflows
-          cd tooling/pipeline-templates
-          ruby scripts/validate-workflows.rb
-          ruby scripts/check-reusable-contracts.rb
-          scripts/check-action-pins.sh .github/workflows
+          scripts/workflow-policy/check-action-pins.sh .github/workflows
+          ruby scripts/workflow-policy/validate-workflows.rb

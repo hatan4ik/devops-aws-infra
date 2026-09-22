@@ -9,9 +9,10 @@ dispatching an apply.
 
 All active delivery workflows use a pinned action revision, short-lived GitHub
 OIDC credentials, a root-specific role, `-lockfile=readonly`, and a dedicated
-remote-state key. No active workflow accepts static AWS credentials. Generic
-workflow templates are source-only under
-[`tooling/pipeline-templates/`](../../tooling/pipeline-templates/).
+remote-state key. No active workflow accepts static AWS credentials. The
+separate [terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines)
+repository provides reusable quality, plan, apply, drift, and release workflows
+for other repositories; consumers pin its release commit.
 
 ## Workflow map
 
@@ -24,6 +25,7 @@ workflow templates are source-only under
 | `sandbox-delivery-iam-{plan,apply,drift}.yml` | PR/manual; manual apply; weekday schedule/manual drift | Sandbox delivery IAM plan/apply/drift roles | Operates only the Terraform-owned OIDC provider, roles, and policies. |
 | `sandbox-network-{plan,apply,drift}.yml` | PR/manual; manual apply; weekday schedule/manual drift | Sandbox network plan/apply/drift roles | Operates only the isolated sandbox network root. |
 | `sandbox-platform-{plan,apply,drift}.yml` | PR/manual; manual apply; weekday schedule/manual drift | Sandbox platform plan/apply/drift roles | Operates only the private ECS/Cognito/data platform root. |
+| `sandbox-workload-{plan,apply,drift}.yml` | PR/manual; manual apply; weekday schedule/manual drift | Sandbox workload plan/apply/drift roles | Operates only the private Fargate-service root and has its own remote-state key. |
 
 Each drift workflow uses `terraform plan -detailed-exitcode` and intentionally
 fails when it detects drift. It never changes AWS.

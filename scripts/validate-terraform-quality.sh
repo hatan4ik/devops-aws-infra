@@ -20,7 +20,7 @@ command -v shellcheck >/dev/null 2>&1 || {
 
 while IFS= read -r -d '' shell_file; do
   shellcheck "$shell_file"
-done < <(find scripts tooling -type f -name '*.sh' -print0)
+done < <(find scripts -type f -name '*.sh' -print0)
 
 modules=()
 while IFS= read -r directory; do

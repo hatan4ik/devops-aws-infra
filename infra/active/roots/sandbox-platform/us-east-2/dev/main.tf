@@ -40,6 +40,7 @@ module "sandbox_platform_core" {
   private_subnet_ids      = toset(data.aws_subnets.private.ids)
   private_route_table_ids = toset(data.aws_route_tables.private.ids)
   interface_endpoint_services = toset([
+    "cognito-idp",
     "ecr.api",
     "ecr.dkr",
     "logs",
