@@ -11,7 +11,7 @@ never use a branch such as `main`.
 | Cognito user pools and clients | [aws.modules.cognito](https://github.com/hatan4ik/aws.modules.cognito) | `v0.1.1` | Candidate workload composition and the ECS platform module. |
 | ECS platform foundation | [aws.modules.ecs](https://github.com/hatan4ik/aws.modules.ecs) | `v0.1.2` | Active sandbox-platform root. |
 | Private ECS Fargate services | [aws.modules.ecs-service](https://github.com/hatan4ik/aws.modules.ecs-service) | `v0.1.1` | Active sandbox-workload root; it creates no service until a reviewed `applications` map is supplied. |
-| GitHub OIDC and delivery IAM | [aws.modules.iam](https://github.com/hatan4ik/aws.modules.iam) | `v0.1.7` | Active sandbox-delivery root, including opt-in ECR image publishers and scoped platform-state reads for workloads. |
+| GitHub OIDC and delivery IAM | [aws.modules.iam](https://github.com/hatan4ik/aws.modules.iam) | `v0.1.8` | Active sandbox-delivery root, including opt-in ECR image publishers, scoped platform-state reads, and workload autoscaling target tags. |
 | Deterministic names and canonical tags | [aws.modules.naming](https://github.com/hatan4ik/aws.modules.naming) | `v0.1.0` | Active sandbox-network and sandbox-platform roots. |
 | Customer-managed KMS keys | [aws.modules.ksm](https://github.com/hatan4ik/aws.modules.ksm) | `v0.1.2` | Available for new approved service roots. The repository name is intentionally preserved as supplied. |
 | Route 53 zones and records | [aws.modules.route53](https://github.com/hatan4ik/aws.modules.route53) | `v0.1.2` | Available for an approved DNS root. |
