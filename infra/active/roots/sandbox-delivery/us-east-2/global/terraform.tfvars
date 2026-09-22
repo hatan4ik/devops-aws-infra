@@ -7,7 +7,7 @@ github_oidc_thumbprints = ["ab9d0263244dd0326eb67015705a667e79cfe998"]
 
 image_publishers = {
   "auth-demo" = {
-    github_subject  = "repo:hatan4ik/sandbox-auth-demo:environment:dev"
+    github_subject  = "repo:hatan4ik@12816536/sandbox-auth-demo@1381754132:environment:dev"
     repository_name = "sandbox-platform-dev-application"
   }
 }

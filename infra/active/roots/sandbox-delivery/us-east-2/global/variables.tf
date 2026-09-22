@@ -56,7 +56,7 @@ variable "image_publishers" {
     condition = alltrue([
       for key, publisher in var.image_publishers :
       key == "auth-demo" &&
-      publisher.github_subject == "repo:hatan4ik/sandbox-auth-demo:environment:dev" &&
+      publisher.github_subject == "repo:hatan4ik@12816536/sandbox-auth-demo@1381754132:environment:dev" &&
       publisher.repository_name == "sandbox-platform-dev-application"
     ])
     error_message = "This sandbox root permits only the reviewed sandbox-auth-demo dev publisher and platform ECR repository."
