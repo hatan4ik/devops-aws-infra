@@ -1,17 +1,19 @@
 # Project status and delivery authority
 
-**Status as of 2026-09-22:** the isolated ADR 0018 sandbox network and the ADR
-0019 direct Organizations control plane have been delivered through protected
-GitHub OIDC workflows and verified read-only in AWS. The control plane owns a
-dedicated encrypted state backend, six top-level OUs, two baseline SCPs, and
-12 policy attachments. It has vended **no** account and has not moved an
-existing account. ADR 0021 now supplies the reviewed single-account sandbox
-platform core delivery lane; it is source until its protected GitHub apply and
-read-only verification succeed. ADR 0022 has transferred the sandbox
-OIDC/provider/role/policy ownership into Terraform, and the three historical
-CloudFormation stacks have been retired with retained IAM resources. It is not
-a production, multi-account, or multi-Region platform. Control Tower and
-VPN/BGP remain out of current scope.
+**Status as of 2026-09-22:** the isolated ADR 0018 sandbox network, ADR 0019
+direct Organizations control plane, sandbox delivery identity, and ADR 0021
+single-account sandbox platform core have been delivered through protected
+GitHub OIDC workflows. The latest platform plan reports no change. The platform
+core has private VPC endpoints, an ECS cluster, ECR repository, Cognito user
+pool with optional MFA, a KMS data key and alias, and a DynamoDB session table
+with point-in-time recovery and TTL. It intentionally has no ECS service,
+public ingress, production workload, account vending, multi-account routing,
+or multi-Region failover. The control plane owns a dedicated encrypted state
+backend, six top-level OUs, two baseline SCPs, and 12 policy attachments. It
+has vended **no** account and has not moved an existing account. ADR 0022 has
+transferred the sandbox OIDC/provider/role/policy ownership into Terraform, and
+the three historical CloudFormation stacks have been retired with retained IAM
+resources. Control Tower and VPN/BGP remain out of current scope.
 
 ## Start here
 
@@ -31,10 +33,12 @@ review snapshot, or Terraform directory.
 ## Current delivery decision
 
 **Completed milestones:** the direct Organizations control plane under
-[ADR 0019](adr/0019-direct-organizations-account-vending.md) and the isolated
+[ADR 0019](adr/0019-direct-organizations-account-vending.md), the isolated
 sandbox-network root under [ADR 0018](adr/0018-sandbox-network-gitops-delivery.md),
-plus the Terraform-owned sandbox delivery identity handoff under
-[ADR 0022](adr/0022-terraform-owned-sandbox-delivery-identity.md).
+the Terraform-owned sandbox delivery identity handoff under
+[ADR 0022](adr/0022-terraform-owned-sandbox-delivery-identity.md), and the
+single-account private sandbox platform core under
+[ADR 0021](adr/0021-sandbox-platform-core-gitops-delivery.md).
 The broader legacy-state adoption in
 [ADR 0015](adr/0015-adopt-legacy-state-bootstrap.md) remains independently
 gated. The Organization root is limited to the management account, top-level
@@ -42,16 +46,15 @@ OUs, baseline SCPs, its dedicated state backend, and account records explicitly
 supplied in reviewed tfvars.
 
 ADR 0022 replaces sandbox CloudFormation policy/bootstrap ownership with a
-Terraform-owned identity root. ADR 0019 additionally authorizes the versioned management-account
-CloudFormation control-plane bootstrap and protected Organization GitOps
-workflow. ADR 0021 authorizes a distinct, single-account sandbox platform
-root. No ADR authorizes an unreviewed local Terraform apply, manual state
-change, Control Tower launch, VPN/BGP, member-account baseline, public
-ingress, production, or
-multi-Region deployment without a separately reviewed root and plan. The sole
-historical exception is ADR 0022's explicitly confirmed, short-lived IAM
-Identity Center adoption of its own Terraform state; all later delivery is
-through GitHub OIDC.
+Terraform-owned identity root. ADR 0019 additionally authorizes the versioned
+management-account CloudFormation control-plane bootstrap and protected
+Organization GitOps workflow. ADR 0021 authorizes a distinct, single-account
+sandbox platform root. No ADR authorizes an unreviewed local Terraform apply,
+manual state change, Control Tower launch, VPN/BGP, member-account baseline,
+public ingress, production, or multi-Region deployment without a separately
+reviewed root and plan. A narrowly reviewed platform state recovery included an
+encrypted pre-change backup, active-lock inspection, and zero-taint verification;
+it is not a general local delivery path. Normal delivery is through GitHub OIDC.
 
 ### Sandbox delivery identity handoff record
 
@@ -100,6 +103,25 @@ Read-only AWS inspection after the successful apply confirmed:
 The read-only evidence helper is
 [`scripts/inspect-sandbox-network.sh`](../scripts/inspect-sandbox-network.sh).
 
+### Sandbox-platform reconciliation record
+
+The protected [platform apply](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35732702897)
+reconciled the remaining KMS alias and endpoint security-group rule after its
+least-privilege policy was updated through the sandbox-delivery Terraform root.
+The subsequent ECS-module ownership correction removed conflicting inline and
+standalone security-group ingress management. Its protected
+[platform plan](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35733786879)
+reported **no changes**. The platform's Terraform state recovery, performed
+before the apply, was limited to clearing two confirmed stale taints after an
+encrypted versioned-state backup and active-lock check; no resource was
+destroyed and the final tainted-resource count was zero.
+
+The verified root owns the private interface endpoints, ECS cluster and ECR
+repository, Cognito user pool, KMS data key and alias, and DynamoDB session
+table with point-in-time recovery and TTL. It deliberately does not create an
+ECS task or service, public route, load balancer, customer domain, second
+Region, transit gateway, or VPN.
+
 ### Organization control-plane delivery record
 
 The [protected Organization apply](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35647498501)
@@ -128,6 +150,8 @@ Read-only Organization inventory confirmed:
 | [Versioned module repositories](MODULE-REPOSITORIES.md) | Reusable `aws.modules.*` implementation, released independently and selected by immutable source commit. | A root, an AWS apply record, or permission to upgrade a consumer. |
 | [`docs/`](README.md) | Current decisions, prerequisites, runbooks, and delivery contracts. | Evidence that AWS services are deployed. |
 | [`tooling/pipeline-templates/`](../tooling/pipeline-templates/README.md) | Reviewed reusable workflow source for a future pipeline-repository split. | The active root-specific delivery workflows. |
+| [`bootstrap/`](../bootstrap/README.md) | One-time, reviewed Organization prerequisite template. | An active Terraform root or recurring deployment lane. |
+| [`reference/`](../reference/README.md) | Read-only review inputs retained for traceability. | A dependency of Terraform, workflows, or an apply. |
 | [`archive/prototypes/`](../archive/prototypes/) | Disabled historical modules and roots retained as forensic input. | A deployment path. |
 | [`docs/book/`](book/README.md) | Explanatory design reference. | Status, approval, or implementation authority. |
 | [`docs/reviews/archive/`](reviews/archive/README.md) | Historical point-in-time assessments. | A current backlog or current repository state. |
@@ -135,16 +159,14 @@ Read-only Organization inventory confirmed:
 ## Next milestone and stop conditions
 
 1. Preserve the apply, CloudTrail, dedicated-state, and weekday-drift evidence
-   for the completed sandbox network and Organization control plane.
-2. Deliver and verify ADR 0021's private sandbox platform core through its
-   dedicated GitHub OIDC workflow.
-3. Supply the container image, approved public domain/Route 53 and ACM owner,
+   for the completed sandbox network, Organization control plane, and platform core.
+2. Supply the container image, approved public domain/Route 53 and ACM owner,
    OAuth callback/logout URLs, and Cognito email/SMS ownership before public
    ingress or an ECS service is created.
-4. Add explicit Network, Shared Services, Log Archive, Security/Audit, and
+3. Add explicit Network, Shared Services, Log Archive, Security/Audit, and
    Production account email/owner/OU contracts; then review the account-vending
    plan. Do not infer aliases.
-5. Obtain an enterprise IPAM supernet and route-domain matrix, including a
+4. Obtain an enterprise IPAM supernet and route-domain matrix, including a
    non-overlapping second-Region CIDR, before TGW or multi-Region delivery.
 
 Stop immediately if the backend lock is active, a plan includes resources

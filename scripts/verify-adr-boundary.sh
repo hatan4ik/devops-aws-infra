@@ -97,9 +97,9 @@ if git grep -nF -- "$historical_profile"; then
   fail 'a historical named local credential profile remains in source'
 fi
 
-delivery_workflow=.github/workflows/terraform-apply.yml
+policy_workflow=.github/workflows/terraform-pr.yml
 active_root_context=infra/active/root-context.yaml
-[[ -f "$delivery_workflow" ]] || fail "missing delivery preflight workflow: $delivery_workflow"
+[[ -f "$policy_workflow" ]] || fail "missing GitOps policy workflow: $policy_workflow"
 [[ -f "$active_root_context" ]] || fail "missing active root naming and tag context: $active_root_context"
 grep -Fq 'repository: hatan4ik/devops-aws-infra' "$active_root_context" || fail 'active root context must identify this repository'
 oidc_proof_workflow=.github/workflows/oidc-sandbox-proof.yml

@@ -39,6 +39,9 @@ quality checks initialize with `-backend=false` and never apply.
 | [Module repositories](docs/MODULE-REPOSITORIES.md) | Versioned `aws.modules.*` implementations and exact source commit pins. | Each module has its own quality workflow and semantic release tag. |
 | [`archive/prototypes`](archive/prototypes/) | Disabled predecessor modules and roots, each guarded to fail a normal plan. | Never deploy. |
 | [`archive/cloudformation-sandbox-bootstrap`](archive/cloudformation-sandbox-bootstrap/) | Retired CloudFormation bootstrap evidence. | Never deploy. |
+| [`archive/workflow-preflights`](archive/workflow-preflights/) | Retired generic workflow preflights that intentionally fail. | Never restore to `.github/workflows/`. |
+| [`bootstrap`](bootstrap/README.md) | One-time CloudFormation prerequisite for the Organization root's state and OIDC policies. | Use only under ADR 0019's bootstrap procedure. |
+| [`reference`](reference/README.md) | Read-only external architecture-review material. | Never initialize, plan, apply, or edit as platform code. |
 | [`tooling/pipeline-templates`](tooling/pipeline-templates/README.md) | Reusable workflow templates for a future pipeline-repository split. | Template-only. |
 | [`docs`](docs/README.md) | Status, ADRs, runbooks, architecture, and evidence. | Operating authority. |
 | [`tests`](tests/README.md) | Terraform contract and operational test contracts. | Quality evidence. |
@@ -47,6 +50,7 @@ quality checks initialize with `-backend=false` and never apply.
 
 - [Project status](docs/PROJECT-STATUS.md) — current verified AWS state and next gate.
 - [ADRs](docs/adr/README.md) — architecture and delivery decisions.
+- [GitHub Actions Terraform delivery](docs/runbooks/github-actions-delivery.md) — triggers, root roles, apply gates, and operator procedure.
 - [First delivery slice](docs/delivery/first-delivery-slice.md) — bounded work before platform expansion.
 - [`docs/book/`](docs/book/README.md) — explanatory reference only, not approval authority.
 
