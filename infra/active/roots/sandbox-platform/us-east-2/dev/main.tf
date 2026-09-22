@@ -6,7 +6,8 @@ module "naming" {
   repository      = local.platform_context.repository
   name_components = ["sandbox", "platform", var.environment]
   additional_names = {
-    network = ["sandbox", "network", var.environment]
+    network  = ["sandbox", "network", var.environment]
+    workload = ["sandbox", "workload", var.environment]
   }
   base_tags = tomap(local.platform_context.base_tags)
 }
@@ -32,7 +33,7 @@ resource "terraform_data" "network_contract" {
 }
 
 module "sandbox_platform_core" {
-  source = "git::https://github.com/hatan4ik/aws.modules.ecs.git?ref=ea77826de488780e5fea63f31e0e7dc4da60638e" # v0.1.1
+  source = "git::https://github.com/hatan4ik/aws.modules.ecs.git?ref=878a733843a8fd3b790aa9d5d4e3a7f7810a8efe" # v0.1.2
 
   name                    = module.naming.name_prefix
   vpc_id                  = data.aws_vpc.sandbox.id
@@ -51,6 +52,9 @@ module "sandbox_platform_core" {
   ])
   gateway_endpoint_services = toset(["dynamodb", "s3"])
   log_retention_in_days     = var.log_retention_in_days
+  additional_cloudwatch_log_group_arns = toset([
+    "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/ecs/${module.naming.names.workload}/*",
+  ])
   tags                      = module.naming.tags
 
   depends_on = [terraform_data.network_contract]
