@@ -55,7 +55,7 @@ module "sandbox_platform_core" {
   additional_cloudwatch_log_group_arns = toset([
     "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/ecs/${module.naming.names.workload}/*",
   ])
-  tags                      = module.naming.tags
+  tags = module.naming.tags
 
   depends_on = [terraform_data.network_contract]
 }
