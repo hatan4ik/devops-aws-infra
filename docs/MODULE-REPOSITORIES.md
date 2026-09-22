@@ -9,7 +9,7 @@ never use a branch such as `main`.
 |---|---|---|---|
 | ACM certificates and DNS validation | [aws.modules.acm](https://github.com/hatan4ik/aws.modules.acm) | `v0.1.2` | Available for an approved domain/certificate root. |
 | Cognito user pools and clients | [aws.modules.cognito](https://github.com/hatan4ik/aws.modules.cognito) | `v0.1.1` | Candidate workload composition and the ECS platform module. |
-| ECS platform foundation | [aws.modules.ecs](https://github.com/hatan4ik/aws.modules.ecs) | `v0.1.0` | Active sandbox-platform root. |
+| ECS platform foundation | [aws.modules.ecs](https://github.com/hatan4ik/aws.modules.ecs) | `v0.1.1` | Active sandbox-platform root. |
 | GitHub OIDC and delivery IAM | [aws.modules.iam](https://github.com/hatan4ik/aws.modules.iam) | `v0.1.2` | Active sandbox-delivery root. |
 | Deterministic names and canonical tags | [aws.modules.naming](https://github.com/hatan4ik/aws.modules.naming) | `v0.1.0` | Active sandbox-network and sandbox-platform roots. |
 | Customer-managed KMS keys | [aws.modules.ksm](https://github.com/hatan4ik/aws.modules.ksm) | `v0.1.2` | Available for new approved service roots. The repository name is intentionally preserved as supplied. |
