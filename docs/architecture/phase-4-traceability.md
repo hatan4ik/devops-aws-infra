@@ -1,4 +1,9 @@
-# Phase 4 requirement traceability
+# Phase 4 requirement traceability (historical design snapshot)
+
+> This is a 2026-09-18 design snapshot, not current implementation status.
+> Use [Project status](../PROJECT-STATUS.md), the
+> [repository map](../../README.md#repository-map), and the
+> [module catalog](../MODULE-REPOSITORIES.md) for current truth.
 
 | Brief requirement | Evidence | Status |
 |---|---|---|

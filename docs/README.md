@@ -13,6 +13,8 @@ separates current truth from design reference and historical material.
   inputs and approvals required before any AWS apply.
 - [Runbooks](runbooks/README.md) — controlled operational procedures; a
   runbook is not automatic authorization to execute an AWS change.
+- [GitHub Actions Terraform delivery](runbooks/github-actions-delivery.md) —
+  active workflow ownership, triggers, OIDC roles, and apply gates.
 - [Versioned module repositories](MODULE-REPOSITORIES.md) — the reusable
   `aws.modules.*` implementations, their immutable release commits, and the
   consumer-source rule.

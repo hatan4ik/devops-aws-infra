@@ -3,6 +3,14 @@
 **Status:** Accepted — Phase 4 stakeholder approval recorded 2026-09-18.  
 **Decision date:** 2026-09-18
 
+**Implementation note (2026-09-22):** This ADR records the Phase 4 design
+decision, not the current repository inventory. The delivered topology is
+authoritatively documented by the [repository map](../../README.md#repository-map)
+and [module catalog](../MODULE-REPOSITORIES.md): active root composition stays
+in this GitOps repository and reusable implementations are published as
+versioned `aws.modules.*` repositories. Treat the proposed `<org>` family
+below as historical design reference until a later ADR explicitly revives it.
+
 ## Context
 
 The platform needs clear ownership, independently deployable account/Region/environment roots, reusable Terraform modules, and GitHub controls that make changes auditable. Phase 1–2 references show useful modular patterns but also demonstrate the cost of over-generalizing a module before its interface has stable consumers. The brief requires GitHub, a specific naming convention, and module repositories only where the lifecycle is independent.

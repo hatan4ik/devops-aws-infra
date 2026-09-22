@@ -1,11 +1,16 @@
 # Phase 4 repository and module strategy
 
-**Status:** `hatan4ik/devops-aws-infra` is the selected initial GitOps control
-repository under ADR 0017. It starts as a single repository so the landing-zone
-bootstrap, pipeline controls, canonical Terraform source, and operator
-documentation have one review boundary. A future split remains an option, not
-the current delivery path. ADR 0015 records a single observed legacy state
-bootstrap; it does not establish a deployed application platform.
+**Status:** Historical Phase 4 design baseline, recorded 2026-09-18. It
+predates the implemented repository layout and must not be used as current
+delivery authority. Current source is the [repository map](../../README.md#repository-map),
+the [module catalog](../MODULE-REPOSITORIES.md), and
+[Project status](../PROJECT-STATUS.md). The current implementation keeps
+active root composition here under `infra/active/` and publishes reusable
+implementations as versioned `aws.modules.*` repositories.
+
+The future split options below remain design reference only. ADR 0015 records
+a legacy state-bootstrap adoption boundary; it does not describe the current
+sandbox platform delivery state.
 
 ## Naming contract
 
