@@ -9,10 +9,58 @@ to deploy the future multi-account/multi-Region architecture; those roots stay
 candidate-only until separately approved.
 
 The current sandbox has a private VPC, flow logs, private AWS endpoints, ECR,
-ECS cluster, Cognito user pool, KMS data key, DynamoDB session table, and
-dedicated Terraform state paths. No application task, ECS service, public
-ingress, customer domain, OAuth client, or second Region exists until its
-reviewed workload change is approved.
+an ECS cluster, Cognito user pool/client, KMS data key, DynamoDB session table,
+and dedicated Terraform state paths. `auth-demo` is the first private workload
+composition. A service is considered operational only after its protected
+workload apply and post-apply ECS stability check have succeeded; source or a
+partially applied resource is never deployment evidence.
+
+## Discussion quick reference
+
+| Topic | Reference answer |
+|---|---|
+| What owns AWS? | Only roots in [`infra/active/`](../../infra/README.md), executed by protected GitHub Actions. Reusable logic lives in independently released `aws.modules.*` repositories and is pinned by full commit SHA. |
+| Human and CI identity | Humans inspect through IAM Identity Center profiles. GitHub uses environment-scoped, short-lived OIDC roles—never static AWS keys. |
+| Current private baseline | One `10.64.0.0/16` VPC, two private subnets in `us-east-2a/b`, Flow Logs, S3/DynamoDB gateway endpoints, STS/SSM/Secrets Manager/ECR/CloudWatch Logs/Cognito interface endpoints, ECR, ECS, Cognito, KMS, and DynamoDB. |
+| How an application is delivered | App repository builds an immutable ECR digest through its own OIDC publisher role. A reviewed `applications` map in the workload root supplies that digest, size, health check, autoscaling, private network contract, and optional Cognito client. |
+| How to prove it works | Required evidence is a green protected apply, ECS service `runningCount == desiredCount`, a passing task/container health check, CloudWatch logs, then a no-change plan or drift result. |
+| What is deliberately absent | No public task IPs, internet gateway, NAT, public ALB/API, Route 53 customer domain, WAF, Transit Gateway, VPN/BGP, Control Tower landing zone, second Region, or production claim. |
+
+## Setup and repeatable delivery order
+
+1. Complete the one-time access prerequisites in
+   [AWS access bootstrap](../runbooks/bootstrap-aws-access.md) and
+   [GitHub OIDC bootstrap](../runbooks/github-oidc-bootstrap.md). Human access
+   uses `AWS-hatan4ik-sandbox`; GitHub environment variables contain only
+   root-specific role ARNs, never credentials.
+2. Apply the roots in dependency order: `sandbox-delivery-iam`,
+   `sandbox-network`, `sandbox-platform`, publish the application image, then
+   `sandbox-workload`. Each root has an isolated state key and an apply role.
+3. For every change, modify Terraform/module pins or the typed app map, open a
+   PR, and review the root plan and quality checks. Merge only a clean plan.
+4. Dispatch the matching `*-apply.yml` workflow from protected `main` with
+   `confirm=apply`. The workflow re-plans `main` under OIDC before applying.
+5. Run the root plan or drift workflow after apply and retain its evidence. Use
+   the workload runbook for service health and rollback; use a prior immutable
+   image digest for application rollback.
+
+Common GitHub CLI dispatches, after merge and plan review:
+
+```bash
+gh workflow run sandbox-delivery-iam-apply.yml --ref main -f confirm=apply
+gh workflow run sandbox-network-apply.yml --ref main -f confirm=apply
+gh workflow run sandbox-platform-apply.yml --ref main -f confirm=apply
+gh workflow run sandbox-workload-apply.yml --ref main -f confirm=apply
+```
+
+Read-only live checks use the sandbox SSO profile:
+
+```bash
+aws sts get-caller-identity --profile AWS-hatan4ik-sandbox
+aws ecs describe-services --cluster sandbox-platform-dev-cluster \
+  --services sandbox-workload-dev-auth-demo --region us-east-2 \
+  --profile AWS-hatan4ik-sandbox
+```
 
 ## Operators and responsibilities
 
@@ -84,9 +132,9 @@ changes that diverge from Terraform.
 ## Current boundaries and next gates
 
 The sandbox is not production or multi-Region. It has no account vending,
-Transit Gateway, VPN/BGP, external ingress, Route 53/ACM/WAF, Secrets Manager
-secret, application image, ECS service, Cognito client, multi-Region Cognito
-replica, or public failover. Each requires the approved input and its own
-reviewed plan. The reusable workflow library is published separately at
+Transit Gateway, VPN/BGP, external ingress, Route 53/ACM/WAF, customer-managed
+application secret, multi-Region Cognito replica, or public failover. Each
+requires approved inputs and its own reviewed plan. The reusable workflow
+library is published separately at
 `hatan4ik/terraform-pipelines`; consumers pin its release commit and retain
 their own protected environments and least-privilege OIDC roles.

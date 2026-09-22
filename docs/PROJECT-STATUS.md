@@ -3,19 +3,20 @@
 **Status as of 2026-09-22:** the isolated ADR 0018 sandbox network, ADR 0019
 direct Organizations control plane, sandbox delivery identity, and ADR 0021
 single-account sandbox platform core have been delivered through protected
-GitHub OIDC workflows. The latest platform and workload reconciliation plans
-report no change. The platform core has private VPC endpoints, an ECS cluster,
-ECR repository, Cognito user pool with optional MFA, a KMS data key and alias,
-and a DynamoDB session table with point-in-time recovery and TTL. Its private
-workload delivery state is initialized but its `applications` map is empty, so
-it intentionally has no ECS service, public ingress, production workload,
-account vending, multi-account routing, or multi-Region failover. The control
-plane owns a dedicated encrypted state backend, six top-level OUs, two baseline
-SCPs, and 12 policy attachments. It has vended **no** account and has not moved
-an existing account. ADR 0022 has transferred the sandbox
-OIDC/provider/role/policy ownership into Terraform, and the three historical
-CloudFormation stacks have been retired with retained IAM resources. Control
-Tower and VPN/BGP remain out of current scope.
+GitHub OIDC workflows. The live baseline includes a private VPC and endpoints,
+an ECS cluster, immutable ECR repository, Cognito user pool/client, KMS data
+key, DynamoDB session table, and dedicated state keys. The first private
+`auth-demo` workload has a Terraform-owned service, task definition, roles,
+security group, encrypted log group, and immutable ECR image. It is not called
+operational until the protected workload reconciliation completes and ECS
+reports healthy tasks at the desired count. There is no public ingress,
+production workload, account vending, multi-account routing, Transit Gateway,
+VPN/BGP, or multi-Region failover. The control plane owns a dedicated encrypted
+state backend, six top-level OUs, two baseline SCPs, and 12 policy attachments.
+It has vended **no** account and has not moved an existing account. ADR 0022
+has transferred sandbox OIDC/provider/role/policy ownership into Terraform, and
+the three historical CloudFormation stacks have been retired with retained IAM
+resources. Control Tower remains out of current scope.
 
 ## Start here
 
@@ -58,12 +59,12 @@ reviewed root and plan. A narrowly reviewed platform state recovery included an
 encrypted pre-change backup, active-lock inspection, and zero-taint verification;
 it is not a general local delivery path. Normal delivery is through GitHub OIDC.
 
-The private `sandbox-workload` root, delivery-IAM policy release, protected role
-variables, dedicated remote state, and plan/apply/drift workflows are active.
-The current committed `applications = {}` map creates no task, service, OAuth
-client, public endpoint, or customer data resource. An application owner must
-still supply an immutable image digest and typed runtime contract before a
-private Fargate service is introduced.
+The private `sandbox-workload` root, delivery-IAM policy releases, protected
+role variables, dedicated remote state, and plan/apply/drift workflows are
+active. Its reviewed `auth-demo` entry supplies an immutable image digest,
+private task contract, health check, CPU target tracking from two to twelve
+tasks, and a Cognito authorization-code client limited to a local HTTPS callback.
+It creates neither a public endpoint nor a customer authentication journey.
 
 ### Sandbox delivery identity handoff record
 
@@ -125,17 +126,18 @@ before the apply, was limited to clearing two confirmed stale taints after an
 encrypted versioned-state backup and active-lock check; no resource was
 destroyed and the final tainted-resource count was zero.
 
-The verified root owns the private interface endpoints, ECS cluster and ECR
-repository, Cognito user pool, KMS data key and alias, and DynamoDB session
-table with point-in-time recovery and TTL. It deliberately does not create an
-ECS task or service, public route, load balancer, customer domain, second
-Region, transit gateway, or VPN.
+The verified platform root owns the private interface endpoints, ECS cluster
+and ECR repository, Cognito user pool, KMS data key and alias, and DynamoDB
+session table with point-in-time recovery and TTL. ECS tasks and services are
+intentionally owned by the separate `sandbox-workload` root. Neither root
+creates a public route, load balancer, customer domain, second Region, transit
+gateway, or VPN.
 
 The protected [Cognito endpoint apply](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35740951565)
 created the private `cognito-idp` interface endpoint required by no-NAT
 workloads. The protected [workload apply](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35741133187)
-initialized the separate workload state and recorded only its Terraform
-contract; the application map remains empty. The post-apply
+initialized the separate workload state and recorded only its then-empty
+Terraform contract. The cited post-apply
 [platform reconciliation plan](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35741234693)
 and [workload reconciliation plan](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35741238997)
 both reported **no changes**.
@@ -177,12 +179,11 @@ Read-only Organization inventory confirmed:
 
 ## Next milestone and stop conditions
 
-1. Preserve the apply, CloudTrail, dedicated-state, and weekday-drift evidence
-   for the completed sandbox network, Organization control plane, platform
-   core, and workload delivery lane.
-2. Supply the container image, approved public domain/Route 53 and ACM owner,
-   OAuth callback/logout URLs, and Cognito email/SMS ownership before public
-   ingress or an ECS service is created.
+1. Complete the protected workload reconciliation and record ECS stability,
+   container health, log evidence, and a no-change workload plan before calling
+   `auth-demo` operational.
+2. Supply an approved public domain/Route 53 and ACM owner, OAuth
+   callback/logout URLs, and Cognito email/SMS ownership before public ingress.
 3. Add explicit Network, Shared Services, Log Archive, Security/Audit, and
    Production account email/owner/OU contracts; then review the account-vending
    plan. Do not infer aliases.

@@ -5,10 +5,11 @@ log_retention_in_days = 365
 
 applications = {
   "auth-demo" = {
-    image_digest  = "448871779014.dkr.ecr.us-east-2.amazonaws.com/sandbox-platform-dev-application@sha256:7237ac7b52235a281d32a2d327016cd8387547c2572bbf962c286536bf38a13d"
-    cpu           = 512
-    memory        = 1024
-    desired_count = 2
+    image_digest         = "448871779014.dkr.ecr.us-east-2.amazonaws.com/sandbox-platform-dev-application@sha256:7237ac7b52235a281d32a2d327016cd8387547c2572bbf962c286536bf38a13d"
+    cpu                  = 512
+    memory               = 1024
+    desired_count        = 2
+    force_new_deployment = true
     autoscaling = {
       min_capacity       = 2
       max_capacity       = 12
@@ -16,7 +17,8 @@ applications = {
     }
     container_port = 8080
     environment = {
-      PORT = "8080"
+      PORT         = "8080"
+      APP_REVISION = "731e18339b14ee1593c9c9eab4c5e001800ba700"
     }
     health_check = {
       command      = ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:8080/healthz').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""]

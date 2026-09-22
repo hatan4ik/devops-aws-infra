@@ -40,10 +40,11 @@ variable "log_retention_in_days" {
 variable "applications" {
   description = "Private Fargate applications keyed by stable service name. Keep empty until an approved immutable image and runtime contract exist."
   type = map(object({
-    image_digest  = string
-    cpu           = number
-    memory        = number
-    desired_count = number
+    image_digest         = string
+    cpu                  = number
+    memory               = number
+    desired_count        = number
+    force_new_deployment = optional(bool, false)
     autoscaling = object({
       min_capacity       = number
       max_capacity       = number
