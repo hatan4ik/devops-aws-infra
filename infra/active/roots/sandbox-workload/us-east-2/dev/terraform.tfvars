@@ -17,7 +17,8 @@ applications = {
     }
     container_port = 8080
     environment = {
-      PORT = "8080"
+      PORT         = "8080"
+      APP_REVISION = "731e18339b14ee1593c9c9eab4c5e001800ba700"
     }
     health_check = {
       command      = ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:8080/healthz').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""]

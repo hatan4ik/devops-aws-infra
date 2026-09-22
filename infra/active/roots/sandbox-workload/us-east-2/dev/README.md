@@ -15,6 +15,8 @@ customer authentication journey.
 The reviewed service composition requests one Terraform-managed fresh ECS
 deployment after the private task-egress ordering fix. It remains private and
 does not introduce NAT, an internet gateway, or public task IPs.
+The immutable application source revision is injected as `APP_REVISION`, so a
+reviewed source revision also produces a declarative ECS rollout.
 
 The root discovers the VPC, two private subnets, ECS cluster, KMS data key, and
 session table through scoped AWS data sources. It reads only the non-secret
