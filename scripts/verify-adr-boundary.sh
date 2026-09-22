@@ -98,7 +98,10 @@ if git grep -nF -- "$historical_profile"; then
 fi
 
 delivery_workflow=.github/workflows/terraform-apply.yml
+active_root_context=infra/active/root-context.yaml
 [[ -f "$delivery_workflow" ]] || fail "missing delivery preflight workflow: $delivery_workflow"
+[[ -f "$active_root_context" ]] || fail "missing active root naming and tag context: $active_root_context"
+grep -Fq 'repository: hatan4ik/devops-aws-infra' "$active_root_context" || fail 'active root context must identify this repository'
 oidc_proof_workflow=.github/workflows/oidc-sandbox-proof.yml
 sandbox_network_plan_workflow=.github/workflows/sandbox-network-plan.yml
 sandbox_network_apply_workflow=.github/workflows/sandbox-network-apply.yml
@@ -229,5 +232,12 @@ grep -Fq 'only executable Terraform delivery tree' README.md || fail 'root READM
 if find infra -type f \( -name '*.tfstate' -o -name '*.tfstate.*' -o -name '*.tfplan' -o -name 'required_permissions.txt' \) -print -quit | grep -q .; then
   fail 'canonical Terraform tree contains a state, plan, or ad hoc permission artifact'
 fi
+
+for naming_root in \
+  infra/active/roots/sandbox-network/us-east-2/dev \
+  infra/active/roots/sandbox-platform/us-east-2/dev; do
+  grep -Eq 'aws\.modules\.naming\.git\?ref=v[0-9]+\.[0-9]+\.[0-9]+' "$naming_root/main.tf" || fail "active root does not use a versioned naming module: $naming_root"
+  grep -Fq 'module.naming.tags' "$naming_root/providers.tf" || fail "active root does not apply canonical provider tags: $naming_root"
+done
 
 printf 'PASS: ADR and Terraform delivery boundary\n'

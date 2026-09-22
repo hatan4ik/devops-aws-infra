@@ -10,6 +10,7 @@ Git URL pinned to an immutable release tag; never use a branch such as `main`.
 | Cognito user pools and clients | [aws.modules.cognito](https://github.com/hatan4ik/aws.modules.cognito) | `v0.1.1` | Candidate workload composition and the ECS platform module. |
 | ECS platform foundation | [aws.modules.ecs](https://github.com/hatan4ik/aws.modules.ecs) | `v0.1.0` | Active sandbox-platform root. |
 | GitHub OIDC and delivery IAM | [aws.modules.iam](https://github.com/hatan4ik/aws.modules.iam) | `v0.1.1` | Active sandbox-delivery root. |
+| Deterministic names and canonical tags | [aws.modules.naming](https://github.com/hatan4ik/aws.modules.naming) | `v0.1.0` | Active sandbox-network and sandbox-platform roots. |
 | Customer-managed KMS keys | [aws.modules.ksm](https://github.com/hatan4ik/aws.modules.ksm) | `v0.1.2` | Available for new approved service roots. The repository name is intentionally preserved as supplied. |
 | Route 53 zones and records | [aws.modules.route53](https://github.com/hatan4ik/aws.modules.route53) | `v0.1.2` | Available for an approved DNS root. |
 | Private encrypted S3 buckets | [aws.modules.s3](https://github.com/hatan4ik/aws.modules.s3) | `v0.1.2` | Available for new approved data roots. |
@@ -35,6 +36,10 @@ module "workload_vpc" {
 An upstream change does nothing until a reviewed pull request updates the tag
 in the consuming root. That review is the upgrade boundary and preserves a
 reproducible Terraform plan.
+
+The naming module derives deterministic names and canonical tags from reviewed
+static context. It does not discover account IDs, backend coordinates, or OIDC
+trust values: those are explicit root security and bootstrap contracts.
 
 ## Deliberate boundaries
 

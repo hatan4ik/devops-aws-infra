@@ -1,8 +1,3 @@
 locals {
-  default_tags = merge(tomap(var.tags), {
-    Environment = var.environment
-    ManagedBy   = "terraform"
-    Repository  = "hatan4ik/devops-aws-infra"
-    Root        = "sandbox-platform"
-  })
+  platform_context = yamldecode(file("${path.root}/../../../../root-context.yaml"))
 }

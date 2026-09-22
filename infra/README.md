@@ -30,6 +30,9 @@ workflow, and reviewed plan.
   `terraform.tfvars.example` files are placeholders, not deployable values.
   The four active roots are the narrow exception: their reviewed, non-secret
   account/Region/CIDR contracts are versioned for their GitHub workflows.
+- `active/root-context.yaml` is the reviewed, non-secret repository and
+  allocation-tag context shared by active roots. It derives names and tags;
+  it does not replace account, Region, backend, or OIDC trust boundaries.
 - Provider credentials are short-lived GitHub OIDC credentials. Modules do not
   contain provider blocks, AWS credentials, account IDs, or remote-state data
   sources.
@@ -40,6 +43,7 @@ workflow, and reviewed plan.
 
 ```text
 active/roots/         Four roots referenced by root GitHub Actions workflows.
+active/root-context.yaml  Shared static naming and tagging context for active roots.
 candidates/modules/   Future root-composition modules only; implementations are external.
 candidates/roots/     Future foundation, regional network, and workload roots.
 ```

@@ -1,32 +1,14 @@
-data "aws_vpc" "sandbox" {
-  filter {
-    name   = "tag:Name"
-    values = [var.network_name]
-  }
-}
+module "naming" {
+  source = "git::https://github.com/hatan4ik/aws.modules.naming.git?ref=v0.1.0"
 
-data "aws_subnets" "private" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.sandbox.id]
+  environment     = var.environment
+  root            = "sandbox-platform"
+  repository      = local.platform_context.repository
+  name_components = ["sandbox", "platform", var.environment]
+  additional_names = {
+    network = ["sandbox", "network", var.environment]
   }
-
-  filter {
-    name   = "tag:Tier"
-    values = ["private"]
-  }
-}
-
-data "aws_route_tables" "private" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.sandbox.id]
-  }
-
-  filter {
-    name   = "tag:Tier"
-    values = ["private"]
-  }
+  base_tags = tomap(local.platform_context.base_tags)
 }
 
 resource "terraform_data" "network_contract" {
@@ -52,7 +34,7 @@ resource "terraform_data" "network_contract" {
 module "sandbox_platform_core" {
   source = "git::https://github.com/hatan4ik/aws.modules.ecs.git?ref=v0.1.0"
 
-  name                    = var.platform_name
+  name                    = module.naming.name_prefix
   vpc_id                  = data.aws_vpc.sandbox.id
   vpc_cidr                = data.aws_vpc.sandbox.cidr_block
   private_subnet_ids      = toset(data.aws_subnets.private.ids)
@@ -68,7 +50,7 @@ module "sandbox_platform_core" {
   ])
   gateway_endpoint_services = toset(["dynamodb", "s3"])
   log_retention_in_days     = var.log_retention_in_days
-  tags                      = local.default_tags
+  tags                      = module.naming.tags
 
   depends_on = [terraform_data.network_contract]
 }

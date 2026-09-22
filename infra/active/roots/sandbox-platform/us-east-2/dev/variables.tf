@@ -31,35 +31,8 @@ variable "environment" {
   }
 }
 
-variable "network_name" {
-  description = "Name tag of the already deployed sandbox VPC."
-  type        = string
-  nullable    = false
-
-  validation {
-    condition     = var.network_name == "sandbox-network-dev"
-    error_message = "This root consumes only the approved sandbox-network-dev VPC."
-  }
-}
-
-variable "platform_name" {
-  description = "Stable resource prefix for the sandbox platform core."
-  type        = string
-  nullable    = false
-}
-
 variable "log_retention_in_days" {
   description = "CloudWatch application log retention."
   type        = number
   nullable    = false
-}
-
-variable "tags" {
-  description = "Required ownership and cost-allocation tags."
-  type = object({
-    Application = string
-    CostCenter  = string
-    Owner       = string
-  })
-  nullable = false
 }

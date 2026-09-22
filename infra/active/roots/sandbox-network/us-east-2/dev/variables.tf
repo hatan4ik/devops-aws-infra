@@ -31,12 +31,6 @@ variable "environment" {
   }
 }
 
-variable "network_name" {
-  description = "Stable resource prefix for the sandbox VPC."
-  type        = string
-  nullable    = false
-}
-
 variable "vpc_cidr" {
   description = "Approved sandbox VPC CIDR."
   type        = string
@@ -65,29 +59,4 @@ variable "flow_log_retention_in_days" {
   type        = number
   default     = 365
   nullable    = false
-}
-
-variable "tags" {
-  description = "Required ownership and cost-allocation tags. All keys are mandatory; values must be non-empty strings."
-  type = object({
-    Application = string
-    CostCenter  = string
-    Owner       = string
-  })
-  nullable = false
-
-  validation {
-    condition     = length(trimspace(var.tags.Application)) > 0
-    error_message = "tags.Application must be a non-empty string."
-  }
-
-  validation {
-    condition     = length(trimspace(var.tags.CostCenter)) > 0
-    error_message = "tags.CostCenter must be a non-empty string."
-  }
-
-  validation {
-    condition     = length(trimspace(var.tags.Owner)) > 0
-    error_message = "tags.Owner must be a non-empty string."
-  }
 }
