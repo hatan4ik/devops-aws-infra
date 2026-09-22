@@ -63,8 +63,13 @@ deleted; the archive remains evidence only. The protected
 [OIDC plan](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35661197443)
 reported **no changes**, and the protected
 [detailed-exitcode drift run](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35661534659)
-also reported no change. The active state is the encrypted object at
-`gitops/sandbox-delivery/us-east-2/global/terraform.tfstate`.
+also reported no change. After the backend KMS correction, the latest protected
+[OIDC plan](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35663753243)
+again reported **no changes**, and the latest protected
+[detailed-exitcode drift run](https://github.com/hatan4ik/devops-aws-infra/actions/runs/35663756348)
+also reported no change. The active state is a versioned, customer-KMS-encrypted
+object at `gitops/sandbox-delivery/us-east-2/global/terraform.tfstate`; its
+prior SSE-S3 version remains preserved.
 
 ### Sandbox-network reconciliation record
 
