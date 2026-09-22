@@ -16,7 +16,9 @@ Point to real files — don't describe from memory.
 **Key point to make early:**
 - The repo is the single source of truth. Nothing is applied outside of it.
 - Every decision is recorded as an ADR in `docs/adr/`.
-- The only active delivery scope right now is one isolated VPC in a sandbox account.
+- The verified delivered scopes are the isolated sandbox VPC and the limited
+  Organizations control plane; [Project status](PROJECT-STATUS.md) is the
+  authority for the current boundary.
 
 **Show:** `README.md` → repository map table.
 
@@ -52,7 +54,7 @@ Point to real files — don't describe from memory.
 
 ```
 Human (SSO session)
-  → Terraform: terraform/roots/sandbox-delivery/us-east-2/global
+  → Terraform: infra/active/roots/sandbox-delivery/us-east-2/global
       → Creates IAM OIDC provider
       → Creates 4 roles: plan, apply, drift, landing-zone
           → All start with ZERO permissions (permissionless)
@@ -62,7 +64,7 @@ Human (SSO session)
           → apply role: exact EC2/KMS/IAM/logs actions, scoped by resource tag
 ```
 
-**Show:** `terraform/modules/internal/sandbox-delivery-iam/`
+**Show:** [`aws.modules.iam`](https://github.com/hatan4ik/aws.modules.iam/tree/v0.1.1)
 - Point to `ManageOnlyTheSandboxNetworkVpcResources` — exact EC2 actions, no wildcards
 - Point to `CreateDedicatedSandboxNetworkFlowLogKey` — condition on `aws:RequestTag/Root`
 - Point to the IAM role resource scoped to `sandbox-network-dev-vpc-flow-logs` only
@@ -113,14 +115,14 @@ artifact. Apply requires a separate human dispatch in a protected environment.
 
 ### Module layer
 ```
-terraform/modules/
-  internal/sandbox-network/    ← composition module for this root
-  terraform-aws-vpc-workload/  ← reusable workload VPC module
-  terraform-aws-tgw-hub/
-  terraform-aws-cognito-userpool/
+infra/
+  active/modules/internal/sandbox-network/       ← composition module for this root
+  active/modules/terraform-aws-cognito-userpool/ ← Cognito module used by the active platform root
+  candidates/modules/terraform-aws-vpc-workload/ ← future reusable workload VPC module
+  candidates/modules/terraform-aws-tgw-hub/      ← future TGW module
 ```
 
-**Show:** `terraform/modules/internal/sandbox-network/main.tf`
+**Show:** [`aws.modules.vpc`](https://github.com/hatan4ik/aws.modules.vpc/tree/v0.1.1)
 - VPC with `enable_dns_hostnames`, `enable_dns_support`
 - `aws_vpc_encryption_control` set to `enforce` — all traffic in the VPC is encrypted
 - `aws_default_security_group` with empty ingress/egress — deny-all by default
@@ -129,7 +131,7 @@ terraform/modules/
 - KMS key with rotation enabled, scoped policy for CloudWatch Logs
 - Flow logs → CloudWatch → encrypted with that KMS key, 365-day retention
 
-**Show:** `terraform/modules/terraform-aws-vpc-workload/variables.tf`
+**Show:** [`aws.modules.vpc/modules/workload`](https://github.com/hatan4ik/aws.modules.vpc/tree/v0.1.1/modules/workload)
 - `type = any` is banned — every variable is typed
 - `object({})` with `optional()` fields
 - `validation` blocks enforce values at plan time, not apply time
@@ -137,7 +139,7 @@ terraform/modules/
 
 ### Root layer
 ```
-terraform/roots/sandbox-network/us-east-2/dev/
+infra/active/roots/sandbox-network/us-east-2/dev/
   main.tf        ← module call only
   variables.tf   ← typed, validated inputs
   locals.tf      ← default_tags computed once

@@ -1,8 +1,8 @@
 # Chapter 6 — Terraform Module Catalog
 
-**Status:** Locally validated · No AWS resources created  
+**Status:** Architecture reference; current delivery status is in [Project status](../PROJECT-STATUS.md).
 **ADR:** [0010](../adr/0010-repository-and-module-topology.md)  
-**Source:** [`terraform/`](../../terraform/)
+**Source:** [`infra/`](../../infra/README.md) — candidates are source-only; Cognito also has an active sandbox-platform module.
 
 ---
 
@@ -75,7 +75,7 @@ flowchart TD
 | `tgw_attachment_subnet_ids` | Dedicated TGW attachment subnet IDs |
 | `endpoint_security_group_id` | Security group for VPC endpoints |
 
-**Test:** `terraform/modules/terraform-aws-vpc-workload/tests/vpc_workload.tftest.hcl` — provider mocks, `command = plan`, no AWS credentials.
+**Test:** [`aws.modules.vpc` workload test](https://github.com/hatan4ik/aws.modules.vpc/tree/v0.1.1/modules/workload/tests) — provider mocks, `command = plan`, no AWS credentials.
 
 ---
 
@@ -98,7 +98,7 @@ flowchart TD
 | `route_table_ids` | Map of route-table name → ID |
 | `ram_share_arn` | RAM resource share ARN |
 
-**Test:** `terraform/modules/terraform-aws-tgw-hub/tests/tgw_hub.tftest.hcl`
+**Test:** [`aws.modules.tgw` test](https://github.com/hatan4ik/aws.modules.tgw/tree/v0.1.1/tests)
 
 ---
 
@@ -117,7 +117,7 @@ flowchart TD
 
 **MRR block:** `enable_mrr = true` is accepted as input but the resource is gated behind a `precondition` that fails until the Terraform AWS provider exposes the required resource. Do not substitute CLI/console steps.
 
-**Test:** `terraform/modules/terraform-aws-cognito-userpool/tests/cognito_userpool.tftest.hcl`
+**Test:** [`aws.modules.cognito` test](https://github.com/hatan4ik/aws.modules.cognito/tree/v0.1.1/tests)
 
 ---
 
@@ -126,7 +126,7 @@ flowchart TD
 Every root represents exactly one `(account, Region, environment)` tuple. Roots contain only provider, backend, variable, and module-call composition — no bare AWS resources.
 
 ```
-terraform/roots/
+infra/candidates/roots/
   foundation/
     region-a/shared/          # State backend bootstrap — isolated procedure
   network/

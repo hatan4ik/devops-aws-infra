@@ -46,13 +46,13 @@ flowchart TD
 
 | Test file | Module | What it validates |
 |---|---|---|
-| `terraform/modules/terraform-aws-vpc-workload/tests/vpc_workload.tftest.hcl` | vpc-workload | VPC, subnet, endpoint, flow-log resource plan with provider mocks |
-| `terraform/modules/terraform-aws-tgw-hub/tests/tgw_hub.tftest.hcl` | tgw-hub | TGW, route tables, RAM share, attachment plan with provider mocks |
-| `terraform/modules/terraform-aws-cognito-userpool/tests/cognito_userpool.tftest.hcl` | cognito-userpool | User pool, custom domain, KMS, MRR block plan with provider mocks |
+| `aws.modules.vpc@v0.1.1//modules/workload/tests` | vpc-workload | VPC, subnet, endpoint, flow-log resource plan with provider mocks |
+| `aws.modules.tgw@v0.1.1/tests` | tgw-hub | TGW, route tables, RAM share, attachment plan with provider mocks |
+| `aws.modules.cognito@v0.1.1/tests` | cognito-userpool | User pool, custom domain, KMS, MRR block plan with provider mocks |
 
 **Execution:** `terraform test` from each module directory. Requires Terraform ≥ 1.7.0. Uses `command = plan` — no AWS resources created, no credentials required.
 
-**Static policy:** Checkov and Trivy run against all `terraform/` source. HIGH or CRITICAL findings fail the pipeline with no soft-fail. Suppressions require an approved, expiring, justified entry.
+**Static policy:** Checkov and Trivy run against all `infra/` source. HIGH or CRITICAL findings fail the pipeline with no soft-fail. Suppressions require an approved, expiring, justified entry.
 
 ---
 

@@ -11,7 +11,7 @@ Terraform plans must be reviewable, applies must be gated, state access must be 
 
 1. Store static AWS credentials in repository or organization secrets and let one workflow role plan, apply, release, and remediate drift.
 2. Use one broad OIDC administrator role with automatic applies and automatic drift remediation after any successful plan.
-3. Use SHA-pinned reusable workflows; no-credential quality checks; separate least-privilege OIDC roles for plan, apply, and drift; protected GitHub environments for execution; plan/cost-diff review; signed immutable module tags; and drift jobs that report/fail but never change AWS.
+3. Use SHA-pinned reusable workflows and module sources; no-credential quality checks; separate least-privilege OIDC roles for plan, apply, and drift; protected GitHub environments for execution; plan/cost-diff review; signed immutable module release tags; and drift jobs that report/fail but never change AWS.
 
 ## Quorum review
 
@@ -27,7 +27,7 @@ Terraform plans must be reviewable, applies must be gated, state access must be 
 
 ## Decision
 
-Adopt option 3 and the workflow contracts in [`automation/terraform-pipelines`](../../automation/terraform-pipelines/). Quality uses no AWS identity. A plan uses a plan-only role and produces an Infracost base/head diff; an apply re-plans only after a protected `dev`, `staging`, or `prod` environment grants approval; drift uses a read-only role and exits non-zero when it detects a difference. Module releases verify a signed semantic-version tag before publishing release notes.
+Adopt option 3 and the workflow contracts in [`tooling/pipeline-templates`](../../tooling/pipeline-templates/). Quality uses no AWS identity. A plan uses a plan-only role and produces an Infracost base/head diff; an apply re-plans only after a protected `dev`, `staging`, or `prod` environment grants approval; drift uses a read-only role and exits non-zero when it detects a difference. Module releases verify a signed semantic-version tag before publishing release notes.
 
 Every third-party action is pinned to a reviewed full commit SHA. No workflow prints, uploads, caches, or commits backend configuration or Terraform plan files. The backend configuration is ephemeral runner input, and all role/back-end/environment values are required caller configuration rather than defaults.
 

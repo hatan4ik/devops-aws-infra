@@ -1,6 +1,9 @@
 # First delivery slice: foundation readiness and isolated sandbox-network delivery
 
-**Status:** selected delivery sequence; execution gated.
+> **Historical sequencing document:** This records the original first-delivery
+> proposal. It is not current AWS status or standing execution authority. Read
+> [Project status](../PROJECT-STATUS.md) for delivered roots, verified AWS
+> evidence, and the next approved gate.
 
 ## Objective
 
@@ -16,7 +19,7 @@ production identity, data-plane, or multi-Region traffic deployment.
    [external verification checklist](../architecture/external-verification.md).
    Assign accountable owners and attach the evidence to one change record.
 2. **Adopt the legacy state bootstrap.** Use the transitional
-   [`bootstrap-state`](../../terraform/roots/foundation/region-a/bootstrap-state/)
+   [`bootstrap-state`](../../infra/candidates/roots/foundation/region-a/bootstrap-state/)
    root and the [adoption runbook](../runbooks/adopt-legacy-state-backend.md)
    only after its state backup, inactive-lock, no-resource-change-plan,
    specialist-approval, and cost-owner gates are met. This is a state-address

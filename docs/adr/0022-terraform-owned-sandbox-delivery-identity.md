@@ -19,7 +19,7 @@ unnecessary and harms repeatability.
 
 ## Decision
 
-1. [`terraform/roots/sandbox-delivery/us-east-2/global`](../../terraform/roots/sandbox-delivery/us-east-2/global)
+1. [`infra/active/roots/sandbox-delivery/us-east-2/global`](../../infra/active/roots/sandbox-delivery/us-east-2/global)
    is the sole sandbox owner of the GitHub OIDC provider, six GitHub roles,
    four existing sandbox network/platform delivery policies, and all their
    role attachments.

@@ -17,7 +17,7 @@ would leave no application foundation running.
 ## Decision
 
 1. Create a separate Terraform root at
-   [`terraform/roots/sandbox-platform/us-east-2/dev`](../../terraform/roots/sandbox-platform/us-east-2/dev).
+   [`infra/active/roots/sandbox-platform/us-east-2/dev`](../../infra/active/roots/sandbox-platform/us-east-2/dev).
    It is pinned to sandbox account `448871779014` in `us-east-2` and owns only
    `gitops/sandbox-platform/us-east-2/dev/terraform.tfstate`.
 2. The root consumes, but does not recreate or change the CIDR of,

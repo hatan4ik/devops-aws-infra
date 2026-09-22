@@ -43,18 +43,18 @@ superseded_adrs=(
 )
 
 prototype_roots=(
-  roots/shared-services/us-east-2/prod
-  roots/workload-app/us-east-2/dev
-  roots/workload-app/us-east-2/staging
-  roots/workload-app/us-east-2/prod
+  archive/prototypes/roots/shared-services/us-east-2/prod
+  archive/prototypes/roots/workload-app/us-east-2/dev
+  archive/prototypes/roots/workload-app/us-east-2/staging
+  archive/prototypes/roots/workload-app/us-east-2/prod
 )
 
 prototype_modules=(
-  modules/aws-cloudfront-alb
-  modules/aws-cognito-auth
-  modules/aws-ecs-fargate
-  modules/aws-tf-state-backend
-  modules/aws-vpc-workload
+  archive/prototypes/modules/aws-cloudfront-alb
+  archive/prototypes/modules/aws-cognito-auth
+  archive/prototypes/modules/aws-ecs-fargate
+  archive/prototypes/modules/aws-tf-state-backend
+  archive/prototypes/modules/aws-vpc-workload
 )
 
 fail() {
@@ -83,11 +83,11 @@ for module in "${prototype_modules[@]}"; do
   grep -Fq 'terraform.workspace != terraform.workspace' "$guard" || fail "prototype guard does not fail plans: $guard"
 done
 
-if grep -R -nE --include='*.tf' 'backend[[:space:]]+"s3"|profile[[:space:]]*=' roots; then
+if grep -R -nE --include='*.tf' 'backend[[:space:]]+"s3"|profile[[:space:]]*=' archive/prototypes/roots; then
   fail 'disabled prototype roots must not configure an S3 backend or local profile'
 fi
 
-if grep -R -nE --include='*.tf' 'provider[[:space:]]+"aws"' roots; then
+if grep -R -nE --include='*.tf' 'provider[[:space:]]+"aws"' archive/prototypes/roots; then
   fail 'disabled prototype roots must not configure an AWS provider'
 fi
 
@@ -98,7 +98,10 @@ if git grep -nF -- "$historical_profile"; then
 fi
 
 delivery_workflow=.github/workflows/terraform-apply.yml
+active_root_context=infra/active/root-context.yaml
 [[ -f "$delivery_workflow" ]] || fail "missing delivery preflight workflow: $delivery_workflow"
+[[ -f "$active_root_context" ]] || fail "missing active root naming and tag context: $active_root_context"
+grep -Fq 'repository: hatan4ik/devops-aws-infra' "$active_root_context" || fail 'active root context must identify this repository'
 oidc_proof_workflow=.github/workflows/oidc-sandbox-proof.yml
 sandbox_network_plan_workflow=.github/workflows/sandbox-network-plan.yml
 sandbox_network_apply_workflow=.github/workflows/sandbox-network-apply.yml
@@ -220,14 +223,25 @@ if grep -R -nE --include='*.yml' --include='*.yaml' '[0-9]{12}' .github/workflow
   fail 'root workflows must not contain a hard-coded AWS account identifier'
 fi
 
-grep -Fq 'only candidate Terraform delivery tree' README.md || fail 'root README does not identify the canonical Terraform tree'
+grep -Fq 'only executable Terraform delivery tree' README.md || fail 'root README does not identify the canonical Terraform tree'
 
 # Canonical source must not carry mutable plans, state, or ad hoc IAM
 # permission artefacts. The disabled prototype is deliberately not scanned:
 # ADR 0015 retains its historical state artefacts until the approved
 # declarative migration evidence permits quarantine or removal.
-if find terraform -type f \( -name '*.tfstate' -o -name '*.tfstate.*' -o -name '*.tfplan' -o -name 'required_permissions.txt' \) -print -quit | grep -q .; then
+if find infra -type f \( -name '*.tfstate' -o -name '*.tfstate.*' -o -name '*.tfplan' -o -name 'required_permissions.txt' \) -print -quit | grep -q .; then
   fail 'canonical Terraform tree contains a state, plan, or ad hoc permission artifact'
 fi
+
+for naming_root in \
+  infra/active/roots/sandbox-network/us-east-2/dev \
+  infra/active/roots/sandbox-platform/us-east-2/dev; do
+  grep -Eq 'aws\.modules\.naming\.git\?ref=[0-9a-f]{40}' "$naming_root/main.tf" || fail "active root does not use an immutable naming module commit: $naming_root"
+  grep -Fq 'module.naming.tags' "$naming_root/providers.tf" || fail "active root does not apply canonical provider tags: $naming_root"
+done
+
+while IFS= read -r module_source; do
+  [[ "$module_source" =~ \?ref=[0-9a-f]{40}\" ]] || fail "external module source is not pinned to a full commit SHA: $module_source"
+done < <(git grep -nE 'source[[:space:]]*=[[:space:]]*"git::https://github\.com/hatan4ik/aws\.modules\.' -- infra)
 
 printf 'PASS: ADR and Terraform delivery boundary\n'

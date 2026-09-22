@@ -56,7 +56,7 @@ jobs:
       - name: Lint GitHub Actions workflows
         run: |
           set -euo pipefail
-          actionlint .github/workflows/*.yml automation/terraform-pipelines/.github/workflows/*.yml
+          actionlint .github/workflows/*.yml tooling/pipeline-templates/.github/workflows/*.yml
 
       - name: Validate Terraform modules and roots without cloud credentials
         run: scripts/validate-terraform-quality.sh
@@ -64,7 +64,7 @@ jobs:
       - name: Run Checkov policy checks
         uses: bridgecrewio/checkov-action@444c9db6fa75e2d9c19ebf1fde7322089be9009e # pinned upstream commit
         with:
-          directory: terraform
+          directory: infra
           framework: terraform
           quiet: true
           soft_fail: false
@@ -74,28 +74,25 @@ jobs:
         uses: aquasecurity/trivy-action@d2a0b60797ff03db6132bd4e2b293f9b37081297 # pinned upstream commit
         with:
           scan-type: config
-          scan-ref: terraform
+          scan-ref: infra
           hide-progress: true
           severity: HIGH,CRITICAL
           exit-code: "1"
 
-      - name: Verify generated Terraform documentation
+      - name: Verify generated candidate-composition Terraform documentation
         uses: terraform-docs/gh-actions@6de6da0cefcc6b4b7a5cbea4d79d97060733093c # v1.4.1
         with:
-          find-dir: terraform/modules
+          working-dir: infra/candidates/modules/internal/network-regional,infra/candidates/modules/internal/workload-regional
           output-file: README.md
           output-method: inject
-          fail-on-diff: "false"
+          fail-on-diff: "true"
           git-push: "false"
-
-      - name: Fail on generated Terraform documentation drift
-        run: git diff HEAD --exit-code -- terraform/modules
 
       - name: Verify reusable-pipeline source boundaries
         run: |
           set -euo pipefail
-          automation/terraform-pipelines/scripts/check-action-pins.sh .github/workflows
-          cd automation/terraform-pipelines
+          tooling/pipeline-templates/scripts/check-action-pins.sh .github/workflows
+          cd tooling/pipeline-templates
           ruby scripts/validate-workflows.rb
           ruby scripts/check-reusable-contracts.rb
           scripts/check-action-pins.sh .github/workflows

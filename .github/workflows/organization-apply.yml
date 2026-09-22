@@ -24,7 +24,7 @@ jobs:
     environment: landing-zone
     defaults:
       run:
-        working-directory: terraform/roots/organization/global
+        working-directory: infra/active/roots/organization/global
     steps:
       - name: Check out protected main source
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0

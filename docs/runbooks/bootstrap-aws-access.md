@@ -84,7 +84,7 @@ for the specific root. Store no AWS access key in GitHub secrets.
 Record the role ARN, target account, GitHub environment, required reviewers,
 and plan/apply separation in the target repository’s protected-environment
 configuration. The reusable workflow source is under
-[`automation/terraform-pipelines`](../../automation/terraform-pipelines/);
+[`tooling/pipeline-templates`](../../tooling/pipeline-templates/);
 it is not an enabled deployment path in this repository.
 
 ## Preflight

@@ -4,7 +4,7 @@ These checks are intentionally divided by safety boundary. Module tests run with
 
 | Layer | Evidence | When it runs | Mutation boundary |
 |---|---|---|---|
-| Module contract | `terraform/modules/**/tests/*.tftest.hcl` | Pull request and release | Provider mocks with `command = plan`; no AWS credentials. |
+| Module contract | Each versioned `aws.modules.*` repository | Pull request and release | Provider mocks with `command = plan`; no AWS credentials. |
 | Static infrastructure policy | Checkov and Trivy in `terraform-quality.yml` | Pull request | Source-only scan; HIGH/CRITICAL findings fail. |
 | Network/hybrid deployment | [`post_deploy/verify_network_read_only.sh`](post_deploy/verify_network_read_only.sh) | Approved post-deployment and game day | AWS CLI `Describe`/`Get` read calls only. |
 | Security baseline deployment | [`post_deploy/verify_security_read_only.sh`](post_deploy/verify_security_read_only.sh) | Approved post-deployment and daily operations | AWS CLI read calls only; fails on active HIGH/CRITICAL Security Hub findings. |

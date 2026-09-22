@@ -22,7 +22,7 @@ review snapshot, or Terraform directory.
 |---|---|
 | What is true now and what happens next? | This status document |
 | Which architecture decision controls a change? | [ADR index](adr/README.md) |
-| Which Terraform tree may become delivery source? | [`terraform/`](../terraform/README.md) only |
+| Which Terraform tree may be executed by GitHub? | [`infra/active/`](../infra/README.md) only |
 | What is the first bounded delivery slice? | [First delivery slice](delivery/first-delivery-slice.md) |
 | What evidence is required before an AWS apply? | [External verification checklist](architecture/external-verification.md) |
 | How is the selected legacy backend adopted safely? | [Adoption runbook](runbooks/adopt-legacy-state-backend.md) |
@@ -123,10 +123,12 @@ Read-only Organization inventory confirmed:
 
 | Lane | Role | Do not treat it as |
 |---|---|---|
-| [`terraform/`](../terraform/README.md) | Candidate canonical Terraform delivery source; ADRs 0018 and 0019 are its initialized-backend exceptions. | Proof that any AWS resource exists before the GitHub run evidence. |
+| [`infra/active/`](../infra/README.md) | The only Terraform source referenced by root GitHub delivery workflows. | Proof that a workflow has run or an AWS resource exists. |
+| [`infra/candidates/`](../infra/README.md#candidates) | Future foundation, network, TGW, and workload source. | A deployment path. |
+| [Versioned module repositories](MODULE-REPOSITORIES.md) | Reusable `aws.modules.*` implementation, released independently and selected by immutable source commit. | A root, an AWS apply record, or permission to upgrade a consumer. |
 | [`docs/`](README.md) | Current decisions, prerequisites, runbooks, and delivery contracts. | Evidence that AWS services are deployed. |
-| [`automation/terraform-pipelines/`](../automation/terraform-pipelines/README.md) | Reviewed reusable workflow source for future roots. | The active ADR 0018 and ADR 0019 root-specific delivery workflows. |
-| Root [`modules/`](../modules/README.md) and [`roots/`](../roots/README.md) | Disabled historical prototypes retained as forensic input. | A deployment path. |
+| [`tooling/pipeline-templates/`](../tooling/pipeline-templates/README.md) | Reviewed reusable workflow source for a future pipeline-repository split. | The active root-specific delivery workflows. |
+| [`archive/prototypes/`](../archive/prototypes/) | Disabled historical modules and roots retained as forensic input. | A deployment path. |
 | [`docs/book/`](book/README.md) | Explanatory design reference. | Status, approval, or implementation authority. |
 | [`docs/reviews/archive/`](reviews/archive/README.md) | Historical point-in-time assessments. | A current backlog or current repository state. |
 

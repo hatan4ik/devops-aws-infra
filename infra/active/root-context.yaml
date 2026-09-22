@@ -1,0 +1,7 @@
+# Reviewed non-secret platform context shared by active roots. This file is
+# static source, not a substitute for a Terraform backend or account boundary.
+repository: hatan4ik/devops-aws-infra
+base_tags:
+  Application: platform
+  CostCenter: platform-bootstrap
+  Owner: hatan4ik

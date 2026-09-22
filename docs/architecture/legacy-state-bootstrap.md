@@ -2,7 +2,7 @@
 
 **Status:** Adoption selected 2026-09-19; canonical state-address migration pending.
 **Scope:** A legacy bootstrap in `us-east-2`; it is represented by the
-transitional canonical [`bootstrap-state` root](../../terraform/roots/foundation/region-a/bootstrap-state/),
+transitional candidate [`bootstrap-state` root](../../infra/candidates/roots/foundation/region-a/bootstrap-state/),
 but the remote Terraform state has not yet been re-addressed.
 
 ## Confirmed resources

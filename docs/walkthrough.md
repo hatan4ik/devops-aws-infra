@@ -6,11 +6,11 @@
 
 ## Current status
 
-No canonical Terraform plan or apply is authorized from this repository. The
-source contains no cloud credentials or committed state. A legacy state
-bootstrap is represented by a transitional canonical root, but its remote
-state-address migration is still gated; see the verified
-[legacy state bootstrap inventory](architecture/legacy-state-bootstrap.md).
+For verified AWS state and the next approved action, use
+[Project status](PROJECT-STATUS.md). This walkthrough is explanatory material;
+the only executable Terraform source is `infra/active/`, and it can run only
+through its named protected GitHub OIDC workflows. `infra/candidates/` remains
+source-only.
 
 The previous walkthrough in this location described an `us-east-2` prototype,
 an authenticated local profile, and a completed state migration. The prototype
@@ -25,10 +25,10 @@ plan; the adoption source and its explicit state-migration gate are defined by
 1. Complete the [external verification checklist](architecture/external-verification.md), including selected Regions, account structure, CIDRs/ASNs, state retention, KMS ownership, quotas, DNS, and cost approval.
 2. Establish human access with IAM Identity Center and CI access with an
    environment-scoped GitHub OIDC role; see the [AWS access bootstrap runbook](runbooks/bootstrap-aws-access.md).
-3. Use the candidate source under [`terraform/`](../terraform/README.md), not
-   the disabled root-level prototypes. Configure a backend only through an
-   approved environment-specific delivery repository and its protected
-   workflow.
+3. Use [`infra/active/`](../infra/README.md) only through its named delivery
+   workflows. Treat [`infra/candidates/`](../infra/README.md#candidates) as
+   non-executable future source and never use
+   [`archive/prototypes/`](../archive/prototypes/) as a deployment path.
 4. Review a credentialed plan with the authoritative backend and real,
    approved inputs. Preserve a state backup and obtain the required change
    approval before any apply.

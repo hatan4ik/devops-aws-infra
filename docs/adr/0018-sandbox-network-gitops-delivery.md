@@ -20,7 +20,7 @@ creation would violate the delivery boundary.
 ## Decision
 
 1. The canonical root is
-   [`terraform/roots/sandbox-network/us-east-2/dev`](../../terraform/roots/sandbox-network/us-east-2/dev).
+   [`infra/active/roots/sandbox-network/us-east-2/dev`](../../infra/active/roots/sandbox-network/us-east-2/dev).
    Its immutable, dedicated S3 state key is
    `gitops/sandbox-network/us-east-2/dev/terraform.tfstate`.
 2. The root is pinned to sandbox account `448871779014`, Region `us-east-2`,

@@ -13,6 +13,9 @@ separates current truth from design reference and historical material.
   inputs and approvals required before any AWS apply.
 - [Runbooks](runbooks/README.md) — controlled operational procedures; a
   runbook is not automatic authorization to execute an AWS change.
+- [Versioned module repositories](MODULE-REPOSITORIES.md) — the reusable
+  `aws.modules.*` implementations, their immutable release commits, and the
+  consumer-source rule.
 
 ## Reference and history
 

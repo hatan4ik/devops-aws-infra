@@ -9,10 +9,10 @@ The repository contains two independently written ADR series that reuse ADR
 numbers 0001 through 0009. Both series were marked Accepted, but they reach
 opposite decisions on account vending, public ingress, workload egress,
 identity replication, observability ownership, and repository topology. A
-second Terraform tree at the repository root (`modules/` and `roots/`) follows
-the later series and contains configured S3 backends, a named local credential
-profile, public-NAT topology, and CloudFront-origin failover semantics that do
-not match the reviewed platform design under `terraform/`.
+archived Terraform tree under `archive/prototypes/` contains configured S3
+backends, a named local credential profile, public-NAT topology, and
+CloudFront-origin failover semantics that do not match the reviewed platform
+source under `infra/`.
 
 This makes an ADR citation ambiguous and risks an operator applying a prototype
 instead of the reviewed platform source.
@@ -28,16 +28,17 @@ instead of the reviewed platform source.
    `0004-identity-provider.md`, `0005-egress-inspection.md`,
    `0006-edge-ingress.md`, `0007-fine-grained-auth.md`,
    `0008-observability.md`, and `0009-repository-strategy.md`.
-3. Only [`terraform/`](../../terraform/README.md) is a candidate Terraform
-   delivery tree. It is backend-disabled, credential-free source and still
-   requires the documented approval and preflight process before any AWS plan
-   or apply.
-4. The root-level `modules/` and `roots/` trees are disabled prototypes. They
+3. [`infra/active/`](../../infra/README.md) is the only executable Terraform
+   delivery tree. [`infra/candidates/`](../../infra/README.md#candidates) is
+   source-only and still requires the documented approval and preflight process
+   before a root can receive an AWS plan or apply workflow.
+4. The [`archive/prototypes/`](../../archive/prototypes/) trees are disabled prototypes. They
    are not a module registry, are not a deployment path, and must fail a normal
    Terraform plan. Their configured remote backend and named-profile settings
    are removed.
 5. A future change may promote a prototype only by first adding or amending an
-   authoritative ADR, moving or re-implementing it in `terraform/`, adding the
+   authoritative ADR, moving or re-implementing it in `infra/candidates/` or
+   `infra/active/`, adding the
    applicable quality/security coverage, and obtaining the normal review and
    delivery approvals.
 
