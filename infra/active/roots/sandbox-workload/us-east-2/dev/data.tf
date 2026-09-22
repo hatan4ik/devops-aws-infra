@@ -33,6 +33,16 @@ data "aws_dynamodb_table" "session" {
   name = "${module.naming.names.platform}-session"
 }
 
+data "terraform_remote_state" "platform" {
+  backend = "s3"
+
+  config = {
+    bucket = local.platform_context.terraform_state.sandbox_platform.bucket
+    key    = local.platform_context.terraform_state.sandbox_platform.key
+    region = local.platform_context.terraform_state.sandbox_platform.region
+  }
+}
+
 check "approved_sandbox_workload_context" {
   assert {
     condition     = data.aws_caller_identity.current.account_id == var.aws_account_id

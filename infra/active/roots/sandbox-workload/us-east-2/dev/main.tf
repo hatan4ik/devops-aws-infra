@@ -13,7 +13,7 @@ module "naming" {
 }
 
 module "sandbox_workload" {
-  source = "git::https://github.com/hatan4ik/aws.modules.ecs-service.git?ref=5cfbc10026bf6a5b2d271f336718efe959b697a2" # v0.1.0
+  source = "git::https://github.com/hatan4ik/aws.modules.ecs-service.git?ref=10815d652a59460ff8919ea4235adcd0f6567c88" # v0.1.1
 
   name                         = module.naming.name_prefix
   cluster_arn                  = data.aws_ecs_cluster.platform.arn
@@ -23,7 +23,7 @@ module "sandbox_workload" {
   private_subnet_ids           = toset(data.aws_subnets.private.ids)
   application_data_kms_key_arn = data.aws_kms_alias.application_data.target_key_arn
   log_retention_in_days        = var.log_retention_in_days
-  cognito_user_pool_id         = var.cognito_user_pool_id
+  cognito_user_pool_id         = data.terraform_remote_state.platform.outputs.application.user_pool.id
   session_table_arn            = data.aws_dynamodb_table.session.arn
   applications                 = var.applications
   tags                         = module.naming.tags

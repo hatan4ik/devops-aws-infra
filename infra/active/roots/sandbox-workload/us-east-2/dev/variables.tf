@@ -37,13 +37,6 @@ variable "log_retention_in_days" {
   nullable    = false
 }
 
-variable "cognito_user_pool_id" {
-  description = "Existing Cognito user-pool ID, supplied only when an application needs a public OAuth client."
-  type        = string
-  default     = null
-  nullable    = true
-}
-
 variable "applications" {
   description = "Private Fargate applications keyed by stable service name. Keep empty until an approved immutable image and runtime contract exist."
   type = map(object({
