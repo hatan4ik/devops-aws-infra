@@ -1,5 +1,5 @@
 module "naming" {
-  source = "git::https://github.com/hatan4ik/aws.modules.naming.git?ref=v0.1.0"
+  source = "git::https://github.com/hatan4ik/aws.modules.naming.git?ref=c0fa6b65f35b1a3c11f64959a753af6bfe8e256e" # v0.1.0
 
   environment     = var.environment
   root            = "sandbox-network"
@@ -9,7 +9,7 @@ module "naming" {
 }
 
 module "sandbox_network" {
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=v0.1.1"
+  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=abaaa401a45f3e3587d0e072c667b79a2ed9cf34" # v0.1.1
 
   name                       = module.naming.name_prefix
   vpc_cidr                   = var.vpc_cidr

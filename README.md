@@ -13,7 +13,7 @@ still blocked.
 ## One executable path
 
 ```text
-.github/workflows/  ->  infra/active/roots/  ->  aws.modules.*@immutable-tag
+.github/workflows/  ->  infra/active/roots/  ->  aws.modules.*@immutable-commit
 ```
 
 `infra/active` is the only executable Terraform delivery tree. Only the four
@@ -36,7 +36,7 @@ quality checks initialize with `-backend=false` and never apply.
 |---|---|---|
 | [`infra/active`](infra/README.md) | Current roots that call versioned external modules. | Executable only through its named GitHub workflows. |
 | [`infra/candidates`](infra/README.md#candidates) | Future root composition that calls versioned external modules. | Source-only; no root workflow may run it. |
-| [Module repositories](docs/MODULE-REPOSITORIES.md) | Versioned `aws.modules.*` implementations and exact source tags. | Each module has its own quality workflow and release tag. |
+| [Module repositories](docs/MODULE-REPOSITORIES.md) | Versioned `aws.modules.*` implementations and exact source commit pins. | Each module has its own quality workflow and semantic release tag. |
 | [`archive/prototypes`](archive/prototypes/) | Disabled predecessor modules and roots, each guarded to fail a normal plan. | Never deploy. |
 | [`archive/cloudformation-sandbox-bootstrap`](archive/cloudformation-sandbox-bootstrap/) | Retired CloudFormation bootstrap evidence. | Never deploy. |
 | [`tooling/pipeline-templates`](tooling/pipeline-templates/README.md) | Reusable workflow templates for a future pipeline-repository split. | Template-only. |

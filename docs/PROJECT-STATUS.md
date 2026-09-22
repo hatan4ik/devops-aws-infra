@@ -125,7 +125,7 @@ Read-only Organization inventory confirmed:
 |---|---|---|
 | [`infra/active/`](../infra/README.md) | The only Terraform source referenced by root GitHub delivery workflows. | Proof that a workflow has run or an AWS resource exists. |
 | [`infra/candidates/`](../infra/README.md#candidates) | Future foundation, network, TGW, and workload source. | A deployment path. |
-| [Versioned module repositories](MODULE-REPOSITORIES.md) | Reusable `aws.modules.*` implementation, released independently and selected by immutable source tag. | A root, an AWS apply record, or permission to upgrade a consumer. |
+| [Versioned module repositories](MODULE-REPOSITORIES.md) | Reusable `aws.modules.*` implementation, released independently and selected by immutable source commit. | A root, an AWS apply record, or permission to upgrade a consumer. |
 | [`docs/`](README.md) | Current decisions, prerequisites, runbooks, and delivery contracts. | Evidence that AWS services are deployed. |
 | [`tooling/pipeline-templates/`](../tooling/pipeline-templates/README.md) | Reviewed reusable workflow source for a future pipeline-repository split. | The active root-specific delivery workflows. |
 | [`archive/prototypes/`](../archive/prototypes/) | Disabled historical modules and roots retained as forensic input. | A deployment path. |

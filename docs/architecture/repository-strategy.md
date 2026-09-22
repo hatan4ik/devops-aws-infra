@@ -88,7 +88,7 @@ Dev, staging, and prod use identical directory and module-call structure. Promot
 ## Versioning, dependencies, and module graduation
 
 - Every module repository uses semantic version tags (`vMAJOR.MINOR.PATCH`), signed and protected against deletion or overwrite. Breaking interface changes require a new major version, migration instructions, and a consumer compatibility test.
-- Root repositories pin module references to immutable release tags (and, after Phase 6, pin third-party actions to immutable commit SHAs). Floating module branches, `latest`, and mutable action tags are prohibited.
+- Root repositories pin module references to the full commit SHA resolved from an immutable release tag (and pin third-party actions to immutable commit SHAs). Floating module branches, `latest`, and mutable action tags are prohibited.
 - A new reusable module requires evidence of the A-18 threshold, a single-responsibility README, typed input/output contract, examples, `terraform test`, semantic-version plan, owners, and an ADR showing why a local module is no longer sufficient.
 - A module is deprecated with a documented successor, migration guide, supported-version window, and consumer inventory. It is not deleted while supported roots still consume it.
 

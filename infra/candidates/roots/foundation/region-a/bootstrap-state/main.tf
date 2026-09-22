@@ -1,5 +1,5 @@
 module "legacy_state_backend" {
-  source = "git::https://github.com/hatan4ik/aws.modules.state.git//modules/legacy-adoption?ref=v0.1.0"
+  source = "git::https://github.com/hatan4ik/aws.modules.state.git//modules/legacy-adoption?ref=521f222211adb727d04f9dd6ff1fa4896e4b5719" # v0.1.0
 
   bucket_name         = var.bucket_name
   dynamodb_table_name = var.dynamodb_table_name

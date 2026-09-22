@@ -2,7 +2,8 @@
 
 Reusable Terraform implementation lives in a dedicated GitHub repository. This
 repository contains roots and composition only. Every Terraform `source` is a
-Git URL pinned to an immutable release tag; never use a branch such as `main`.
+Git URL pinned to the full immutable commit SHA resolved from a release tag;
+never use a branch such as `main`.
 
 | Capability | Repository | Current release | Current consumer |
 |---|---|---|---|
@@ -21,20 +22,22 @@ Git URL pinned to an immutable release tag; never use a branch such as `main`.
 
 ## Consumer rule
 
-Use the exact tag released by the upstream module. Examples:
+Use the full commit SHA resolved from the exact upstream release tag. Keep the
+release tag as an inline comment so reviewers can identify the intended
+semantic version. Examples:
 
 ```hcl
 module "network" {
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=v0.1.1"
+  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=abaaa401a45f3e3587d0e072c667b79a2ed9cf34" # v0.1.1
 }
 
 module "workload_vpc" {
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git//modules/workload?ref=v0.1.1"
+  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git//modules/workload?ref=abaaa401a45f3e3587d0e072c667b79a2ed9cf34" # v0.1.1
 }
 ```
 
-An upstream change does nothing until a reviewed pull request updates the tag
-in the consuming root. That review is the upgrade boundary and preserves a
+An upstream change does nothing until a reviewed pull request updates the
+commit pin in the consuming root. That review is the upgrade boundary and preserves a
 reproducible Terraform plan.
 
 The naming module derives deterministic names and canonical tags from reviewed

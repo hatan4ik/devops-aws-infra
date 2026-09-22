@@ -1,5 +1,5 @@
 module "vpc" {
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git//modules/workload?ref=v0.1.1"
+  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git//modules/workload?ref=abaaa401a45f3e3587d0e072c667b79a2ed9cf34" # v0.1.1
 
   name                       = var.workload_name
   ipv4_ipam_pool_id          = var.vpc.ipv4_ipam_pool_id
@@ -15,7 +15,7 @@ module "vpc" {
 module "cognito_primary" {
   for_each = var.identity.mode == "primary" ? { primary = var.identity.user_pool } : {}
 
-  source = "git::https://github.com/hatan4ik/aws.modules.cognito.git?ref=v0.1.1"
+  source = "git::https://github.com/hatan4ik/aws.modules.cognito.git?ref=5d605eff1d5cdabf84b6f525ed56e0057b84152d" # v0.1.1
 
   name                = each.value.name
   feature_plan        = each.value.feature_plan

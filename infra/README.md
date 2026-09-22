@@ -8,7 +8,7 @@ Read [Project status](../docs/PROJECT-STATUS.md) before using any root.
 
 `active/` is the only executable Terraform delivery tree. The repository's
 root GitHub Actions workflows reference only its four roots. Each reusable
-implementation is an immutable, tag-pinned `aws.modules.*` Git source; this
+implementation is an immutable, commit-pinned `aws.modules.*` Git source; this
 repository deliberately contains no duplicate active module implementation.
 It contains the delivered Organizations and sandbox-network roots plus the
 Terraform-owned delivery IAM and sandbox-platform roots. GitHub OIDC is the

@@ -17,7 +17,7 @@ check "provider_region_binding" {
 }
 
 module "state_backend" {
-  source = "git::https://github.com/hatan4ik/aws.modules.state.git?ref=v0.1.0"
+  source = "git::https://github.com/hatan4ik/aws.modules.state.git?ref=521f222211adb727d04f9dd6ff1fa4896e4b5719" # v0.1.0
 
   providers = {
     aws         = aws

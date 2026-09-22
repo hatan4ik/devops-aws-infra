@@ -11,7 +11,7 @@ Terraform plans must be reviewable, applies must be gated, state access must be 
 
 1. Store static AWS credentials in repository or organization secrets and let one workflow role plan, apply, release, and remediate drift.
 2. Use one broad OIDC administrator role with automatic applies and automatic drift remediation after any successful plan.
-3. Use SHA-pinned reusable workflows; no-credential quality checks; separate least-privilege OIDC roles for plan, apply, and drift; protected GitHub environments for execution; plan/cost-diff review; signed immutable module tags; and drift jobs that report/fail but never change AWS.
+3. Use SHA-pinned reusable workflows and module sources; no-credential quality checks; separate least-privilege OIDC roles for plan, apply, and drift; protected GitHub environments for execution; plan/cost-diff review; signed immutable module release tags; and drift jobs that report/fail but never change AWS.
 
 ## Quorum review
 

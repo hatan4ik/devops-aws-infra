@@ -107,7 +107,7 @@ flowchart TD
 - Tags are created only by the approved release workflow after the full check profile passes
 - Tags are signed, immutable, and protected against deletion or overwrite
 - Breaking interface changes require a new major version, migration instructions, and a consumer compatibility test
-- Root repositories pin module references to immutable release tags — no floating branches or `latest`
+- Root repositories pin module references to the full commit of an immutable release tag — no floating branches or `latest`
 
 ---
 
