@@ -5,6 +5,13 @@ role_prefix             = "devops-aws-infra-sandbox"
 github_subject_prefix   = "repo:hatan4ik@12816536/devops-aws-infra@1375932356"
 github_oidc_thumbprints = ["ab9d0263244dd0326eb67015705a667e79cfe998"]
 
+image_publishers = {
+  "auth-demo" = {
+    github_subject  = "repo:hatan4ik/sandbox-auth-demo:environment:dev"
+    repository_name = "sandbox-platform-dev-application"
+  }
+}
+
 state_backend = {
   bucket_name     = "platform-tf-state-shared-f3ddb8cc"
   key_prefix      = "gitops/sandbox-delivery/us-east-2/global/"
