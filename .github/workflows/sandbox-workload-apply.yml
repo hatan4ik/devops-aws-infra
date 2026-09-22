@@ -68,3 +68,19 @@ jobs:
 
       - name: Apply the reviewed plan exactly once
         run: terraform apply -input=false -lock-timeout=5m tfplan
+
+      - name: Verify private ECS services reach a stable deployment
+        run: |
+          set -euo pipefail
+          mapfile -t services < <(terraform output -json services | jq -r 'to_entries[] | .value.name')
+          if [[ "${#services[@]}" -eq 0 ]]; then
+            exit 0
+          fi
+          aws ecs wait services-stable \
+            --cluster "$(terraform output -raw cluster_name)" \
+            --services "${services[@]}"
+          aws ecs describe-services \
+            --cluster "$(terraform output -raw cluster_name)" \
+            --services "${services[@]}" \
+            --query 'services[].{Name:serviceName,Desired:desiredCount,Running:runningCount,Deployments:deployments[].rolloutState}' \
+            --output table

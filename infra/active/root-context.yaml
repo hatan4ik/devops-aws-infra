@@ -5,3 +5,8 @@ base_tags:
   Application: platform
   CostCenter: platform-bootstrap
   Owner: hatan4ik
+terraform_state:
+  sandbox_platform:
+    bucket: platform-tf-state-shared-f3ddb8cc
+    key: gitops/sandbox-platform/us-east-2/dev/terraform.tfstate
+    region: us-east-2
