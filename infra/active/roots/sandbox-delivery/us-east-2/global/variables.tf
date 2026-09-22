@@ -43,6 +43,26 @@ variable "github_oidc_thumbprints" {
   nullable    = false
 }
 
+variable "image_publishers" {
+  description = "Dedicated GitHub OIDC image publishers allowed to push only to declared ECR repositories."
+  type = map(object({
+    github_subject  = string
+    repository_name = string
+  }))
+  default  = {}
+  nullable = false
+
+  validation {
+    condition = alltrue([
+      for key, publisher in var.image_publishers :
+      key == "auth-demo" &&
+      publisher.github_subject == "repo:hatan4ik/sandbox-auth-demo:environment:dev" &&
+      publisher.repository_name == "sandbox-platform-dev-application"
+    ])
+    error_message = "This sandbox root permits only the reviewed sandbox-auth-demo dev publisher and platform ECR repository."
+  }
+}
+
 variable "state_backend" {
   description = "Dedicated non-secret state configuration for this Terraform root."
   type = object({
