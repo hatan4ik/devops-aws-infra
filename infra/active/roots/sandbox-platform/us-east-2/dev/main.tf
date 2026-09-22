@@ -32,7 +32,7 @@ resource "terraform_data" "network_contract" {
 }
 
 module "sandbox_platform_core" {
-  source = "git::https://github.com/hatan4ik/aws.modules.ecs.git?ref=c595b15efc024df46ecc74b659277cce311ef42d" # v0.1.0
+  source = "git::https://github.com/hatan4ik/aws.modules.ecs.git?ref=ea77826de488780e5fea63f31e0e7dc4da60638e" # v0.1.1
 
   name                    = module.naming.name_prefix
   vpc_id                  = data.aws_vpc.sandbox.id
