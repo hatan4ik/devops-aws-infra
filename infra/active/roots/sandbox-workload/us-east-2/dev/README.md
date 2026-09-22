@@ -12,6 +12,10 @@ creates a Cognito authorization-code client for the documented local HTTPS
 callback only; it does not add public ingress, a hosted application, or a
 customer authentication journey.
 
+The reviewed service composition requests one Terraform-managed fresh ECS
+deployment after the private task-egress ordering fix. It remains private and
+does not introduce NAT, an internet gateway, or public task IPs.
+
 The root discovers the VPC, two private subnets, ECS cluster, KMS data key, and
 session table through scoped AWS data sources. It reads only the non-secret
 platform output state to obtain the existing Cognito user-pool ID; its delivery
