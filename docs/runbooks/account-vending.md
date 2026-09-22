@@ -14,7 +14,7 @@ the management account, enabling Control Tower, or deploying workloads.
 
 ## Required reviewed inputs
 
-Before editing `terraform/roots/organization/global/terraform.tfvars`, record:
+Before editing `infra/active/roots/organization/global/terraform.tfvars`, record:
 
 1. unique AWS account email and account name;
 2. target OU, business owner, technical owner, cost center, data class, and

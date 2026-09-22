@@ -7,7 +7,7 @@ printf '%s\n' 'This CloudFormation retirement helper is archived. The handoff is
 exit 78
 
 repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd)"
-root_directory="$repository_root/terraform/roots/sandbox-delivery/us-east-2/global"
+root_directory="$repository_root/infra/active/roots/sandbox-delivery/us-east-2/global"
 oidc_template="$repository_root/archive/cloudformation-sandbox-bootstrap/templates/github-oidc.template.yaml"
 network_template="$repository_root/archive/cloudformation-sandbox-bootstrap/templates/sandbox-network-delivery-policy.template.yaml"
 platform_template="$repository_root/archive/cloudformation-sandbox-bootstrap/templates/sandbox-platform-delivery-policy.template.yaml"

@@ -51,7 +51,7 @@ quorum or dissent result for a state mutation.
 
 ## Decision
 
-1. [`terraform/roots/foundation/region-a/bootstrap-state/`](../../terraform/roots/foundation/region-a/bootstrap-state/)
+1. [`infra/candidates/roots/foundation/region-a/bootstrap-state/`](../../infra/candidates/roots/foundation/region-a/bootstrap-state/)
    and its internal module are the sole canonical, transitional source for
    this bootstrap. The root has an empty S3 backend block and receives all
    backend configuration only from an uncommitted, approved runtime file.

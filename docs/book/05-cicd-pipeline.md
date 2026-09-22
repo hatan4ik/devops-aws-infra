@@ -1,8 +1,8 @@
 # Chapter 5 — CI/CD Pipeline Design
 
-**Status:** Stakeholder-approved 2026-09-18 · Pipeline source locally validated — not yet active  
+**Status:** Architecture reference. Current active-root workflow status is in [Project status](../PROJECT-STATUS.md); this chapter describes template source for a future pipeline-repository split.
 **ADRs:** [0012](../adr/0012-oidc-gated-terraform-delivery.md) · [0013](../adr/0013-layered-verification-no-automatic-fault-injection.md)  
-**Source:** [`automation/terraform-pipelines/`](../../automation/terraform-pipelines/)
+**Source:** [`tooling/pipeline-templates/`](../../tooling/pipeline-templates/)
 
 ---
 
@@ -120,13 +120,13 @@ jobs:
   quality:
     uses: <org>/terraform-pipelines/.github/workflows/terraform-quality.yml@<FULL_40_CHAR_SHA>
     with:
-      working_directory: terraform/modules/terraform-aws-vpc-workload
+      working_directory: .
       check_docs: true
 
   plan:
     uses: <org>/terraform-pipelines/.github/workflows/terraform-plan.yml@<FULL_40_CHAR_SHA>
     with:
-      working_directory: terraform/roots/network/region-a/shared
+      working_directory: infra/candidates/roots/network/region-a/shared
       tf_version: "1.7.5"
     secrets:
       backend_config_b64: ${{ secrets.BACKEND_CONFIG_B64 }}
@@ -151,4 +151,4 @@ Before any pipeline receives AWS access:
 5. Dry-run quality workflow first; then sandbox plan with no apply permission; record OIDC subject, CloudTrail events, state-lock behavior, lint/security results, and cost-diff behavior
 6. Only after step 5 passes: enable apply workflow for dev environment
 
-Full remote setup requirements: [automation/terraform-pipelines/README.md](../../automation/terraform-pipelines/README.md)
+Full remote setup requirements: [tooling/pipeline-templates/README.md](../../tooling/pipeline-templates/README.md)

@@ -95,7 +95,7 @@ optional regional cache]
 | [0011](../adr/0011-cognito-mrr-provider-boundary.md) | Do not substitute CLI/console steps for Terraform-managed Cognito MRR; block it pending provider support. |
 | [0012](../adr/0012-oidc-gated-terraform-delivery.md) | Separate OIDC plan/apply/drift roles, protected execution environments, SHA-pinned CI, and no automatic remediation. |
 | [0013](../adr/0013-layered-verification-no-automatic-fault-injection.md) | Layered credential-safe verification; controlled game days rather than automatic disruptive tests. |
-| [0014](../adr/0014-canonical-architecture-and-iac-boundary.md) | One authoritative ADR sequence and `terraform/` as the only candidate delivery tree. |
+| [0014](../adr/0014-canonical-architecture-and-iac-boundary.md) | One authoritative ADR sequence; `infra/active/` is executable, `infra/candidates/` is source-only, and prototypes are archived. |
 | [0015](../adr/0015-adopt-legacy-state-bootstrap.md) | Transitional canonical source for the observed bootstrap; state migration remains explicitly gated. |
 | [0016](../adr/0016-terraform-state-lock-transition.md) | DynamoDB state locking remains until a controlled S3 lockfile transition has evidence and specialist approval. |
 | [0017](../adr/0017-github-oidc-bootstrap-proof.md) | Bootstrap a permissionless GitHub OIDC trust proof before granting Terraform delivery permissions. |

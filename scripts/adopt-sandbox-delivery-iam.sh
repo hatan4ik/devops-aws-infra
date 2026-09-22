@@ -4,7 +4,7 @@
 set -euo pipefail
 
 repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-root_directory="$repository_root/terraform/roots/sandbox-delivery/us-east-2/global"
+root_directory="$repository_root/infra/active/roots/sandbox-delivery/us-east-2/global"
 
 profile="AWS-hatan4ik-sandbox"
 apply=false

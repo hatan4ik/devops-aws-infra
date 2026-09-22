@@ -40,7 +40,7 @@ object key, state content, or credentials.
 
 1. Start from the reviewed Git commit containing ADR 0015; use a clean,
    access-controlled worktree outside any shared directory.
-2. Copy `terraform/roots/foundation/region-a/bootstrap-state/terraform.tfvars.example`
+2. Copy `infra/candidates/roots/foundation/region-a/bootstrap-state/terraform.tfvars.example`
    to an ignored `terraform.tfvars` file and replace **every** placeholder
    from the approved inventory after confirming the STS identity.
 3. Create an uncommitted backend file in an access-controlled location. It
@@ -50,7 +50,7 @@ object key, state content, or credentials.
    UTC timestamp, operator, and change record outside the repository.
 
 ```bash
-root=terraform/roots/foundation/region-a/bootstrap-state
+root=infra/candidates/roots/foundation/region-a/bootstrap-state
 
 terraform -chdir="$root" init \
   -reconfigure \

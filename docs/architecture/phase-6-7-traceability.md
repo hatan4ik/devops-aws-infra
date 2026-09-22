@@ -1,20 +1,17 @@
 # Phase 6–7 delivery and verification traceability
 
-**Status:** The credential-free quality source and root workflow are published in
-`hatan4ik/devops-aws-infra`. Protected `main`, four deployment environments,
-and a sandbox permissionless AWS OIDC proof are live under ADR 0017. No
-Terraform backend, resource-permissioned delivery role, canonical AWS plan,
-apply, or application deployment exists. ADR 0015 records the legacy state
-bootstrap and a source-only adoption path; it is not a deployed application
-platform. “Implemented” means committed source unless this document explicitly
-records remote proof.
+**Status:** Historical Phase 6–7 design snapshot. For verified current AWS
+delivery, use [Project status](../PROJECT-STATUS.md). Root-specific GitHub OIDC
+workflows now exist for the active Organization, sandbox delivery IAM,
+sandbox-network, and sandbox-platform roots; the template source below remains
+for a future pipeline-repository split.
 
 | Brief requirement | Local evidence | Status and remaining gate |
 |---|---|---|
 | CI/CD: Terraform formatting, validation, lint, tests, Checkov, Trivy, and generated-doc checks | [root quality workflow](../../.github/workflows/terraform-quality.yml), module tests, action-pin inventory. | Remote required-check and `main` branch-protection enforcement verified. The workflow itself remains credential-free. |
-| CI/CD: plan review, cost diff, deployment approval gates, no static AWS keys | [`terraform-plan.yml`](../../automation/terraform-pipelines/.github/workflows/terraform-plan.yml), [`terraform-apply.yml`](../../automation/terraform-pipelines/.github/workflows/terraform-apply.yml), [ADR 0012](../adr/0012-oidc-gated-terraform-delivery.md), [ADR 0017](../adr/0017-github-oidc-bootstrap-proof.md). | Environments and sandbox OIDC trust proof are verified. Needs a backend, root-specific least-privilege role policy, environment-scoped backend configuration, and approved non-production plan before activation. |
-| CI/CD: drift detection without automatic remediation | [`terraform-drift.yml`](../../automation/terraform-pipelines/.github/workflows/terraform-drift.yml), [ADR 0012](../adr/0012-oidc-gated-terraform-delivery.md). | Implemented as source. Needs a read-only role, schedule/caller, alert route, and an intentionally introduced sandbox drift test. |
-| CI/CD: module release through signed semantic tags | [`module-release.yml`](../../automation/terraform-pipelines/.github/workflows/module-release.yml), [`module-release-caller.yml`](../../automation/terraform-pipelines/templates/module-release-caller.yml). | Implemented as source. Needs independent module repositories, tag/ruleset protection, signer trust, protected environment, and first approved release. |
+| CI/CD: plan review, cost diff, deployment approval gates, no static AWS keys | [`terraform-plan.yml`](../../tooling/pipeline-templates/.github/workflows/terraform-plan.yml), [`terraform-apply.yml`](../../tooling/pipeline-templates/.github/workflows/terraform-apply.yml), [ADR 0012](../adr/0012-oidc-gated-terraform-delivery.md), [ADR 0017](../adr/0017-github-oidc-bootstrap-proof.md). | Template source for a future pipeline repository; active root workflows are under [`.github/workflows`](../../.github/workflows/). |
+| CI/CD: drift detection without automatic remediation | [`terraform-drift.yml`](../../tooling/pipeline-templates/.github/workflows/terraform-drift.yml), [ADR 0012](../adr/0012-oidc-gated-terraform-delivery.md). | Template source; active root drift workflows report changes and never remediate. |
+| CI/CD: module release through signed semantic tags | [`module-release.yml`](../../tooling/pipeline-templates/.github/workflows/module-release.yml), [`module-release-caller.yml`](../../tooling/pipeline-templates/templates/module-release-caller.yml). | Template source; needs independent module repositories, tag/ruleset protection, signer trust, protected environment, and first approved release. |
 | Action supply chain | [Full SHA inventory](action-pin-inventory.md); all third-party `uses:` in reusable workflows resolve to 40-character commits. | Source uses full commit SHAs and the published repository enforces mandatory SHA pinning. |
 | Account vending / Region expansion / VPN-BGP / failover / emergency access operations | [Runbook index](../runbooks/README.md), [account vending](../runbooks/account-vending.md), [Region](../runbooks/adding-region.md), [hybrid](../runbooks/hybrid-vpn-bgp-onboarding.md), [failover](../runbooks/regional-failover.md), [break-glass](../runbooks/break-glass-access.md). | Documented. Target identifiers, owners, change system, and remote controls remain required. |
 | Network connectivity, VPN/BGP health, endpoints, Flow Logs | [`verify_network_read_only.sh`](../../tests/post_deploy/verify_network_read_only.sh), hybrid onboarding runbook. | Implemented read-only script; cannot run until a target account/Region and approved read role exist. |

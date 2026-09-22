@@ -11,9 +11,9 @@ Only three modules are candidates for independent release after the required
 extraction criteria are satisfied: `terraform-aws-vpc-workload`,
 `terraform-aws-tgw-hub`, and `terraform-aws-cognito-userpool`. The current
 candidate source for them and for internal composition is under
-[`terraform/`](../../terraform/README.md).
+[`infra/candidates/`](../../infra/README.md#candidates).
 
-The root-level `modules/` and `roots/` directories are disabled historical
+The [`archive/prototypes/`](../../archive/prototypes/) directories are disabled historical
 prototypes, not an alternative monorepo topology. Their source must not be
 copied into a target repository or delivery workflow; see
 [ADR 0014](../adr/0014-canonical-architecture-and-iac-boundary.md).

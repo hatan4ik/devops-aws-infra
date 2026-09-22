@@ -43,18 +43,18 @@ superseded_adrs=(
 )
 
 prototype_roots=(
-  roots/shared-services/us-east-2/prod
-  roots/workload-app/us-east-2/dev
-  roots/workload-app/us-east-2/staging
-  roots/workload-app/us-east-2/prod
+  archive/prototypes/roots/shared-services/us-east-2/prod
+  archive/prototypes/roots/workload-app/us-east-2/dev
+  archive/prototypes/roots/workload-app/us-east-2/staging
+  archive/prototypes/roots/workload-app/us-east-2/prod
 )
 
 prototype_modules=(
-  modules/aws-cloudfront-alb
-  modules/aws-cognito-auth
-  modules/aws-ecs-fargate
-  modules/aws-tf-state-backend
-  modules/aws-vpc-workload
+  archive/prototypes/modules/aws-cloudfront-alb
+  archive/prototypes/modules/aws-cognito-auth
+  archive/prototypes/modules/aws-ecs-fargate
+  archive/prototypes/modules/aws-tf-state-backend
+  archive/prototypes/modules/aws-vpc-workload
 )
 
 fail() {
@@ -83,11 +83,11 @@ for module in "${prototype_modules[@]}"; do
   grep -Fq 'terraform.workspace != terraform.workspace' "$guard" || fail "prototype guard does not fail plans: $guard"
 done
 
-if grep -R -nE --include='*.tf' 'backend[[:space:]]+"s3"|profile[[:space:]]*=' roots; then
+if grep -R -nE --include='*.tf' 'backend[[:space:]]+"s3"|profile[[:space:]]*=' archive/prototypes/roots; then
   fail 'disabled prototype roots must not configure an S3 backend or local profile'
 fi
 
-if grep -R -nE --include='*.tf' 'provider[[:space:]]+"aws"' roots; then
+if grep -R -nE --include='*.tf' 'provider[[:space:]]+"aws"' archive/prototypes/roots; then
   fail 'disabled prototype roots must not configure an AWS provider'
 fi
 
@@ -220,13 +220,13 @@ if grep -R -nE --include='*.yml' --include='*.yaml' '[0-9]{12}' .github/workflow
   fail 'root workflows must not contain a hard-coded AWS account identifier'
 fi
 
-grep -Fq 'only candidate Terraform delivery tree' README.md || fail 'root README does not identify the canonical Terraform tree'
+grep -Fq 'only executable Terraform delivery tree' README.md || fail 'root README does not identify the canonical Terraform tree'
 
 # Canonical source must not carry mutable plans, state, or ad hoc IAM
 # permission artefacts. The disabled prototype is deliberately not scanned:
 # ADR 0015 retains its historical state artefacts until the approved
 # declarative migration evidence permits quarantine or removal.
-if find terraform -type f \( -name '*.tfstate' -o -name '*.tfstate.*' -o -name '*.tfplan' -o -name 'required_permissions.txt' \) -print -quit | grep -q .; then
+if find infra -type f \( -name '*.tfstate' -o -name '*.tfstate.*' -o -name '*.tfplan' -o -name 'required_permissions.txt' \) -print -quit | grep -q .; then
   fail 'canonical Terraform tree contains a state, plan, or ad hoc permission artifact'
 fi
 

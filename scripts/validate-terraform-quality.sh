@@ -20,19 +20,19 @@ command -v shellcheck >/dev/null 2>&1 || {
 
 while IFS= read -r -d '' shell_file; do
   shellcheck "$shell_file"
-done < <(find scripts automation -type f -name '*.sh' -print0)
+done < <(find scripts tooling -type f -name '*.sh' -print0)
 
 modules=()
 while IFS= read -r directory; do
   modules+=("$directory")
-done < <(find terraform/modules -name versions.tf -exec dirname {} \; | sort)
+done < <(find infra -type f -path '*/modules/*' -name versions.tf -exec dirname {} \; | sort)
 
 roots=()
 while IFS= read -r directory; do
   roots+=("$directory")
-done < <(find terraform/roots -name main.tf -exec dirname {} \; | sort)
+done < <(find infra -type f -path '*/roots/*' -name main.tf -exec dirname {} \; | sort)
 
-terraform fmt -check -recursive -no-color terraform
+terraform fmt -check -recursive -no-color infra
 
 for directory in "${modules[@]}"; do
   test_file="$directory/tests"
