@@ -1,13 +1,13 @@
-# Terraform pipeline templates — not active CI/CD
+# Archived pipeline-template bootstrap
 
-This directory is the reviewed reusable-workflow source for the initial
-`hatan4ik/devops-aws-infra` GitOps repository under
-[ADR 0017](../../docs/adr/0017-github-oidc-bootstrap-proof.md). It is not an
-active GitHub Actions directory by itself because GitHub discovers workflows
-only in a repository's top-level `.github/workflows/` directory. A future
-pipeline-repository split requires a separate ADR and migration record.
+This directory is historical evidence only. Its source was published as the
+standalone [terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines)
+repository and released as `v0.1.0`. Consumers must use that repository and
+pin its release commit; they must not copy workflows from this archive.
 
-No plan/apply/drift/release workflow from this staging area is active, no AWS identity is configured, and no release can be created from this staging area. The root credential-free Terraform quality workflow validates this source, but copying these reusable workflows to a newly approved pipeline repository and enabling callers remain separate remote-change gates.
+No workflow below is discovered, executed, or validated by the GitOps
+repository. It contains no AWS identity and is retained only to preserve the
+pre-release design and caller-template history.
 
 ## Workflow contracts
 

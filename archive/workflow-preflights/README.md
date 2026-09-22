@@ -9,5 +9,5 @@ intentionally exit nonzero and must not be restored to `.github/workflows/`.
 
 The active workflows are root-specific and live in
 `.github/workflows/{organization,sandbox-delivery-iam,sandbox-network,sandbox-platform}-{plan,apply,drift}.yml`.
-Reusable generic workflow source for a future pipeline repository lives under
-[`tooling/pipeline-templates/`](../../tooling/pipeline-templates/).
+The released reusable workflow source is
+[terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines).

@@ -19,11 +19,8 @@ jobs:
       - name: Validate reusable workflow structure and action pins
         run: |
           set -euo pipefail
-          tooling/pipeline-templates/scripts/check-action-pins.sh .github/workflows
-          cd tooling/pipeline-templates
-          ruby scripts/validate-workflows.rb
-          ruby scripts/check-reusable-contracts.rb
-          scripts/check-action-pins.sh .github/workflows
+          scripts/workflow-policy/check-action-pins.sh .github/workflows
+          ruby scripts/workflow-policy/validate-workflows.rb
 
       - name: Assert the canonical delivery boundary
         run: scripts/verify-adr-boundary.sh

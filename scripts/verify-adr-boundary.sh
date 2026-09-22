@@ -109,6 +109,9 @@ sandbox_network_drift_workflow=.github/workflows/sandbox-network-drift.yml
 sandbox_platform_plan_workflow=.github/workflows/sandbox-platform-plan.yml
 sandbox_platform_apply_workflow=.github/workflows/sandbox-platform-apply.yml
 sandbox_platform_drift_workflow=.github/workflows/sandbox-platform-drift.yml
+sandbox_workload_plan_workflow=.github/workflows/sandbox-workload-plan.yml
+sandbox_workload_apply_workflow=.github/workflows/sandbox-workload-apply.yml
+sandbox_workload_drift_workflow=.github/workflows/sandbox-workload-drift.yml
 sandbox_delivery_iam_plan_workflow=.github/workflows/sandbox-delivery-iam-plan.yml
 sandbox_delivery_iam_apply_workflow=.github/workflows/sandbox-delivery-iam-apply.yml
 sandbox_delivery_iam_drift_workflow=.github/workflows/sandbox-delivery-iam-drift.yml
@@ -120,7 +123,7 @@ if [[ -n "$credentialed_workflows" ]]; then
   while IFS= read -r workflow; do
     [[ -n "$workflow" ]] || continue
     case "$workflow" in
-      "$oidc_proof_workflow"|"$sandbox_network_plan_workflow"|"$sandbox_network_apply_workflow"|"$sandbox_network_drift_workflow"|"$sandbox_platform_plan_workflow"|"$sandbox_platform_apply_workflow"|"$sandbox_platform_drift_workflow"|"$sandbox_delivery_iam_plan_workflow"|"$sandbox_delivery_iam_apply_workflow"|"$sandbox_delivery_iam_drift_workflow"|"$organization_plan_workflow"|"$organization_apply_workflow"|"$organization_drift_workflow") ;;
+      "$oidc_proof_workflow"|"$sandbox_network_plan_workflow"|"$sandbox_network_apply_workflow"|"$sandbox_network_drift_workflow"|"$sandbox_platform_plan_workflow"|"$sandbox_platform_apply_workflow"|"$sandbox_platform_drift_workflow"|"$sandbox_workload_plan_workflow"|"$sandbox_workload_apply_workflow"|"$sandbox_workload_drift_workflow"|"$sandbox_delivery_iam_plan_workflow"|"$sandbox_delivery_iam_apply_workflow"|"$sandbox_delivery_iam_drift_workflow"|"$organization_plan_workflow"|"$organization_apply_workflow"|"$organization_drift_workflow") ;;
       *) fail "unexpected credentialed root workflow: $workflow" ;;
     esac
   done <<< "$credentialed_workflows"
@@ -139,6 +142,9 @@ fi
 [[ -f "$sandbox_platform_plan_workflow" ]] || fail "missing sandbox-platform plan workflow"
 [[ -f "$sandbox_platform_apply_workflow" ]] || fail "missing sandbox-platform apply workflow"
 [[ -f "$sandbox_platform_drift_workflow" ]] || fail "missing sandbox-platform drift workflow"
+[[ -f "$sandbox_workload_plan_workflow" ]] || fail "missing sandbox-workload plan workflow"
+[[ -f "$sandbox_workload_apply_workflow" ]] || fail "missing sandbox-workload apply workflow"
+[[ -f "$sandbox_workload_drift_workflow" ]] || fail "missing sandbox-workload drift workflow"
 [[ -f "$sandbox_delivery_iam_plan_workflow" ]] || fail "missing sandbox-delivery-iam plan workflow"
 [[ -f "$sandbox_delivery_iam_apply_workflow" ]] || fail "missing sandbox-delivery-iam apply workflow"
 [[ -f "$sandbox_delivery_iam_drift_workflow" ]] || fail "missing sandbox-delivery-iam drift workflow"
@@ -164,7 +170,7 @@ terraform_apply_workflows="$(grep -lEi 'terraform[[:space:]]+apply' .github/work
 if [[ -n "$terraform_apply_workflows" ]]; then
   while IFS= read -r workflow; do
     [[ -n "$workflow" ]] || continue
-    [[ "$workflow" == "$sandbox_network_apply_workflow" || "$workflow" == "$sandbox_platform_apply_workflow" || "$workflow" == "$sandbox_delivery_iam_apply_workflow" || "$workflow" == "$organization_apply_workflow" ]] || fail "unexpected Terraform apply workflow: $workflow"
+    [[ "$workflow" == "$sandbox_network_apply_workflow" || "$workflow" == "$sandbox_platform_apply_workflow" || "$workflow" == "$sandbox_workload_apply_workflow" || "$workflow" == "$sandbox_delivery_iam_apply_workflow" || "$workflow" == "$organization_apply_workflow" ]] || fail "unexpected Terraform apply workflow: $workflow"
   done <<< "$terraform_apply_workflows"
 fi
 
@@ -196,6 +202,28 @@ grep -Fq 'Require the protected dev environment drift role variable' "$sandbox_p
 grep -Fq 'terraform plan -detailed-exitcode' "$sandbox_platform_drift_workflow" || fail 'sandbox-platform drift must report detected changes'
 if grep -nEi 'terraform[[:space:]]+apply' "$sandbox_platform_drift_workflow"; then
   fail 'sandbox-platform drift must not apply Terraform'
+fi
+
+grep -Fq 'github.event.pull_request.head.repo.full_name == github.repository' "$sandbox_workload_plan_workflow" || fail 'sandbox-workload plan must reject fork pull requests'
+grep -Fq 'AWS_SANDBOX_WORKLOAD_PLAN_ROLE_ARN' "$sandbox_workload_plan_workflow" || fail 'sandbox-workload plan must use its dedicated role variable'
+grep -Fq 'terraform plan' "$sandbox_workload_plan_workflow" || fail 'sandbox-workload plan must produce a Terraform plan'
+if grep -nEi 'terraform[[:space:]]+apply' "$sandbox_workload_plan_workflow"; then
+  fail 'sandbox-workload plan must not apply Terraform'
+fi
+
+grep -Fq 'workflow_dispatch:' "$sandbox_workload_apply_workflow" || fail 'sandbox-workload apply must require manual dispatch'
+grep -Fq "if: inputs.confirm == 'apply'" "$sandbox_workload_apply_workflow" || fail 'sandbox-workload apply must require explicit confirmation'
+grep -Fq 'environment: dev' "$sandbox_workload_apply_workflow" || fail 'sandbox-workload apply must use the protected dev environment'
+grep -Fq 'AWS_SANDBOX_WORKLOAD_APPLY_ROLE_ARN' "$sandbox_workload_apply_workflow" || fail 'sandbox-workload apply must use its dedicated role variable'
+grep -Fq 'Require the protected dev environment workload apply role variable' "$sandbox_workload_apply_workflow" || fail 'sandbox-workload apply must validate its environment role variable after environment protection applies'
+grep -Fq 'terraform apply' "$sandbox_workload_apply_workflow" || fail 'sandbox-workload apply workflow is missing its controlled apply step'
+
+grep -Fq 'schedule:' "$sandbox_workload_drift_workflow" || fail 'sandbox-workload drift must be scheduled'
+grep -Fq 'AWS_SANDBOX_WORKLOAD_DRIFT_ROLE_ARN' "$sandbox_workload_drift_workflow" || fail 'sandbox-workload drift must use its dedicated role variable'
+grep -Fq 'Require the protected dev environment workload drift role variable' "$sandbox_workload_drift_workflow" || fail 'sandbox-workload drift must validate its environment role variable after environment protection applies'
+grep -Fq 'terraform plan -detailed-exitcode' "$sandbox_workload_drift_workflow" || fail 'sandbox-workload drift must report detected changes'
+if grep -nEi 'terraform[[:space:]]+apply' "$sandbox_workload_drift_workflow"; then
+  fail 'sandbox-workload drift must not apply Terraform'
 fi
 
 grep -Fq 'github.event.pull_request.head.repo.full_name == github.repository' "$organization_plan_workflow" || fail 'organization plan must reject fork pull requests'
@@ -235,7 +263,8 @@ fi
 
 for naming_root in \
   infra/active/roots/sandbox-network/us-east-2/dev \
-  infra/active/roots/sandbox-platform/us-east-2/dev; do
+  infra/active/roots/sandbox-platform/us-east-2/dev \
+  infra/active/roots/sandbox-workload/us-east-2/dev; do
   grep -Eq 'aws\.modules\.naming\.git\?ref=[0-9a-f]{40}' "$naming_root/main.tf" || fail "active root does not use an immutable naming module commit: $naming_root"
   grep -Fq 'module.naming.tags' "$naming_root/providers.tf" || fail "active root does not apply canonical provider tags: $naming_root"
 done

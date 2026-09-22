@@ -16,7 +16,7 @@ still blocked.
 .github/workflows/  ->  infra/active/roots/  ->  aws.modules.*@immutable-commit
 ```
 
-`infra/active` is the only executable Terraform delivery tree. Only the four
+`infra/active` is the only executable Terraform delivery tree. Only the five
 roots below are referenced by the root GitHub Actions workflows:
 
 | Active root | Owning delivery workflow family |
@@ -25,6 +25,7 @@ roots below are referenced by the root GitHub Actions workflows:
 | `sandbox-delivery/us-east-2/global` | `sandbox-delivery-iam-{plan,apply,drift}.yml` |
 | `sandbox-network/us-east-2/dev` | `sandbox-network-{plan,apply,drift}.yml` |
 | `sandbox-platform/us-east-2/dev` | `sandbox-platform-{plan,apply,drift}.yml` |
+| `sandbox-workload/us-east-2/dev` | `sandbox-workload-{plan,apply,drift}.yml` |
 
 All applies require a manual dispatch, an explicit `apply` confirmation, the
 protected GitHub environment, and short-lived GitHub OIDC credentials. Local
@@ -42,7 +43,8 @@ quality checks initialize with `-backend=false` and never apply.
 | [`archive/workflow-preflights`](archive/workflow-preflights/) | Retired generic workflow preflights that intentionally fail. | Never restore to `.github/workflows/`. |
 | [`bootstrap`](bootstrap/README.md) | One-time CloudFormation prerequisite for the Organization root's state and OIDC policies. | Use only under ADR 0019's bootstrap procedure. |
 | [`reference`](reference/README.md) | Read-only external architecture-review material. | Never initialize, plan, apply, or edit as platform code. |
-| [`tooling/pipeline-templates`](tooling/pipeline-templates/README.md) | Reusable workflow templates for a future pipeline-repository split. | Template-only. |
+| [terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines) | Released reusable Terraform quality, plan, apply, drift, and module-release workflows. | Consumers pin the `v0.1.0` release commit; it has no AWS identity itself. |
+| [`archive/pipeline-templates-bootstrap`](archive/pipeline-templates-bootstrap/) | Pre-release workflow-template bootstrap retained as history. | Never use as an active workflow source. |
 | [`docs`](docs/README.md) | Status, ADRs, runbooks, architecture, and evidence. | Operating authority. |
 | [`tests`](tests/README.md) | Terraform contract and operational test contracts. | Quality evidence. |
 
@@ -51,6 +53,7 @@ quality checks initialize with `-backend=false` and never apply.
 - [Project status](docs/PROJECT-STATUS.md) — current verified AWS state and next gate.
 - [ADRs](docs/adr/README.md) — architecture and delivery decisions.
 - [GitHub Actions Terraform delivery](docs/runbooks/github-actions-delivery.md) — triggers, root roles, apply gates, and operator procedure.
+- [Platform ConOps](docs/operations/conops.md) — current operational model, change lifecycle, and service-delivery gates.
 - [First delivery slice](docs/delivery/first-delivery-slice.md) — bounded work before platform expansion.
 - [`docs/book/`](docs/book/README.md) — explanatory reference only, not approval authority.
 
