@@ -17,54 +17,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Reusable contract: Require the protected dev environment apply role variable and run terraform apply only after a protected-main re-plan.
   apply:
     name: sandbox_network_apply
     if: inputs.confirm == 'apply'
-    runs-on: ubuntu-24.04
-    environment: dev
-    defaults:
-      run:
-        working-directory: infra/active/roots/sandbox-network/us-east-2/dev
-    steps:
-      - name: Check out protected main source
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
-
-      - name: Require the protected dev environment apply role variable
-        env:
-          AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN: ${{ vars.AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN }}
-        run: |
-          set -euo pipefail
-          test -n "$AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN"
-
-      - name: Read the repository Terraform version
-        id: terraform-version
-        working-directory: .
-        run: echo "version=$(tr -d '[:space:]' < .terraform-version)" >> "$GITHUB_OUTPUT"
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
-        with:
-          terraform_version: ${{ steps.terraform-version.outputs.version }}
-          terraform_wrapper: false
-
-      - name: Exchange GitHub OIDC for the dedicated dev apply role
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.0
-        with:
-          role-to-assume: ${{ vars.AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN }}
-          role-session-name: sandbox-network-apply-${{ github.run_id }}
-          aws-region: us-east-2
-          mask-aws-account-id: true
-
-      - name: Confirm the short-lived target identity
-        run: |
-          set -euo pipefail
-          aws sts get-caller-identity --query '{Account:Account,Arn:Arn}' --output json
-
-      - name: Initialize the dedicated remote state
-        run: terraform init -input=false -lockfile=readonly -backend-config=backend.hcl
-
-      - name: Re-plan the protected main revision
-        run: terraform plan -input=false -lock-timeout=5m -var-file=terraform.tfvars -out=tfplan
-
-      - name: Apply the reviewed plan exactly once
-        run: terraform apply -input=false -lock-timeout=5m tfplan
+    uses: ./.github/workflows/_terraform-root-apply.yml
+    with:
+      root_directory: infra/active/roots/sandbox-network/us-east-2/dev
+      aws_region: us-east-2
+      environment: dev
+      role_variable: AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN
+      session_prefix: sandbox-network
+      job_name: sandbox_network_apply

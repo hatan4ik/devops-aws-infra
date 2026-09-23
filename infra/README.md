@@ -45,7 +45,7 @@ workflow, and reviewed plan.
 active/roots/         Five roots referenced by root GitHub Actions workflows.
 active/root-context.yaml  Shared static naming and tagging context for active roots.
 candidates/modules/   Future root-composition modules only; implementations are external.
-candidates/roots/     Future foundation, regional network, and workload roots.
+candidates/roots/     Future foundation (including IPAM delegation), Network IPAM/TGW, and workload roots.
 ```
 
 Run the repository quality check with `scripts/validate-terraform-quality.sh`.

@@ -1,9 +1,14 @@
 # Chapter 4 — Identity, Compute & Data
 
-**Status:** Stakeholder-approved 2026-09-18 · No AWS resources created  
+**Status:** Target application design — not deployed; current capability is in
+[Project status](../PROJECT-STATUS.md).
 **ADRs:** [0006](../adr/0006-identity-and-authorization.md) · [0007](../adr/0007-compute-and-data.md) · [0011](../adr/0011-cognito-mrr-provider-boundary.md)
 
 ---
+
+> **Target design — not deployed:** diagrams and targets below describe the
+> future multi-Region platform. The current private sandbox is not a
+> production authentication or data-plane deployment.
 
 ## 4.1 Identity architecture
 

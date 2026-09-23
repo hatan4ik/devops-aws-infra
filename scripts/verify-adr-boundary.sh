@@ -118,12 +118,15 @@ sandbox_delivery_iam_drift_workflow=.github/workflows/sandbox-delivery-iam-drift
 organization_plan_workflow=.github/workflows/organization-plan.yml
 organization_apply_workflow=.github/workflows/organization-apply.yml
 organization_drift_workflow=.github/workflows/organization-drift.yml
+reusable_plan_workflow=.github/workflows/_terraform-root-plan.yml
+reusable_apply_workflow=.github/workflows/_terraform-root-apply.yml
+reusable_drift_workflow=.github/workflows/_terraform-root-drift.yml
 credentialed_workflows="$(grep -lEi 'id-token:[[:space:]]*write|configure-aws-credentials' .github/workflows/*.yml || true)"
 if [[ -n "$credentialed_workflows" ]]; then
   while IFS= read -r workflow; do
     [[ -n "$workflow" ]] || continue
     case "$workflow" in
-      "$oidc_proof_workflow"|"$sandbox_network_plan_workflow"|"$sandbox_network_apply_workflow"|"$sandbox_network_drift_workflow"|"$sandbox_platform_plan_workflow"|"$sandbox_platform_apply_workflow"|"$sandbox_platform_drift_workflow"|"$sandbox_workload_plan_workflow"|"$sandbox_workload_apply_workflow"|"$sandbox_workload_drift_workflow"|"$sandbox_delivery_iam_plan_workflow"|"$sandbox_delivery_iam_apply_workflow"|"$sandbox_delivery_iam_drift_workflow"|"$organization_plan_workflow"|"$organization_apply_workflow"|"$organization_drift_workflow") ;;
+      "$oidc_proof_workflow"|"$sandbox_network_plan_workflow"|"$sandbox_network_apply_workflow"|"$sandbox_network_drift_workflow"|"$sandbox_platform_plan_workflow"|"$sandbox_platform_apply_workflow"|"$sandbox_platform_drift_workflow"|"$sandbox_workload_plan_workflow"|"$sandbox_workload_apply_workflow"|"$sandbox_workload_drift_workflow"|"$sandbox_delivery_iam_plan_workflow"|"$sandbox_delivery_iam_apply_workflow"|"$sandbox_delivery_iam_drift_workflow"|"$organization_plan_workflow"|"$organization_apply_workflow"|"$organization_drift_workflow"|"$reusable_plan_workflow"|"$reusable_apply_workflow"|"$reusable_drift_workflow") ;;
       *) fail "unexpected credentialed root workflow: $workflow" ;;
     esac
   done <<< "$credentialed_workflows"
@@ -151,6 +154,21 @@ fi
 [[ -f "$organization_plan_workflow" ]] || fail "missing organization plan workflow"
 [[ -f "$organization_apply_workflow" ]] || fail "missing organization apply workflow"
 [[ -f "$organization_drift_workflow" ]] || fail "missing organization drift workflow"
+[[ -f "$reusable_plan_workflow" ]] || fail "missing reusable Terraform plan workflow"
+[[ -f "$reusable_apply_workflow" ]] || fail "missing reusable Terraform apply workflow"
+[[ -f "$reusable_drift_workflow" ]] || fail "missing reusable Terraform drift workflow"
+
+grep -Fq 'github.event.pull_request.head.repo.full_name == github.repository' "$reusable_plan_workflow" || fail 'reusable plan must reject fork pull requests'
+grep -Fq 'terraform plan' "$reusable_plan_workflow" || fail 'reusable plan must produce a Terraform plan'
+if grep -nEi 'terraform[[:space:]]+apply' "$reusable_plan_workflow"; then
+  fail 'reusable plan must not apply Terraform'
+fi
+grep -Fq 'github.event.repository.default_branch' "$reusable_apply_workflow" || fail 'reusable apply must check out protected default-branch source'
+grep -Fq 'terraform apply' "$reusable_apply_workflow" || fail 'reusable apply workflow is missing its controlled apply step'
+grep -Fq 'terraform plan -detailed-exitcode' "$reusable_drift_workflow" || fail 'reusable drift must report detected changes'
+if grep -nEi 'terraform[[:space:]]+apply' "$reusable_drift_workflow"; then
+  fail 'reusable drift must not apply Terraform'
+fi
 
 grep -Fq 'github.event.pull_request.head.repo.full_name == github.repository' "$sandbox_network_plan_workflow" || fail 'sandbox-network plan must reject fork pull requests'
 grep -Fq 'AWS_SANDBOX_NETWORK_PLAN_ROLE_ARN' "$sandbox_network_plan_workflow" || fail 'sandbox-network plan must use its dedicated role variable'
@@ -166,13 +184,8 @@ grep -Fq 'AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN' "$sandbox_network_apply_workflow" 
 grep -Fq 'Require the protected dev environment apply role variable' "$sandbox_network_apply_workflow" || fail 'sandbox-network apply must validate its environment role variable after environment protection applies'
 grep -Fq 'terraform apply' "$sandbox_network_apply_workflow" || fail 'sandbox-network apply workflow is missing its controlled apply step'
 
-terraform_apply_workflows="$(grep -lEi 'terraform[[:space:]]+apply' .github/workflows/*.yml || true)"
-if [[ -n "$terraform_apply_workflows" ]]; then
-  while IFS= read -r workflow; do
-    [[ -n "$workflow" ]] || continue
-    [[ "$workflow" == "$sandbox_network_apply_workflow" || "$workflow" == "$sandbox_platform_apply_workflow" || "$workflow" == "$sandbox_workload_apply_workflow" || "$workflow" == "$sandbox_delivery_iam_apply_workflow" || "$workflow" == "$organization_apply_workflow" ]] || fail "unexpected Terraform apply workflow: $workflow"
-  done <<< "$terraform_apply_workflows"
-fi
+# Terraform apply is implemented only in reusable_apply_workflow, which was
+# checked above. Caller comments intentionally describe that delegation.
 
 grep -Fq 'schedule:' "$sandbox_network_drift_workflow" || fail 'sandbox-network drift must be scheduled'
 grep -Fq 'AWS_SANDBOX_NETWORK_DRIFT_ROLE_ARN' "$sandbox_network_drift_workflow" || fail 'sandbox-network drift must use its dedicated role variable'

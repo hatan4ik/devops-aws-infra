@@ -17,6 +17,8 @@ separates current truth from design reference and historical material.
   active workflow ownership, triggers, OIDC roles, and apply gates.
 - [Platform ConOps](operations/conops.md) — operating model for the current
   sandbox and the controlled path to private application services.
+- [Discussion ConOps](operations/discussion-conops.md) — one-page statement of
+  current capability, setup order, operating boundaries, and deployment proof.
 - [Versioned module repositories](MODULE-REPOSITORIES.md) — the reusable
   `aws.modules.*` implementations, their immutable release commits, and the
   consumer-source rule.

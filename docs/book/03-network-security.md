@@ -1,9 +1,14 @@
 # Chapter 3 — Network & Security Design
 
-**Status:** Stakeholder-approved 2026-09-18 · No AWS resources created  
+**Status:** Target network design — not deployed; current capability is in
+[Project status](../PROJECT-STATUS.md).
 **ADRs:** [0003](../adr/0003-segmented-tgw-ipam-and-encryption.md) · [0004](../adr/0004-edge-ingress-and-egress.md) · [0005](../adr/0005-hybrid-connectivity.md) · [0008](../adr/0008-security-and-state.md)
 
 ---
+
+> **Target design — not deployed:** the live sandbox has a private VPC and AWS
+> service endpoints only. It has no TGW, attachment, VPN/BGP, inspection VPC,
+> centralized NAT, public route, or multi-account route segmentation.
 
 ## 3.1 Network account ownership model
 
@@ -32,7 +37,7 @@ flowchart TD
 
   tgw --> rt_prod[prod route table\nProduction VPCs only]
   tgw --> rt_nonprod[non-prod route table\nDev + Staging VPCs only]
-  tgw --> rt_shared[shared-svc route table\nResolver · endpoints · CI]
+  tgw --> rt_shared[shared route table\nResolver · endpoints · CI]
   tgw --> rt_inspect[inspection route table\nApproved egress only]
   tgw --> rt_onprem[on-prem route table\nApproved prefixes · BGP]
 

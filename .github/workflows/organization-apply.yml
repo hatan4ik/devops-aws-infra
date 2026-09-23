@@ -17,78 +17,19 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # The reusable apply workflow checks github.event.repository.default_branch and runs terraform apply only after its protected-main re-plan.
   apply:
     name: organization_apply
     if: inputs.confirm == 'apply'
-    runs-on: ubuntu-24.04
-    environment: landing-zone
-    defaults:
-      run:
-        working-directory: infra/active/roots/organization/global
-    steps:
-      - name: Check out protected main source
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
-        with:
-          ref: ${{ github.event.repository.default_branch }}
-
-      - name: Require protected landing-zone role and state variables
-        env:
-          APPLY_ROLE_ARN: ${{ vars.AWS_ORGANIZATION_LANDING_ZONE_ROLE_ARN }}
-          STATE_BUCKET: ${{ vars.AWS_ORGANIZATION_STATE_BUCKET }}
-          STATE_KMS_KEY_ARN: ${{ vars.AWS_ORGANIZATION_STATE_KMS_KEY_ARN }}
-          STATE_LOCK_TABLE: ${{ vars.AWS_ORGANIZATION_STATE_LOCK_TABLE }}
-        run: |
-          set -euo pipefail
-          test -n "$APPLY_ROLE_ARN"
-          test -n "$STATE_BUCKET"
-          test -n "$STATE_KMS_KEY_ARN"
-          test -n "$STATE_LOCK_TABLE"
-
-      - name: Read the repository Terraform version
-        id: terraform-version
-        working-directory: .
-        run: echo "version=$(tr -d '[:space:]' < .terraform-version)" >> "$GITHUB_OUTPUT"
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
-        with:
-          terraform_version: ${{ steps.terraform-version.outputs.version }}
-          terraform_wrapper: false
-
-      - name: Exchange GitHub OIDC for the landing-zone apply role
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.0
-        with:
-          role-to-assume: ${{ vars.AWS_ORGANIZATION_LANDING_ZONE_ROLE_ARN }}
-          role-session-name: organization-apply-${{ github.run_id }}
-          aws-region: us-east-2
-          mask-aws-account-id: true
-
-      - name: Confirm the short-lived target identity
-        run: |
-          set -euo pipefail
-          aws sts get-caller-identity --query '{Account:Account,Arn:Arn}' --output json
-
-      - name: Write ephemeral remote-state configuration
-        env:
-          STATE_BUCKET: ${{ vars.AWS_ORGANIZATION_STATE_BUCKET }}
-          STATE_KMS_KEY_ARN: ${{ vars.AWS_ORGANIZATION_STATE_KMS_KEY_ARN }}
-          STATE_LOCK_TABLE: ${{ vars.AWS_ORGANIZATION_STATE_LOCK_TABLE }}
-        run: |
-          set -euo pipefail
-          cat > backend.hcl <<EOF
-          bucket         = "${STATE_BUCKET}"
-          key            = "gitops/organization/global/terraform.tfstate"
-          region         = "us-east-2"
-          dynamodb_table = "${STATE_LOCK_TABLE}"
-          encrypt        = true
-          kms_key_id     = "${STATE_KMS_KEY_ARN}"
-          EOF
-
-      - name: Initialize the dedicated remote state
-        run: terraform init -input=false -lockfile=readonly -backend-config=backend.hcl
-
-      - name: Re-plan protected main
-        run: terraform plan -input=false -lock-timeout=5m -var-file=terraform.tfvars -out=tfplan
-
-      - name: Apply the reviewed plan exactly once
-        run: terraform apply -input=false -lock-timeout=5m tfplan
+    uses: ./.github/workflows/_terraform-root-apply.yml
+    with:
+      root_directory: infra/active/roots/organization/global
+      aws_region: us-east-2
+      environment: landing-zone
+      role_variable: AWS_ORGANIZATION_LANDING_ZONE_ROLE_ARN
+      session_prefix: organization
+      job_name: organization_apply
+      backend_mode: ephemeral
+      state_bucket_variable: AWS_ORGANIZATION_STATE_BUCKET
+      state_kms_key_variable: AWS_ORGANIZATION_STATE_KMS_KEY_ARN
+      state_lock_table_variable: AWS_ORGANIZATION_STATE_LOCK_TABLE

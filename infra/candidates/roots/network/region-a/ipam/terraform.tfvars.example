@@ -1,0 +1,39 @@
+aws_region     = "REPLACE_WITH_PRIMARY_REGION"
+regional_region_registry = {
+  primary   = "REPLACE_WITH_PRIMARY_REGION"
+  secondary = "REPLACE_WITH_SECONDARY_REGION"
+}
+aws_account_id = "REPLACE_WITH_NETWORK_ACCOUNT_ID"
+
+# This is a valid shape only. The enterprise routing owner must replace every
+# CIDR and principal after overlap review; the current values are not approval
+# to apply this root.
+ipam = {
+  name              = "REPLACE_WITH_IPAM_NAME"
+  operating_regions = ["REPLACE_WITH_PRIMARY_REGION", "REPLACE_WITH_SECONDARY_REGION"]
+  top_level_cidr    = "10.128.0.0/9"
+  regional_pools = {
+    primary = {
+      locale                            = "REPLACE_WITH_PRIMARY_REGION"
+      cidr                              = "10.128.0.0/16"
+      allocation_default_netmask_length = 20
+      allocation_min_netmask_length     = 20
+      allocation_max_netmask_length     = 24
+      ram_principals                    = ["REPLACE_WITH_WORKLOAD_ACCOUNT_ID"]
+    }
+    secondary = {
+      locale                            = "REPLACE_WITH_SECONDARY_REGION"
+      cidr                              = "10.129.0.0/16"
+      allocation_default_netmask_length = 20
+      allocation_min_netmask_length     = 20
+      allocation_max_netmask_length     = 24
+      ram_principals                    = ["REPLACE_WITH_WORKLOAD_ACCOUNT_ID"]
+    }
+  }
+}
+
+tags = {
+  Application = "platform"
+  CostCenter  = "REPLACE_WITH_APPROVED_VALUE"
+  Owner       = "REPLACE_WITH_APPROVED_VALUE"
+}

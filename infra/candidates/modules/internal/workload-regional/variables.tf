@@ -14,6 +14,14 @@ variable "vpc" {
       subnet_newbits    = number
       subnet_netnum     = number
     }))
+    transit_gateway_attachment_subnets = optional(map(object({
+      subnet_newbits = number
+      subnet_netnum  = number
+    })), {})
+    transit_gateway_routes = optional(map(object({
+      destination_cidr_block = string
+      transit_gateway_id     = string
+    })), {})
     interface_endpoints = map(object({
       service_name        = string
       private_dns_enabled = bool
@@ -27,6 +35,17 @@ variable "vpc" {
     flow_log_retention_in_days = number
   })
   nullable = false
+}
+
+variable "transit_gateway_attachment" {
+  description = "Optional workload-side TGW attachment request. The attachment_key is an opaque Network-account catalog key, not a route domain."
+  type = object({
+    transit_gateway_id     = string
+    attachment_key         = string
+    appliance_mode_support = optional(bool, false)
+  })
+  default  = null
+  nullable = true
 }
 
 variable "identity" {

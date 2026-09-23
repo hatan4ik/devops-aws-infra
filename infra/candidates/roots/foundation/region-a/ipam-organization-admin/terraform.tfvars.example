@@ -1,0 +1,13 @@
+aws_region                      = "REPLACE_WITH_PRIMARY_REGION"
+regional_region_registry = {
+  primary   = "REPLACE_WITH_PRIMARY_REGION"
+  secondary = "REPLACE_WITH_SECONDARY_REGION"
+}
+aws_account_id                  = "REPLACE_WITH_MANAGEMENT_ACCOUNT_ID"
+delegated_ipam_admin_account_id = "REPLACE_WITH_NETWORK_ACCOUNT_ID"
+
+tags = {
+  Application = "platform"
+  CostCenter  = "REPLACE_WITH_APPROVED_VALUE"
+  Owner       = "REPLACE_WITH_APPROVED_VALUE"
+}

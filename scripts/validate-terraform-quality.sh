@@ -25,12 +25,12 @@ done < <(find scripts -type f -name '*.sh' -print0)
 modules=()
 while IFS= read -r directory; do
   modules+=("$directory")
-done < <(find infra -type f -path '*/modules/*' -name versions.tf -exec dirname {} \; | sort)
+done < <(find infra -type d -name .terraform -prune -o -type f -path '*/modules/*' -name versions.tf -exec dirname {} \; | sort)
 
 roots=()
 while IFS= read -r directory; do
   roots+=("$directory")
-done < <(find infra -type f -path '*/roots/*' -name main.tf -exec dirname {} \; | sort)
+done < <(find infra -type d -name .terraform -prune -o -type f -path '*/roots/*' -name main.tf -exec dirname {} \; | sort)
 
 terraform fmt -check -recursive -no-color infra
 

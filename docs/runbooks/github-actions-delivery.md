@@ -10,7 +10,11 @@ dispatching an apply.
 All active delivery workflows use a pinned action revision, short-lived GitHub
 OIDC credentials, a root-specific role, `-lockfile=readonly`, and a dedicated
 remote-state key. No active workflow accepts static AWS credentials. The
-separate [terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines)
+root-specific workflow files are intentionally thin callers of the local,
+reviewed `_terraform-root-{plan,apply,drift}.yml` reusable workflows. This keeps
+the implementation consistent without sharing an AWS role, state key, or
+environment between roots. The separate
+[terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines)
 repository provides reusable quality, plan, apply, drift, and release workflows
 for other repositories; consumers pin its release commit.
 
@@ -29,6 +33,11 @@ for other repositories; consumers pin its release commit.
 
 Each drift workflow uses `terraform plan -detailed-exitcode` and intentionally
 fails when it detects drift. It never changes AWS.
+
+The reusable apply workflow always checks out the repository default branch,
+re-plans that protected revision, and applies the freshly generated plan once.
+It does **not** apply a pull-request artifact. The workload caller additionally
+waits for declared ECS services to become stable after apply.
 
 ## Delivery procedure
 

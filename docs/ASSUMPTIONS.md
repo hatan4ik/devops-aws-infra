@@ -39,5 +39,6 @@ or a business decision before an implementation is approved.
   treated as final until it is revalidated in the chosen account and Region.
 - No Terraform plan is valid until target Regions, account IDs, IPAM pools, KMS
   keys, retention policy, BGP details, OIDC subjects, and workload inputs are
-  approved. `region-a` and `region-b` are source-layout placeholders, never AWS
-  deployment targets.
+  approved. `region-a` and `region-b` are primary/secondary source roles; their
+  reviewed shared Region registry must contain distinct values before either
+  candidate root can proceed.

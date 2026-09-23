@@ -41,7 +41,7 @@ sandbox-network root under [ADR 0018](adr/0018-sandbox-network-gitops-delivery.m
 the Terraform-owned sandbox delivery identity handoff under
 [ADR 0022](adr/0022-terraform-owned-sandbox-delivery-identity.md), and the
 single-account private sandbox platform core under
-[ADR 0021](adr/0021-sandbox-platform-core-gitops-delivery.md).
+[ADR 0021](adr/0021-sandbox-platform-core-single-account.md).
 The broader legacy-state adoption in
 [ADR 0015](adr/0015-adopt-legacy-state-bootstrap.md) remains independently
 gated. The Organization root is limited to the management account, top-level
@@ -104,7 +104,8 @@ Read-only AWS inspection after the successful apply confirmed:
 - VPC encryption control `enforce` and `available`;
 - two private, non-public subnets: `10.64.0.0/20` in `us-east-2a` and
   `10.64.16.0/20` in `us-east-2b`;
-- only local route targets, no endpoints, and a deny-all default security
+- no Internet or Transit Gateway routes, private endpoint routes only where the
+  platform root has created an endpoint, and a deny-all default security
   group;
 - an `ACTIVE` all-traffic VPC Flow Log to the dedicated KMS-encrypted,
   365-day CloudWatch Log Group; and
@@ -176,6 +177,20 @@ Read-only Organization inventory confirmed:
 | [`archive/prototypes/`](../archive/prototypes/) | Disabled historical modules and roots retained as forensic input. | A deployment path. |
 | [`docs/book/`](book/README.md) | Explanatory design reference. | Status, approval, or implementation authority. |
 | [`docs/reviews/archive/`](reviews/archive/README.md) | Historical point-in-time assessments. | A current backlog or current repository state. |
+
+### Target-network source status
+
+The candidate multi-account network composition pins immutable `v0.2.0` TGW
+and `v0.3.0` VPC module releases. It models a management-account IPAM
+delegation prerequisite, a Network-account IPAM hierarchy and constrained RAM
+shares, dedicated TGW attachment subnets, non-default workload routes,
+workload-side attachment requests, and Network-account-only acceptance,
+route-domain assignment, association, and propagation. A shared Region registry
+requires distinct primary/secondary Regions; a separate registry requires
+unique Regional TGW ASNs; and direct `prod` ↔ `non-prod` propagation is
+rejected. This is source and mocked-test coverage only: there is still no
+deployed TGW, attachment, IPAM pool, Network account, or multi-account route
+catalog.
 
 ## Next milestone and stop conditions
 

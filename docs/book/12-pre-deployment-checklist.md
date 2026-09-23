@@ -1,6 +1,6 @@
 # Chapter 12 — Pre-Deployment Checklist
 
-**Status:** All items OPEN — no AWS infrastructure has been created  
+**Status:** Future multi-account platform gate — the active sandbox/control-plane baseline is recorded in [Project status](../PROJECT-STATUS.md); every target-platform item below remains open.
 **Source:** [docs/architecture/external-verification.md](../architecture/external-verification.md)
 
 > No AWS infrastructure apply may start until a change record contains: selected Region pairs; all items below completed; named cost/security/architecture approvers; Terraform plan; policy/security scan; cost diff; account IDs; approved CIDR/ASN allocation; and a rollback/stop condition.

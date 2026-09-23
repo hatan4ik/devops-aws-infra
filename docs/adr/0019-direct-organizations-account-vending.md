@@ -12,10 +12,11 @@ setup and Account Factory for Terraform are not prerequisites for secure direct
 Organizations APIs, and using either would add a separate operational project
 before the first network, security, and workload accounts can be created.
 
-The approved initial Regions are `us-east-2` (primary), `us-west-2`
-(secondary), and `us-east-1` for global-service control-plane dependencies.
-The on-premises VPN/BGP inputs have not been supplied and are explicitly out
-of this delivery slice.
+`us-east-2`, `us-west-2`, and `us-east-1` remain sandbox and pricing
+benchmarks only; they are not an approved multi-Region platform selection.
+Before a candidate network root can plan, a reviewed configuration must supply
+one distinct primary/secondary Region registry. The on-premises VPN/BGP inputs
+have not been supplied and are explicitly out of this delivery slice.
 
 ## Decision
 

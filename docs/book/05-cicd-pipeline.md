@@ -1,8 +1,8 @@
 # Chapter 5 — CI/CD Pipeline Design
 
-**Status:** Architecture reference. Current active-root workflow status is in [Project status](../PROJECT-STATUS.md); reusable workflows are published separately.
+**Status:** Architecture reference. Current active-root workflow status is in [Project status](../PROJECT-STATUS.md). Active roots call the local reviewed `_terraform-root-{plan,apply,drift}.yml` reusable workflows; the separately published workflow library remains an optional product for other repositories.
 **ADRs:** [0012](../adr/0012-oidc-gated-terraform-delivery.md) · [0013](../adr/0013-layered-verification-no-automatic-fault-injection.md)  
-**Source:** [terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines)
+**Active source:** [`.github/workflows/`](../../.github/workflows/) · **External reusable library:** [terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines)
 
 ---
 
@@ -21,6 +21,15 @@
 ---
 
 ## 5.2 Reusable workflow catalog
+
+### Active repository implementation
+
+The fifteen root-specific plan/apply/drift files are thin callers. Their local
+reusable implementation accepts the root path, Region, environment, and the
+names of root-scoped GitHub role variables; it does not accept an arbitrary
+role ARN or backend key. Apply checks out the default branch, creates a fresh
+plan after the protected environment gate, and applies only that fresh plan.
+Drift uses `-detailed-exitcode` and never remediates.
 
 | Workflow | AWS credentials | Purpose | Required caller control |
 |---|---|---|---|
