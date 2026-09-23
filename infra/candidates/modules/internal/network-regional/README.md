@@ -6,33 +6,33 @@ Composes the independently released Transit Gateway hub into the Network account
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.7.0, < 2.0.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.35.0, < 7.0.0 |
 
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
 
 | Name | Source | Version |
-| ---- | ------ | ------- |
+|------|--------|---------|
 | <a name="module_network_routing"></a> [network\_routing](#module\_network\_routing) | git::https://github.com/hatan4ik/aws.modules.tgw.git//modules/network-routing | 886043384c3bc1637ed9b64e72d2af87d172d52e |
 | <a name="module_transit_gateway_hub"></a> [transit\_gateway\_hub](#module\_transit\_gateway\_hub) | git::https://github.com/hatan4ik/aws.modules.tgw.git | 886043384c3bc1637ed9b64e72d2af87d172d52e |
 
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [terraform_data.route_policy](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_amazon_side_asn"></a> [amazon\_side\_asn](#input\_amazon\_side\_asn) | Approved private BGP ASN for the regional Transit Gateway. | `number` | n/a | yes |
 | <a name="input_flow_log_retention_in_days"></a> [flow\_log\_retention\_in\_days](#input\_flow\_log\_retention\_in\_days) | Retention period for encrypted TGW Flow Logs. The network baseline is at least one year. | `number` | `365` | no |
 | <a name="input_name"></a> [name](#input\_name) | Lowercase name for this regional network hub. | `string` | n/a | yes |
@@ -46,7 +46,7 @@ Composes the independently released Transit Gateway hub into the Network account
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_flow_logs"></a> [flow\_logs](#output\_flow\_logs) | Encrypted TGW Flow Log and rejected-traffic alarm identifiers owned by the Network account. |
 | <a name="output_network_routing"></a> [network\_routing](#output\_network\_routing) | Accepted attachments and their Network-assigned domains. Null until the approved routing catalog is supplied. |
 | <a name="output_ram_resource_share_arn"></a> [ram\_resource\_share\_arn](#output\_ram\_resource\_share\_arn) | RAM share ARN used by account-vending and attachment approval workflows. |
