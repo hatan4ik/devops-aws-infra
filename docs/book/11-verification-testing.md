@@ -46,8 +46,8 @@ flowchart TD
 
 | Test file | Module | What it validates |
 |---|---|---|
-| `aws.modules.vpc@v0.1.1//modules/workload/tests` | vpc-workload | VPC, subnet, endpoint, flow-log resource plan with provider mocks |
-| `aws.modules.tgw@v0.1.1/tests` | tgw-hub | TGW, route tables, RAM share, attachment plan with provider mocks |
+| `aws.modules.vpc@v0.3.0//modules/workload/tests` | vpc-workload | VPC, subnet, endpoint, flow-log resource plan with provider mocks |
+| `aws.modules.tgw@v0.2.0/tests` | tgw-hub | TGW, route tables, RAM share, attachment plan with provider mocks |
 | `aws.modules.cognito@v0.1.1/tests` | cognito-userpool | User pool, custom domain, KMS, MRR block plan with provider mocks |
 
 **Execution:** `terraform test` from each module directory. Requires Terraform ≥ 1.7.0. Uses `command = plan` — no AWS resources created, no credentials required.

@@ -1,12 +1,43 @@
-aws_region     = "REPLACE_WITH_APPROVED_REGION"
+aws_region     = "REPLACE_WITH_PRIMARY_REGION"
 aws_account_id = "REPLACE_WITH_NETWORK_ACCOUNT_ID"
+
+regional_region_registry = {
+  primary   = "REPLACE_WITH_PRIMARY_REGION"
+  secondary = "REPLACE_WITH_SECONDARY_REGION"
+}
+
+regional_asn_registry = {
+  REPLACE_WITH_PRIMARY_REGION   = 64512
+  REPLACE_WITH_SECONDARY_REGION = 64513
+}
 
 network = {
   name            = "REPLACE_WITH_REGIONAL_TGW_NAME"
   amazon_side_asn = 0 # Deliberately invalid until the approved private ASN is supplied.
-  ram_principal_arns = [
+  ram_principals = [
     "arn:aws:organizations::REPLACE_WITH_MANAGEMENT_ACCOUNT_ID:organization/REPLACE_WITH_ORGANIZATION_ID",
   ]
+
+  # The Network account alone maintains this catalog after a workload account
+  # creates an attachment. route domains are intentionally absent from spokes.
+  routing = {
+    approved_account_domains = {
+      "REPLACE_WITH_PROD_ACCOUNT_ID" = "prod"
+    }
+    attachments = {
+      "workload-prod-use2" = {
+        attachment_id = "tgw-attach-REPLACE_WITH_ATTACHMENT_ID"
+        account_id    = "REPLACE_WITH_PROD_ACCOUNT_ID"
+      }
+    }
+    propagation_matrix = {
+      prod       = ["shared", "inspection", "on-prem"]
+      non-prod   = ["shared", "inspection", "on-prem"]
+      shared     = ["prod", "non-prod", "inspection", "on-prem"]
+      inspection = ["prod", "non-prod", "shared", "on-prem"]
+      on-prem    = ["prod", "non-prod", "shared", "inspection"]
+    }
+  }
 }
 
 tags = {

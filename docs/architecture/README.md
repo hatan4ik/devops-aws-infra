@@ -1,17 +1,22 @@
 # Proposed AWS multi-account, multi-Region platform
 
-**Status:** Candidate source package under governance review. ADR 0015 records
-one observed legacy state bootstrap and a transitional canonical source; its
-state-address migration remains unexecuted. ADR 0017 has established protected
-GitHub environments, protected `main`, and a sandbox permissionless AWS OIDC
-proof. No workload deployment, Terraform backend, or Terraform delivery role
-permission is evidenced by this repository.
+**Status:** Target-design package. The active single-account sandbox, its
+remote state, and GitHub OIDC delivery roots are recorded in
+[Project status](../PROJECT-STATUS.md). This directory remains target design
+and candidate source; it is not deployment evidence.
 
 **Current authority:** This architecture describes the target design. For the
 current execution order and stop conditions, start with
 [Project status](../PROJECT-STATUS.md) and the
 [first delivery slice](../delivery/first-delivery-slice.md).
-**Scope:** AWS-native platform design and GitOps source for a low-latency application serving millions of authenticated users. The repository is not deployment evidence and has not created an application, network, identity, or data-plane deployment.
+**Scope:** AWS-native target design for a low-latency application serving
+millions of authenticated users. It is not evidence that the target
+multi-account, multi-Region application, network, identity, or data plane has
+been deployed.
+
+> **Target design — not deployed:** all TGW, VPN/BGP, centralized inspection,
+> public edge, multi-Region, and multi-account diagrams below are future-state
+> architecture. The current sandbox has no such resources.
 
 The design is active-active for stateless application and DynamoDB profile/session traffic across two Regions and two AZs per Region. Cognito is intentionally a native multi-Region **primary/secondary directory**: the secondary is activated for authentication and failover, but user creation, password resets, and profile writes remain primary-Region operations. This distinction is material to the stated RTO/RPO and product experience.
 
@@ -82,7 +87,7 @@ optional regional cache]
 
 | ADR | Recommendation |
 |---|---|
-| [0001](../adr/0001-control-tower-account-vending.md) | AWS Control Tower with Account Factory for Terraform and a dedicated AFT management account. |
+| [0019](../adr/0019-direct-organizations-account-vending.md) | Direct Terraform-managed Organizations control plane; Control Tower/AFT is deferred. |
 | [0002](../adr/0002-regional-availability-and-data.md) | Active-active application/data plane; Cognito managed replication for a primary/secondary identity directory. |
 | [0003](../adr/0003-segmented-tgw-ipam-and-encryption.md) | Regional TGW hubs, IPAM, encryption controls, RAM sharing, explicit deny-by-default route segmentation. |
 | [0004](../adr/0004-edge-ingress-and-egress.md) | CloudFront/WAF for static delivery; Global Accelerator to regional ALBs for dynamic API; no Internet egress by default. |
@@ -105,7 +110,7 @@ optional regional cache]
 ```mermaid
 flowchart TB
   management[Management account
-Organizations + Control Tower]
+AWS Organizations]
   management --> securityOU[Security OU]
   management --> platformOU[Platform OU]
   management --> workloadsOU[Workloads OU]
@@ -119,13 +124,14 @@ IAM Identity Center delegated admin]
 TGW, IPAM, Resolver]
   platformOU --> shared[Shared Services
 state backends, CI support]
-  platformOU --> aft[AFT Management]
   workloadsOU --> prod[Workload prod account(s)]
   workloadsOU --> nonprod[Workload dev & staging account(s)]
   sandboxOU --> ephemeral[Ephemeral test accounts]
 ```
 
-The Control Tower-created Audit account is the Security/Audit account in this diagram. Management has no workload resources, no daily human administration, and is never a CI deployment target.
+Control Tower/AFT is not part of the current target-delivery baseline. Management
+has no workload resources, no daily human administration, and is never a CI
+deployment target.
 
 ## Supporting documents
 

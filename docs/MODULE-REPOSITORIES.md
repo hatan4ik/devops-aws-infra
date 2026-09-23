@@ -17,8 +17,8 @@ never use a branch such as `main`.
 | Route 53 zones and records | [aws.modules.route53](https://github.com/hatan4ik/aws.modules.route53) | `v0.1.2` | Available for an approved DNS root. |
 | Private encrypted S3 buckets | [aws.modules.s3](https://github.com/hatan4ik/aws.modules.s3) | `v0.1.2` | Available for new approved data roots. |
 | Terraform state backends and adoption | [aws.modules.state](https://github.com/hatan4ik/aws.modules.state) | `v0.1.0` | Candidate foundation and controlled legacy-adoption roots. |
-| Transit Gateway hub and VPC attachment | [aws.modules.tgw](https://github.com/hatan4ik/aws.modules.tgw) | `v0.1.1` | Candidate regional-network composition. |
-| VPC foundations and workload VPCs | [aws.modules.vpc](https://github.com/hatan4ik/aws.modules.vpc) | `v0.1.1` | Active sandbox-network root and candidate workload composition. |
+| Transit Gateway hub, network-owned routing, and VPC attachment | [aws.modules.tgw](https://github.com/hatan4ik/aws.modules.tgw) | `v0.2.0` | Candidate regional-network and workload composition; Network account accepts and classifies every shared attachment. |
+| VPC foundations, organization IPAM, and workload VPCs | [aws.modules.vpc](https://github.com/hatan4ik/aws.modules.vpc) | `v0.3.0` | Active sandbox-network root plus candidate IPAM and workload composition; candidate VPCs use dedicated TGW subnets and explicit non-default routes. |
 | Encrypted DynamoDB tables | [aws.modules.dynamodb](https://github.com/hatan4ik/aws.modules.dynamodb) | `v0.1.2` | Available for new approved state or workload roots. |
 
 ## Consumer rule
@@ -29,11 +29,19 @@ semantic version. Examples:
 
 ```hcl
 module "network" {
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=abaaa401a45f3e3587d0e072c667b79a2ed9cf34" # v0.1.1
+  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=ada254e7327ff9f401df41c0819a34fc7891938f" # v0.3.0
 }
 
 module "workload_vpc" {
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git//modules/workload?ref=abaaa401a45f3e3587d0e072c667b79a2ed9cf34" # v0.1.1
+  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git//modules/workload?ref=ada254e7327ff9f401df41c0819a34fc7891938f" # v0.3.0
+}
+
+module "network_ipam" {
+  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git//modules/ipam?ref=ada254e7327ff9f401df41c0819a34fc7891938f" # v0.3.0
+}
+
+module "network_owned_tgw_routing" {
+  source = "git::https://github.com/hatan4ik/aws.modules.tgw.git//modules/network-routing?ref=886043384c3bc1637ed9b64e72d2af87d172d52e" # v0.2.0
 }
 ```
 

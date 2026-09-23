@@ -17,6 +17,22 @@ variables {
         subnet_netnum     = 1
       }
     }
+    transit_gateway_attachment_subnets = {
+      use1-az1 = {
+        subnet_newbits = 2
+        subnet_netnum  = 2
+      }
+      use1-az2 = {
+        subnet_newbits = 2
+        subnet_netnum  = 3
+      }
+    }
+    transit_gateway_routes = {
+      on_prem = {
+        destination_cidr_block = "10.250.0.0/16"
+        transit_gateway_id     = "tgw-0123abcd"
+      }
+    }
     interface_endpoints = {}
     gateway_endpoints = {
       s3 = {
@@ -24,7 +40,11 @@ variables {
       }
     }
     flow_log_kms_key_arn       = "arn:aws:kms:us-east-2:111122223333:key/11111111-1111-1111-1111-111111111111"
-    flow_log_retention_in_days = 30
+    flow_log_retention_in_days = 365
+  }
+  transit_gateway_attachment = {
+    transit_gateway_id = "tgw-0123abcd"
+    attachment_key     = "workload-dev-use2"
   }
   identity = {
     mode      = "secondary"
@@ -41,9 +61,24 @@ run "plans_secondary_private_vpc_without_independent_user_pool" {
   }
 
   assert {
+    condition     = length(output.transit_gateway_attachment_subnets) == 2
+    error_message = "A workload TGW attachment must use dedicated transit subnets in two Availability Zones."
+  }
+
+  assert {
     condition     = output.identity_replication_status.status == "blocked-provider-support"
     error_message = "The MRR provider-support gap must remain explicit."
   }
+}
+
+run "rejects_tgw_routes_without_an_attachment" {
+  command = plan
+
+  variables {
+    transit_gateway_attachment = null
+  }
+
+  expect_failures = [terraform_data.transit_gateway_contract]
 }
 
 run "rejects_secondary_with_independent_pool" {

@@ -1,8 +1,13 @@
 # Chapter 2 — Architecture Reference
 
-**Status:** Stakeholder-approved 2026-09-18 · No application-platform resources created; see ADR 0015 for the separately observed state bootstrap
+**Status:** Target architecture — not deployed; current capability is recorded
+in [Project status](../PROJECT-STATUS.md).
 
 ---
+
+> **Target design — not deployed:** this chapter includes TGW, multi-Region,
+> public edge, and multi-account diagrams. The current sandbox has none of
+> those capabilities; do not use this page as deployment evidence.
 
 ## 2.1 Architecture at a glance
 

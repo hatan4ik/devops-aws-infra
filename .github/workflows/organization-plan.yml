@@ -2,10 +2,10 @@ name: Organization control-plane plan
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - .github/workflows/organization-plan.yml
+      - .github/workflows/_terraform-root-plan.yml
       - infra/active/roots/organization/global/**
   workflow_dispatch:
 
@@ -18,66 +18,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Delegates fork rejection (`github.event.pull_request.head.repo.full_name == github.repository`) and terraform plan execution to the reusable workflow.
   plan:
     name: organization_plan
-    # Never issue an AWS token to an untrusted fork pull request.
-    if: >-
-      vars.AWS_ORGANIZATION_PLAN_ROLE_ARN != '' &&
-      vars.AWS_ORGANIZATION_STATE_BUCKET != '' &&
-      vars.AWS_ORGANIZATION_STATE_KMS_KEY_ARN != '' &&
-      vars.AWS_ORGANIZATION_STATE_LOCK_TABLE != '' &&
-      (github.event_name == 'workflow_dispatch' ||
-      github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ubuntu-24.04
-    defaults:
-      run:
-        working-directory: infra/active/roots/organization/global
-    steps:
-      - name: Check out source
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
-
-      - name: Read the repository Terraform version
-        id: terraform-version
-        working-directory: .
-        run: echo "version=$(tr -d '[:space:]' < .terraform-version)" >> "$GITHUB_OUTPUT"
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
-        with:
-          terraform_version: ${{ steps.terraform-version.outputs.version }}
-          terraform_wrapper: false
-
-      - name: Exchange GitHub OIDC for the organization plan role
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.0
-        with:
-          role-to-assume: ${{ vars.AWS_ORGANIZATION_PLAN_ROLE_ARN }}
-          role-session-name: organization-plan-${{ github.run_id }}
-          aws-region: us-east-2
-          mask-aws-account-id: true
-
-      - name: Confirm the short-lived target identity
-        run: |
-          set -euo pipefail
-          aws sts get-caller-identity --query '{Account:Account,Arn:Arn}' --output json
-
-      - name: Write ephemeral remote-state configuration
-        env:
-          STATE_BUCKET: ${{ vars.AWS_ORGANIZATION_STATE_BUCKET }}
-          STATE_KMS_KEY_ARN: ${{ vars.AWS_ORGANIZATION_STATE_KMS_KEY_ARN }}
-          STATE_LOCK_TABLE: ${{ vars.AWS_ORGANIZATION_STATE_LOCK_TABLE }}
-        run: |
-          set -euo pipefail
-          cat > backend.hcl <<EOF
-          bucket         = "${STATE_BUCKET}"
-          key            = "gitops/organization/global/terraform.tfstate"
-          region         = "us-east-2"
-          dynamodb_table = "${STATE_LOCK_TABLE}"
-          encrypt        = true
-          kms_key_id     = "${STATE_KMS_KEY_ARN}"
-          EOF
-
-      - name: Initialize the dedicated remote state
-        run: terraform init -input=false -lockfile=readonly -backend-config=backend.hcl
-
-      - name: Produce a non-mutating organization plan
-        run: terraform plan -input=false -lock-timeout=5m -var-file=terraform.tfvars -out=tfplan
+    uses: ./.github/workflows/_terraform-root-plan.yml
+    with:
+      root_directory: infra/active/roots/organization/global
+      aws_region: us-east-2
+      role_variable: AWS_ORGANIZATION_PLAN_ROLE_ARN
+      session_prefix: organization
+      job_name: organization_plan
+      backend_mode: ephemeral
+      state_bucket_variable: AWS_ORGANIZATION_STATE_BUCKET
+      state_kms_key_variable: AWS_ORGANIZATION_STATE_KMS_KEY_ARN
+      state_lock_table_variable: AWS_ORGANIZATION_STATE_LOCK_TABLE

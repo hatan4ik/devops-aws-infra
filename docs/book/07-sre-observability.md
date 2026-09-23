@@ -1,10 +1,15 @@
 # Chapter 7 — SRE, Observability & Recovery
 
-**Status:** Stakeholder-approved 2026-09-18 · No AWS resources created  
+**Status:** Target operating design — not deployed; current capability is in
+[Project status](../PROJECT-STATUS.md).
 **ADR:** [0009](../adr/0009-observability-and-sre.md)  
 **Runbooks:** [docs/runbooks/](../runbooks/)
 
 ---
+
+> **Target design — not deployed:** the evidence and runbook model below is
+> the desired multi-account operating state, not proof that its target services
+> or alerting integrations exist today.
 
 ## 7.1 Service Level Objectives
 

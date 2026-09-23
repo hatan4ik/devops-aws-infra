@@ -58,47 +58,68 @@ flowchart TD
 
 ### terraform-aws-vpc-workload
 
-**Purpose:** Private workload VPC with subnets, VPC endpoints, flow logs, and encryption boundary.
+**Purpose:** Private workload VPC with IPAM allocation, private application
+subnets, optional dedicated TGW attachment subnets, endpoints, Flow Logs, and
+an encryption boundary.
 
 | Input | Type | Description |
 |---|---|---|
-| `vpc_cidr` | `string` | CIDR block allocated by IPAM — no default |
-| `availability_zones` | `list(string)` | Exactly 2 AZs required |
-| `interface_endpoint_services` | `list(string)` | AWS service names for PrivateLink endpoints |
-| `flow_log_destination_arn` | `string` | Log Archive S3 bucket ARN |
-| `kms_key_arn` | `string` | CMK for flow log encryption |
+| `ipv4_ipam_pool_id` / `ipv4_netmask_length` | `string` / `number` | IPAM allocation; callers do not submit a literal VPC CIDR. The pool comes from the separately approved Network-account IPAM root. |
+| `availability_zones` | AZ-keyed object map | Private application-subnet allocation plan; at least two AZs |
+| `transit_gateway_attachment_subnets` | Optional AZ-keyed object map | Separate transit subnet tier; keys must exist in `availability_zones` |
+| `transit_gateway_routes` | Optional map | Explicit non-default CIDRs to an approved TGW; default routes are rejected |
+| `flow_log_kms_key_arn` | `string` | Customer-managed KMS key for Flow Logs |
 
 | Output | Description |
 |---|---|
-| `vpc_id` | VPC resource ID |
-| `private_subnet_ids` | List of private subnet IDs (one per AZ) |
-| `tgw_attachment_subnet_ids` | Dedicated TGW attachment subnet IDs |
-| `endpoint_security_group_id` | Security group for VPC endpoints |
+| `vpc` | VPC ID, ARN, and IPAM-assigned CIDR |
+| `private_subnets` | AZ-keyed private subnet, CIDR, and route-table IDs |
+| `transit_gateway_attachment_subnets` | Dedicated transit-subnet and route-table IDs |
+| `flow_logs` | Encrypted Flow Log and delivery-role identifiers |
 
-**Test:** [`aws.modules.vpc` workload test](https://github.com/hatan4ik/aws.modules.vpc/tree/v0.1.1/modules/workload/tests) — provider mocks, `command = plan`, no AWS credentials.
+**Test:** [`aws.modules.vpc` workload test](https://github.com/hatan4ik/aws.modules.vpc/tree/v0.3.0/modules/workload/tests) — provider mocks, `command = plan`, no AWS credentials.
+
+### IPAM companion modules
+
+`modules/ipam-organization-admin` runs only in the Organizations management
+account: it enables RAM organization sharing and delegates IPAM administration
+to the reviewed Network account. `modules/ipam` then runs in the IPAM home
+Region in that Network account; it creates a non-allocating enterprise pool,
+localized child pools, and restricted RAM shares. The IPAM root output is
+promoted through a reviewed workload-root configuration change, never a
+cross-account `terraform_remote_state` read. See the [IPAM delivery runbook](../runbooks/ipam-foundation.md).
 
 ---
 
 ### terraform-aws-tgw-hub
 
-**Purpose:** Regional Transit Gateway hub with RAM sharing, route-table segmentation, and attachment management.
+**Purpose:** Regional Transit Gateway hub with RAM sharing, route-table
+segmentation, KMS-encrypted TGW Flow Logs, and a separately invoked
+Network-account routing submodule.
 
 | Input | Type | Description |
 |---|---|---|
 | `amazon_side_asn` | `number` | BGP ASN — must not overlap on-premises ASN |
-| `ram_principal_arns` | `list(string)` | Account ARNs to receive RAM share |
-| `route_table_names` | `list(string)` | `["prod","non-prod","shared","inspection","on-prem"]` |
-| `enable_default_route_table_association` | `bool` | Must be `false` |
-| `enable_default_route_table_propagation` | `bool` | Must be `false` |
+| `ram_principals` | `set(string)` | 12-digit account IDs or Organizations organization/OU ARNs; IAM principals are rejected |
+| `route_domains` | `set(string)` | Defaults to `prod`, `non-prod`, `shared`, `inspection`, and `on-prem` |
+| `flow_log_retention_in_days` | `number` | At least 365 days, KMS-encrypted CloudWatch destination |
+| `rejected_traffic_alarm_actions` | `set(string)` | Optional responder/incident destinations for rejected traffic |
 
 | Output | Description |
 |---|---|
-| `tgw_id` | Transit Gateway resource ID |
-| `tgw_arn` | Transit Gateway ARN for RAM sharing |
+| `transit_gateway` | Transit Gateway ID and ARN |
 | `route_table_ids` | Map of route-table name → ID |
-| `ram_share_arn` | RAM resource share ARN |
+| `ram_resource_share_arn` | RAM resource share ARN |
+| `flow_logs` | Flow Log, log group, KMS key, and rejected-traffic alarm |
 
-**Test:** [`aws.modules.tgw` test](https://github.com/hatan4ik/aws.modules.tgw/tree/v0.1.1/tests)
+The `modules/vpc-attachment` submodule creates only the workload-owned
+attachment and accepts an opaque `attachment_key`, never a route domain. The
+`modules/network-routing` submodule runs in the Network account, accepts the
+attachment, verifies its owning account, assigns its domain from the approved
+catalog, and creates explicit association, propagation, and static/blackhole
+routes. This is the trust boundary for segmentation.
+
+**Test:** [`aws.modules.tgw` tests](https://github.com/hatan4ik/aws.modules.tgw/tree/v0.2.0/tests) and [`network-routing` tests](https://github.com/hatan4ik/aws.modules.tgw/tree/v0.2.0/modules/network-routing/tests).
 
 ---
 
@@ -147,7 +168,7 @@ infra/candidates/roots/
 - All roots have `backend "s3" {}` with no inline configuration — backend config is supplied only after account vending and state-backend bootstrap
 - `terraform.tfvars` files contain no values until a reviewed account-vending record provides account IDs, Regions, CIDRs, principals, and names
 - No module contains a provider block, AWS credential, account ID, or remote-state data source
-- `region-a` and `region-b` are source-layout placeholders — never AWS deployment targets
+- `region-a` and `region-b` are primary/secondary source roles. Both roots consume the same reviewed Region registry, which requires distinct values and prevents a tfvars-only Region collision.
 
 ---
 

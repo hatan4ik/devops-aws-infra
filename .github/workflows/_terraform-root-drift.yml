@@ -1,0 +1,116 @@
+name: Reusable Terraform root drift detection
+
+on:
+  workflow_call:
+    inputs:
+      root_directory:
+        required: true
+        type: string
+      aws_region:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      role_variable:
+        required: true
+        type: string
+      session_prefix:
+        required: true
+        type: string
+      job_name:
+        required: true
+        type: string
+      backend_mode:
+        required: false
+        default: root-file
+        type: string
+      state_bucket_variable:
+        required: false
+        default: ""
+        type: string
+      state_kms_key_variable:
+        required: false
+        default: ""
+        type: string
+      state_lock_table_variable:
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  drift:
+    name: ${{ inputs.job_name }}
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.root_directory }}
+    steps:
+      - name: Check out protected default-branch source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Require the scoped drift role and optional state variables
+        env:
+          ROLE_TO_ASSUME: ${{ vars[inputs.role_variable] }}
+          STATE_BUCKET: ${{ vars[inputs.state_bucket_variable] }}
+          STATE_KMS_KEY_ARN: ${{ vars[inputs.state_kms_key_variable] }}
+          STATE_LOCK_TABLE: ${{ vars[inputs.state_lock_table_variable] }}
+          BACKEND_MODE: ${{ inputs.backend_mode }}
+        run: |
+          set -euo pipefail
+          test -n "$ROLE_TO_ASSUME"
+          if [[ "$BACKEND_MODE" == "ephemeral" ]]; then
+            test -n "$STATE_BUCKET"
+            test -n "$STATE_KMS_KEY_ARN"
+            test -n "$STATE_LOCK_TABLE"
+          fi
+
+      - name: Read the repository Terraform version
+        id: terraform-version
+        working-directory: .
+        run: echo "version=$(tr -d '[:space:]' < .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: ${{ steps.terraform-version.outputs.version }}
+          terraform_wrapper: false
+
+      - name: Exchange GitHub OIDC for the dedicated drift role
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.0
+        with:
+          role-to-assume: ${{ vars[inputs.role_variable] }}
+          role-session-name: ${{ inputs.session_prefix }}-drift-${{ github.run_id }}
+          aws-region: ${{ inputs.aws_region }}
+          mask-aws-account-id: true
+
+      - name: Write ephemeral remote-state configuration
+        if: inputs.backend_mode == 'ephemeral'
+        env:
+          STATE_BUCKET: ${{ vars[inputs.state_bucket_variable] }}
+          STATE_KMS_KEY_ARN: ${{ vars[inputs.state_kms_key_variable] }}
+          STATE_LOCK_TABLE: ${{ vars[inputs.state_lock_table_variable] }}
+          AWS_REGION: ${{ inputs.aws_region }}
+        run: |
+          set -euo pipefail
+          cat > backend.hcl <<EOF
+          bucket         = "${STATE_BUCKET}"
+          key            = "gitops/organization/global/terraform.tfstate"
+          region         = "${AWS_REGION}"
+          dynamodb_table = "${STATE_LOCK_TABLE}"
+          encrypt        = true
+          kms_key_id     = "${STATE_KMS_KEY_ARN}"
+          EOF
+
+      - name: Initialize the dedicated remote state
+        run: terraform init -input=false -lockfile=readonly -backend-config=backend.hcl
+
+      - name: Fail visibly when drift is detected; never remediate automatically
+        run: terraform plan -detailed-exitcode -input=false -lock-timeout=5m -var-file=terraform.tfvars

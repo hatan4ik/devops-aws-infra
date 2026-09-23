@@ -7,6 +7,10 @@ workflow_directory="${1:-.github/workflows}"
 
 found_reference=false
 while IFS= read -r reference; do
+  # Repository-local reusable workflows are source files, not third-party
+  # Actions. Their immutable boundary is the caller's protected revision.
+  [[ "$reference" == ./* ]] && continue
+
   found_reference=true
   [[ "$reference" =~ ^[^[:space:]@]+@[0-9a-f]{40}$ ]] || {
     echo "mutable or malformed action reference: $reference" >&2

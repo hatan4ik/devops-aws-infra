@@ -1,10 +1,24 @@
 # Network and security design
 
+> **Target design — not deployed:** this page describes the future network
+> account and multi-account routing model. The current sandbox has no TGW,
+> cross-account routing, VPN/BGP, public ingress, or inspection/egress VPC.
+> See [Project status](../PROJECT-STATUS.md) for the live boundary.
+
 ## Account and network boundaries
 
 Every workload receives an account and a VPC in each selected Region. CIDRs are allocated by AWS VPC IPAM from the approved enterprise pool, never supplied ad hoc. The current `10.128.0.0/9` placeholder in [the assumptions](../ASSUMPTIONS.md) is invalid until the enterprise routing team confirms it does not overlap on-premises, acquired networks, or another cloud.
 
 The Network account owns one Transit Gateway per Region, AWS RAM shares, IPAM, Route 53 Resolver endpoints/rules, and an optional inspection/egress VPC. Workload accounts own their VPCs and only their TGW attachment and VPC route entries. Cross-account acceptance and route programming are deliberately separate Terraform roots.
+
+The candidate Terraform contract implements that split: a management-account
+prerequisite delegates IPAM administration, the Network account creates the
+home-Region IPAM hierarchy and RAM shares, workload composition can create an
+attachment from dedicated transit subnets and its own explicit non-default VPC
+routes, and Network composition alone accepts the attachment, verifies the
+owner, assigns its route domain, and controls association and propagation.
+`prod` and `non-prod` direct propagation is rejected by a tested policy guard.
+This is candidate source, not a deployed route policy.
 
 ```mermaid
 flowchart LR

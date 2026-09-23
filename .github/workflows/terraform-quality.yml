@@ -58,6 +58,9 @@ jobs:
           set -euo pipefail
           actionlint .github/workflows/*.yml
 
+      - name: Verify repository-local Markdown links
+        run: scripts/check-markdown-links.rb docs
+
       - name: Validate Terraform modules and roots without cloud credentials
         run: scripts/validate-terraform-quality.sh
 

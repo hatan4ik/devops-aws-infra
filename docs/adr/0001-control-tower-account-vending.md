@@ -1,6 +1,7 @@
 # ADR 0001: Govern accounts with Control Tower and Account Factory for Terraform
 
-**Status:** Accepted — Phase 3 stakeholder approval recorded 2026-09-18.  
+**Status:** Superseded by [ADR 0019](0019-direct-organizations-account-vending.md)
+for account vending on 2026-09-21. Historical decision record only.
 **Decision date:** 2026-09-18
 
 ## Context

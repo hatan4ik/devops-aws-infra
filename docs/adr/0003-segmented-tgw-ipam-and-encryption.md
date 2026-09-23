@@ -31,6 +31,16 @@ The Network account owns a TGW per Region, RAM shares, route tables, and peering
 
 Enable TGW encryption support and VPC Encryption Controls enforce mode where supported. Use TLS 1.2+ between services regardless of network encryption. Create explicit static routes for TGW peering; use BGP propagation only in the permitted on-prem/VPN tables.
 
+## Implementation boundary
+
+Candidate implementation uses immutable `aws.modules.tgw` and
+`aws.modules.vpc` releases. Workload code receives an opaque attachment key
+and cannot select a route domain. The Network-account routing composition must
+accept and verify the attachment owner before associating or propagating it;
+its tested guard rejects direct `prod` to `non-prod` propagation in either
+direction. The candidate source has no delivery workflow or deployed TGW, so
+this section is an implementation contract rather than live evidence.
+
 ## Consequences
 
 - Each attachment costs money and must be named/tagged/justified; TGW data processing is usage-based.
