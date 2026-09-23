@@ -13,7 +13,7 @@ module "naming" {
 }
 
 module "sandbox_workload" {
-  source = "git::https://github.com/hatan4ik/aws.modules.ecs-service.git?ref=6eb344598051da906ab1dfb79fcd4de59b3f24dd" # v0.1.2
+  source = "git::https://github.com/hatan4ik/aws.modules.ecs-service.git?ref=54a67756de825f3b04f9c780552cba8c8365030d" # v0.1.3
 
   name                         = module.naming.name_prefix
   cluster_arn                  = data.aws_ecs_cluster.platform.arn

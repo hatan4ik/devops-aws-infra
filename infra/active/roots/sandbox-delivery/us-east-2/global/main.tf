@@ -1,5 +1,5 @@
 module "sandbox_delivery_iam" {
-  source = "git::https://github.com/hatan4ik/aws.modules.iam.git?ref=4722b8b670e4b0b3127581bf6b6d126e365e6b7e" # v0.1.9
+  source = "git::https://github.com/hatan4ik/aws.modules.iam.git?ref=f529b69e6fc6d58842e7c3ba3a78540e457551c5" # v0.1.10
 
   aws_account_id          = var.aws_account_id
   aws_region              = var.aws_region
