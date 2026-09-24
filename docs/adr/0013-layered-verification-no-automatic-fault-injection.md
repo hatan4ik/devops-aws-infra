@@ -27,7 +27,13 @@ The platform has private multi-account routing, VPN/BGP, encryption, central sec
 
 ## Decision
 
-Adopt option 3. `terraform test` with mocks, Terraform validation, TFLint, Checkov, Trivy, and generated-documentation drift run before merge. The post-deployment network and security scripts make only AWS CLI read calls, require supplied deployed IDs/Region, and fail closed. Public synthetics use only HTTPS endpoints. The full AuthN/AuthZ journey uses a protected, non-human staging identity and stores no credential/token or customer data in source/artifacts.
+Adopt option 3. `terraform test` with mocks, Terraform validation, TFLint,
+Checkov, Trivy, Markdown-link verification, and workflow-policy checks run
+before merge. The post-deployment network and security scripts make only AWS
+CLI read calls, require supplied deployed IDs/Region, and fail closed. Public
+synthetics use only HTTPS endpoints. The full AuthN/AuthZ journey uses a
+protected, non-human staging identity and stores no credential/token or
+customer data in source/artifacts.
 
 Regional failover, VPN/BGP path withdrawal, data recovery, and Cognito MRR validation are change-approved game-day actions in the runbooks. They are not scheduled by CI, and the MRR test remains blocked until ADR 0011's provider-backed deployment condition is satisfied.
 

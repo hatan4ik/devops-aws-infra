@@ -33,13 +33,13 @@ Enable TGW encryption support and VPC Encryption Controls enforce mode where sup
 
 ## Implementation boundary
 
-Candidate implementation uses immutable `aws.modules.tgw` and
-`aws.modules.vpc` releases. Workload code receives an opaque attachment key
+Future implementation must use immutable `aws.modules.tgw` and
+`aws.modules.vpc` releases. Workload code must receive an opaque attachment key
 and cannot select a route domain. The Network-account routing composition must
-accept and verify the attachment owner before associating or propagating it;
-its tested guard rejects direct `prod` to `non-prod` propagation in either
-direction. The candidate source has no delivery workflow or deployed TGW, so
-this section is an implementation contract rather than live evidence.
+accept and verify the attachment owner before associating or propagating it and
+must reject direct `prod` to `non-prod` propagation in either direction. No
+such delivery workflow or TGW exists today, so this is an implementation
+contract rather than live evidence.
 
 ## Consequences
 

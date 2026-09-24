@@ -22,7 +22,7 @@ for other repositories; consumers pin its release commit.
 
 | Workflow family | Trigger | AWS authority | Result |
 |---|---|---|---|
-| `terraform-quality.yml` | Pull request, `main` push, manual | None | Formats, validates, mock-tests, lints, scans IaC, checks generated docs and action pins. |
+| `terraform-quality.yml` | Pull request, `main` push, manual | None | Formats, validates, mock-tests, lints, scans IaC, checks Markdown links and action pins. |
 | `terraform-pr.yml` | Pull request to `main` | None | Enforces workflow contracts, action pins, and the active-root delivery boundary. |
 | `oidc-sandbox-proof.yml` | Manual | Permissionless proof role | Verifies GitHub-to-AWS trust only; it does not run Terraform. |
 | `organization-{plan,apply,drift}.yml` | PR/manual; manual apply; weekday schedule/manual drift | Organization plan/apply/drift roles | Operates only `organization/global`; backend values are supplied as protected GitHub variables at runtime. |
