@@ -9,7 +9,7 @@ implementation into `infra/active`.
 | Private Fargate services | [aws.modules.ecs-service](https://github.com/hatan4ik/aws.modules.ecs-service) | Active workload root uses `v0.1.4`. The v1 design requires a signed release and a state-move migration. |
 | ECS platform foundation | [aws.modules.ecs](https://github.com/hatan4ik/aws.modules.ecs) | `v0.1.2` in the active sandbox-platform root. |
 | GitHub OIDC and delivery IAM | [aws.modules.iam](https://github.com/hatan4ik/aws.modules.iam) | `v0.1.10` in the active sandbox-delivery root. |
-| VPC foundations | [aws.modules.vpc](https://github.com/hatan4ik/aws.modules.vpc) | `v0.3.0` in the active sandbox-network root. |
+| VPC foundations | [aws.modules.vpc](https://github.com/hatan4ik/aws.modules.vpc) | Active root uses `v0.3.0`; the v1 migration is prepared but cannot merge until `v1.0.0` is a signed release. |
 | Deterministic names and tags | [aws.modules.naming](https://github.com/hatan4ik/aws.modules.naming) | `v0.1.0` in active sandbox roots. |
 | Cognito | [aws.modules.cognito](https://github.com/hatan4ik/aws.modules.cognito) | `v0.1.1`, consumed by the platform foundation. |
 | Supporting services | [ACM](https://github.com/hatan4ik/aws.modules.acm), [KMS](https://github.com/hatan4ik/aws.modules.ksm), [Route 53](https://github.com/hatan4ik/aws.modules.route53), [S3](https://github.com/hatan4ik/aws.modules.s3), [DynamoDB](https://github.com/hatan4ik/aws.modules.dynamodb), [TGW](https://github.com/hatan4ik/aws.modules.tgw), and [state](https://github.com/hatan4ik/aws.modules.state) | Available for a separately approved root. |
