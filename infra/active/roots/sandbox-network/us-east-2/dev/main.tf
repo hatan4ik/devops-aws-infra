@@ -9,8 +9,7 @@ module "naming" {
 }
 
 module "sandbox_network" {
-  # Pre-release pin for plan verification; replaced by the v1.0.0 release commit before merge.
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=e6f697f5e60f358574e6db595ed42b022cd8527f" # v1.0.0
+  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=5c0092737c51c99c699bb7122ea147c65b9ca507" # v1.0.0
 
   name       = module.naming.name_prefix
   cidr_block = var.vpc_cidr
