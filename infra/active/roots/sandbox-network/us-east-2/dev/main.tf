@@ -9,12 +9,29 @@ module "naming" {
 }
 
 module "sandbox_network" {
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=abaaa401a45f3e3587d0e072c667b79a2ed9cf34" # v0.1.1
+  # Pre-release pin for plan verification; replaced by the v1.0.0 release commit before merge.
+  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=f7047053200ecf7735e171e0be8d4472483b9466" # v1.0.0
 
-  name                       = module.naming.name_prefix
-  vpc_cidr                   = var.vpc_cidr
-  availability_zones         = var.availability_zones
-  private_subnet_cidrs       = var.private_subnet_cidrs
-  flow_log_retention_in_days = var.flow_log_retention_in_days
-  tags                       = module.naming.tags
+  name       = module.naming.name_prefix
+  cidr_block = var.vpc_cidr
+  tags       = module.naming.tags
+
+  subnets = {
+    private = {
+      availability_zones = {
+        for key, zone in var.availability_zones : key => {
+          availability_zone = zone
+          cidr_block        = var.private_subnet_cidrs[key]
+        }
+      }
+    }
+  }
+
+  flow_logs = {
+    destination       = { create_kms_key = true }
+    retention_in_days = var.flow_log_retention_in_days
+    partition         = "aws"
+    region            = var.aws_region
+    account_id        = var.aws_account_id
+  }
 }
