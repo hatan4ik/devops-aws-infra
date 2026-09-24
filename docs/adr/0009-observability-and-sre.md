@@ -5,7 +5,11 @@
 
 ## Context
 
-The platform needs SLOs, low-latency diagnosis, security alert routing, cross-account visibility, retention, regional-failover procedures, and game-day evidence. Per-account dashboards alone make a regional incident slower to diagnose. Assumptions A-04 through A-06 apply.
+The platform needs SLOs, low-latency diagnosis, security alert routing,
+cross-account visibility, retention, regional-failover procedures, and game-day
+evidence. Per-account dashboards alone make a regional incident slower to
+diagnose. Product-approved latency, availability, recovery, and data-loss
+objectives are required before multi-Region implementation.
 
 ## Options considered
 

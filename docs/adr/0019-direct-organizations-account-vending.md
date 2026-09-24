@@ -14,7 +14,7 @@ before the first network, security, and workload accounts can be created.
 
 `us-east-2`, `us-west-2`, and `us-east-1` remain sandbox and pricing
 benchmarks only; they are not an approved multi-Region platform selection.
-Before a candidate network root can plan, a reviewed configuration must supply
+Before a new network root can plan, a reviewed configuration must supply
 one distinct primary/secondary Region registry. The on-premises VPN/BGP inputs
 have not been supplied and are explicitly out of this delivery slice.
 

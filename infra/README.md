@@ -1,52 +1,19 @@
-# Terraform source
+# Active Terraform roots
 
-This directory separates code that GitHub Actions may execute from future
-design source that may not be executed yet. It is not a Terraform root.
-Read [Project status](../docs/PROJECT-STATUS.md) before using any root.
+`infra/active` is the only Terraform delivery tree in this repository. It is
+not a Terraform root itself; run the root-specific GitHub workflow listed in
+the top-level [README](../README.md) after a reviewed pull request.
 
-## Active
+## Rules
 
-`active/` is the only executable Terraform delivery tree. The repository's
-root GitHub Actions workflows reference only its five roots. Each reusable
-implementation is an immutable, commit-pinned `aws.modules.*` Git source; this
-repository deliberately contains no duplicate active module implementation.
-It contains the delivered Organizations and sandbox-network roots plus the
-Terraform-owned delivery IAM and sandbox-platform roots. GitHub OIDC is the
-only supported apply path.
+- One root represents one account, Region, and environment boundary.
+- Roots compose released `aws.modules.*` implementations through immutable
+  commit-SHA sources. They do not duplicate reusable module code.
+- Root state is isolated. Do not read or edit state locally.
+- A root may reach AWS only through its matching GitHub OIDC workflow.
+- `root-context.yaml` contains reviewed, non-secret naming and allocation tags;
+  it is not an identity, account, backend, or credential source.
 
-## Candidates
-
-`candidates/` contains the future foundation, regional network, TGW, and
-workload root composition. It has no dedicated plan, apply, or drift workflow. A
-candidate becomes executable only through a separately approved ADR, backend
-contract, least-privilege OIDC role, protected environment, root-specific
-workflow, and reviewed plan.
-
-## Safety boundary
-
-- Never run `terraform apply` locally. Use the named GitHub workflow for an
-  active root after its documented approval gate.
-- Most deployment values belong in ignored `terraform.tfvars`; committed
-  `terraform.tfvars.example` files are placeholders, not deployable values.
-  The five active roots are the narrow exception: their reviewed, non-secret
-  account/Region/CIDR contracts are versioned for their GitHub workflows.
-- `active/root-context.yaml` is the reviewed, non-secret repository and
-  allocation-tag context shared by active roots. It derives names and tags;
-  it does not replace account, Region, backend, or OIDC trust boundaries.
-- Provider credentials are short-lived GitHub OIDC credentials. Modules do not
-  contain provider blocks, AWS credentials, account IDs, or remote-state data
-  sources.
-- `terraform test` uses provider mocks and `command = plan`; it does not
-  create AWS resources. Terraform 1.7 or later is required.
-
-## Layout
-
-```text
-active/roots/         Five roots referenced by root GitHub Actions workflows.
-active/root-context.yaml  Shared static naming and tagging context for active roots.
-candidates/modules/   Future root-composition modules only; implementations are external.
-candidates/roots/     Future foundation (including IPAM delegation), Network IPAM/TGW, and workload roots.
-```
-
-Run the repository quality check with `scripts/validate-terraform-quality.sh`.
-It formats, validates, and mock-tests the source without authenticating to AWS.
+Run `scripts/validate-terraform-quality.sh` for credential-free formatting,
+validation, tests, linting, and delivery-boundary checks. It initializes roots
+with `-backend=false` and never plans or applies remote state.

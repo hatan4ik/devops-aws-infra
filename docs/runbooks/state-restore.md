@@ -4,9 +4,8 @@
 
 Use only to restore a corrupted or accidentally changed Terraform state object.
 This is a metadata recovery procedure, not permission to recreate, destroy, or
-modify AWS resources. It applies to the transitional legacy backend only after
-the [adoption runbook](adopt-legacy-state-backend.md) has established canonical
-ownership. Before that point, follow the adoption runbook's rollback procedure.
+modify AWS resources. It applies only to a state object already owned by an
+active root and operated through the protected delivery lifecycle.
 
 The incident commander, Platform/DevOps Lead, and a Security approver must
 approve the action. Pause all plan/apply jobs, verify that the DynamoDB lock is

@@ -1,12 +1,13 @@
 # Architecture Decision Records
 
-The active architecture record is the reviewed sequence below. ADR numbers are
-unique within this list; a link in an implementation or runbook must resolve to
-one of these files.
+The records below are the authoritative architecture sequence. ADR numbers are
+unique in this repository. Retired duplicate ADRs and design drafts were
+removed during the repository cleanup; Git history preserves them for forensic
+comparison but they are not implementation authority.
 
 | ADR | Active decision |
 |---|---|
-| 0001 | [Control Tower and Account Factory for Terraform](0001-control-tower-account-vending.md) — superseded for account vending by ADR 0019 |
+| 0001 | [Control Tower and Account Factory for Terraform](0001-control-tower-account-vending.md) — superseded for account vending by ADR 0019. |
 | 0002 | [Active-active regional availability and data](0002-regional-availability-and-data.md) |
 | 0003 | [Segmented Transit Gateway, IPAM, and encryption](0003-segmented-tgw-ipam-and-encryption.md) |
 | 0004 | [Static/dynamic ingress and conditional egress inspection](0004-edge-ingress-and-egress.md) |
@@ -16,7 +17,7 @@ one of these files.
 | 0008 | [Security baseline and isolated Terraform state](0008-security-and-state.md) |
 | 0009 | [Observability access and independent evidence retention](0009-observability-and-sre.md) |
 | 0010 | [Repository and module topology](0010-repository-and-module-topology.md) |
-| 0011 | [Cognito MRR provider boundary](0011-cognito-mrr-provider-boundary.md) — amended by ADR 0020 |
+| 0011 | [Cognito MRR provider boundary](0011-cognito-mrr-provider-boundary.md) — amended by ADR 0020. |
 | 0012 | [OIDC-gated Terraform delivery](0012-oidc-gated-terraform-delivery.md) |
 | 0013 | [Layered verification and no automatic fault injection](0013-layered-verification-no-automatic-fault-injection.md) |
 | 0014 | [Canonical architecture and IaC boundary](0014-canonical-architecture-and-iac-boundary.md) |
@@ -28,12 +29,3 @@ one of these files.
 | 0020 | [CloudFormation ownership for Cognito MRR lifecycle](0020-cognito-mrr-cloudformation-ownership.md) |
 | 0021 | [Single-account sandbox platform core](0021-sandbox-platform-core-single-account.md) |
 | 0022 | [Terraform-owned sandbox GitHub delivery identity](0022-terraform-owned-sandbox-delivery-identity.md) |
-
-## Historical superseded records
-
-The duplicate-number files ending in `account-structure`,
-`multi-region-strategy`, `compute-platform`, `identity-provider`,
-`egress-inspection`, `edge-ingress`, `fine-grained-auth`, `observability`, and
-`repository-strategy` are retained for history only. They are superseded by
-[ADR 0014](0014-canonical-architecture-and-iac-boundary.md) and must not be
-used as implementation authority.

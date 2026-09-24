@@ -30,33 +30,6 @@ active_adrs=(
   docs/adr/0022-terraform-owned-sandbox-delivery-identity.md
 )
 
-superseded_adrs=(
-  docs/adr/0001-account-structure.md
-  docs/adr/0002-multi-region-strategy.md
-  docs/adr/0003-compute-platform.md
-  docs/adr/0004-identity-provider.md
-  docs/adr/0005-egress-inspection.md
-  docs/adr/0006-edge-ingress.md
-  docs/adr/0007-fine-grained-auth.md
-  docs/adr/0008-observability.md
-  docs/adr/0009-repository-strategy.md
-)
-
-prototype_roots=(
-  archive/prototypes/roots/shared-services/us-east-2/prod
-  archive/prototypes/roots/workload-app/us-east-2/dev
-  archive/prototypes/roots/workload-app/us-east-2/staging
-  archive/prototypes/roots/workload-app/us-east-2/prod
-)
-
-prototype_modules=(
-  archive/prototypes/modules/aws-cloudfront-alb
-  archive/prototypes/modules/aws-cognito-auth
-  archive/prototypes/modules/aws-ecs-fargate
-  archive/prototypes/modules/aws-tf-state-backend
-  archive/prototypes/modules/aws-vpc-workload
-)
-
 fail() {
   printf 'ADR boundary check failed: %s\n' "$*" >&2
   exit 1
@@ -66,30 +39,17 @@ for adr in "${active_adrs[@]}"; do
   [[ -f "$adr" ]] || fail "missing active ADR: $adr"
 done
 
-for adr in "${superseded_adrs[@]}"; do
-  [[ -f "$adr" ]] || fail "missing historical ADR: $adr"
-  grep -Fq 'Superseded by [ADR 0014]' "$adr" || fail "historical ADR is not superseded: $adr"
+for retired_path in \
+  archive \
+  infra/candidates \
+  reference \
+  docs/book \
+  docs/architecture \
+  docs/delivery \
+  docs/reference \
+  docs/reviews; do
+  [[ ! -e "$retired_path" ]] || fail "retired source path must not return: $retired_path"
 done
-
-for root in "${prototype_roots[@]}"; do
-  guard="$root/prototype_guard.tf"
-  [[ -f "$guard" ]] || fail "missing disabled-prototype guard: $guard"
-  grep -Fq 'terraform.workspace != terraform.workspace' "$guard" || fail "prototype guard does not fail plans: $guard"
-done
-
-for module in "${prototype_modules[@]}"; do
-  guard="$module/prototype_guard.tf"
-  [[ -f "$guard" ]] || fail "missing disabled-prototype guard: $guard"
-  grep -Fq 'terraform.workspace != terraform.workspace' "$guard" || fail "prototype guard does not fail plans: $guard"
-done
-
-if grep -R -nE --include='*.tf' 'backend[[:space:]]+"s3"|profile[[:space:]]*=' archive/prototypes/roots; then
-  fail 'disabled prototype roots must not configure an S3 backend or local profile'
-fi
-
-if grep -R -nE --include='*.tf' 'provider[[:space:]]+"aws"' archive/prototypes/roots; then
-  fail 'disabled prototype roots must not configure an AWS provider'
-fi
 
 historical_profile_prefix='AWS-hatan4ik-'
 historical_profile="${historical_profile_prefix}gmail"
@@ -264,12 +224,10 @@ if grep -R -nE --include='*.yml' --include='*.yaml' '[0-9]{12}' .github/workflow
   fail 'root workflows must not contain a hard-coded AWS account identifier'
 fi
 
-grep -Fq 'only executable Terraform delivery tree' README.md || fail 'root README does not identify the canonical Terraform tree'
+grep -Fq 'single GitOps repository' README.md || fail 'root README does not identify the canonical delivery repository'
 
-# Canonical source must not carry mutable plans, state, or ad hoc IAM
-# permission artefacts. The disabled prototype is deliberately not scanned:
-# ADR 0015 retains its historical state artefacts until the approved
-# declarative migration evidence permits quarantine or removal.
+# Active source must not carry mutable plans, state, or ad hoc IAM permission
+# artefacts.
 if find infra -type f \( -name '*.tfstate' -o -name '*.tfstate.*' -o -name '*.tfplan' -o -name 'required_permissions.txt' \) -print -quit | grep -q .; then
   fail 'canonical Terraform tree contains a state, plan, or ad hoc permission artifact'
 fi

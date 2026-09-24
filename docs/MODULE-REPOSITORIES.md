@@ -1,63 +1,31 @@
-# Versioned Terraform module repositories
+# Versioned Terraform modules
 
-Reusable Terraform implementation lives in a dedicated GitHub repository. This
-repository contains roots and composition only. Every Terraform `source` is a
-Git URL pinned to the full immutable commit SHA resolved from a release tag;
-never use a branch such as `main`.
+Reusable Terraform is maintained in its owning `aws.modules.*` repository.
+This GitOps repository contains root composition only; it never copies module
+implementation into `infra/active`.
 
-| Capability | Repository | Current release | Current consumer |
-|---|---|---|---|
-| ACM certificates and DNS validation | [aws.modules.acm](https://github.com/hatan4ik/aws.modules.acm) | `v0.1.2` | Available for an approved domain/certificate root. |
-| Cognito user pools and clients | [aws.modules.cognito](https://github.com/hatan4ik/aws.modules.cognito) | `v0.1.1` | Candidate workload composition and the ECS platform module. |
-| ECS platform foundation | [aws.modules.ecs](https://github.com/hatan4ik/aws.modules.ecs) | `v0.1.2` | Active sandbox-platform root. |
-| Private ECS Fargate services | [aws.modules.ecs-service](https://github.com/hatan4ik/aws.modules.ecs-service) | `v0.1.4` | Active sandbox-workload root; task egress is ordered before service launch and permits only VPC-private endpoints plus the regional S3 prefix list required for ECR layers; every security-group rule is a standalone resource with no inline `egress`, so plans stay clean. The repository `main` is already the breaking v1.0.0 line; adopting it needs a deliberate root migration with `moved` blocks. |
-| GitHub OIDC and delivery IAM | [aws.modules.iam](https://github.com/hatan4ik/aws.modules.iam) | `v0.1.10` | Active sandbox-delivery root, including opt-in ECR image publishers, scoped platform-state reads, and least-privilege autoscaling bootstrap/tag-read permissions. |
-| Deterministic names and canonical tags | [aws.modules.naming](https://github.com/hatan4ik/aws.modules.naming) | `v0.1.0` | Active sandbox-network and sandbox-platform roots. |
-| Customer-managed KMS keys | [aws.modules.ksm](https://github.com/hatan4ik/aws.modules.ksm) | `v0.1.2` | Available for new approved service roots. The repository name is intentionally preserved as supplied. |
-| Route 53 zones and records | [aws.modules.route53](https://github.com/hatan4ik/aws.modules.route53) | `v0.1.2` | Available for an approved DNS root. |
-| Private encrypted S3 buckets | [aws.modules.s3](https://github.com/hatan4ik/aws.modules.s3) | `v0.1.2` | Available for new approved data roots. |
-| Terraform state backends and adoption | [aws.modules.state](https://github.com/hatan4ik/aws.modules.state) | `v0.1.0` | Candidate foundation and controlled legacy-adoption roots. |
-| Transit Gateway hub, network-owned routing, and VPC attachment | [aws.modules.tgw](https://github.com/hatan4ik/aws.modules.tgw) | `v0.2.0` | Candidate regional-network and workload composition; Network account accepts and classifies every shared attachment. |
-| VPC foundations, organization IPAM, and workload VPCs | [aws.modules.vpc](https://github.com/hatan4ik/aws.modules.vpc) | `v0.3.0` | Active sandbox-network root plus candidate IPAM and workload composition; candidate VPCs use dedicated TGW subnets and explicit non-default routes. |
-| Encrypted DynamoDB tables | [aws.modules.dynamodb](https://github.com/hatan4ik/aws.modules.dynamodb) | `v0.1.2` | Available for new approved state or workload roots. |
+| Capability | Repository | Release used or available |
+|---|---|---|
+| Private Fargate services | [aws.modules.ecs-service](https://github.com/hatan4ik/aws.modules.ecs-service) | Active workload root uses `v0.1.4`. The v1 design requires a signed release and a state-move migration. |
+| ECS platform foundation | [aws.modules.ecs](https://github.com/hatan4ik/aws.modules.ecs) | `v0.1.2` in the active sandbox-platform root. |
+| GitHub OIDC and delivery IAM | [aws.modules.iam](https://github.com/hatan4ik/aws.modules.iam) | `v0.1.10` in the active sandbox-delivery root. |
+| VPC foundations | [aws.modules.vpc](https://github.com/hatan4ik/aws.modules.vpc) | `v0.3.0` in the active sandbox-network root. |
+| Deterministic names and tags | [aws.modules.naming](https://github.com/hatan4ik/aws.modules.naming) | `v0.1.0` in active sandbox roots. |
+| Cognito | [aws.modules.cognito](https://github.com/hatan4ik/aws.modules.cognito) | `v0.1.1`, consumed by the platform foundation. |
+| Supporting services | [ACM](https://github.com/hatan4ik/aws.modules.acm), [KMS](https://github.com/hatan4ik/aws.modules.ksm), [Route 53](https://github.com/hatan4ik/aws.modules.route53), [S3](https://github.com/hatan4ik/aws.modules.s3), [DynamoDB](https://github.com/hatan4ik/aws.modules.dynamodb), [TGW](https://github.com/hatan4ik/aws.modules.tgw), and [state](https://github.com/hatan4ik/aws.modules.state) | Available for a separately approved root. |
 
 ## Consumer rule
 
-Use the full commit SHA resolved from the exact upstream release tag. Keep the
-release tag as an inline comment so reviewers can identify the intended
-semantic version. Examples:
+Every root pins the full 40-character commit SHA resolved from a signed,
+annotated semantic-version release tag. The tag is retained as an inline
+comment for reviewers.
 
 ```hcl
 module "network" {
   source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=ada254e7327ff9f401df41c0819a34fc7891938f" # v0.3.0
 }
-
-module "workload_vpc" {
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git//modules/workload?ref=ada254e7327ff9f401df41c0819a34fc7891938f" # v0.3.0
-}
-
-module "network_ipam" {
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git//modules/ipam?ref=ada254e7327ff9f401df41c0819a34fc7891938f" # v0.3.0
-}
-
-module "network_owned_tgw_routing" {
-  source = "git::https://github.com/hatan4ik/aws.modules.tgw.git//modules/network-routing?ref=886043384c3bc1637ed9b64e72d2af87d172d52e" # v0.2.0
-}
 ```
 
-An upstream change does nothing until a reviewed pull request updates the
-commit pin in the consuming root. That review is the upgrade boundary and preserves a
-reproducible Terraform plan.
-
-The naming module derives deterministic names and canonical tags from reviewed
-static context. It does not discover account IDs, backend coordinates, or OIDC
-trust values: those are explicit root security and bootstrap contracts.
-
-## Deliberate boundaries
-
-- `archive/prototypes/` is historical evidence and is not republished.
-- ACM and Route 53 have no current consumer because DNS/certificate ownership
-  and the public-ingress ADR gate are unresolved.
-- The state module is separate because its multi-Region replication, Object
-  Lock, and recovery policy require a stronger contract than a generic S3,
-  KMS, or DynamoDB resource wrapper.
+Never follow `main`, a mutable tag, a local checkout, or a relative module
+path. A module upgrade is a root pull request: its plan is the compatibility
+proof, and its rollback is a revert to the previous immutable commit.

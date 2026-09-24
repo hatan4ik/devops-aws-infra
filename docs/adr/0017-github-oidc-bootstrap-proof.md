@@ -27,8 +27,8 @@ policy to a particular workflow filename.
    `landing-zone` GitHub deployment environments. A future repository split
    requires its own ADR and migration record.
 2. A short-lived IAM Identity Center session historically performed a one-time
-   CloudFormation bootstrap. The retired template is preserved under
-   [`archive/cloudformation-sandbox-bootstrap`](../../archive/cloudformation-sandbox-bootstrap/).
+   CloudFormation bootstrap. The retired template is preserved in Git history
+   only; it is not a deployment path.
    [ADR 0022](0022-terraform-owned-sandbox-delivery-identity.md) now adopts
    the GitHub OIDC provider and roles into Terraform and retires that stack.
 3. The only credentialed root workflow authorized before a root-specific policy

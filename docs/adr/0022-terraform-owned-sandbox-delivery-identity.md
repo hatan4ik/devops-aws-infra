@@ -36,10 +36,9 @@ unnecessary and harms repeatability.
    once. The backend names the approved customer-managed key by its stable KMS
    alias, rather than repeating an account-qualified `kms_key_id` ARN. The
    bucket default is verified to use that same key.
-5. The three retired CloudFormation templates and their bootstrap scripts live
-   only under [`archive/cloudformation-sandbox-bootstrap`](../../archive/cloudformation-sandbox-bootstrap/).
-   The controlled handoff sets `Retain` metadata, deletes the stacks, and
-   verifies Terraform ownership before the archive is left as evidence.
+5. The three retired CloudFormation templates and their bootstrap scripts are
+   retained in Git history only. The controlled handoff set `Retain` metadata,
+   deleted the stacks, and verified Terraform ownership before retirement.
 6. The management-account Organization bootstrap and the future Cognito MRR
    boundary are not changed by this sandbox migration. They require separate,
    account-specific Terraform adoption records; they are not justification for
