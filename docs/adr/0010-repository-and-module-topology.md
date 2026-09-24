@@ -35,7 +35,11 @@ The platform needs clear ownership, independently deployable account/Region/envi
 
 ## Decision
 
-Adopt option 3 and the naming, inventory, lifecycle, and GitHub-control model in [the Phase 4 repository strategy](../architecture/repository-strategy.md) and [planned GitHub controls](../architecture/github-repository-controls.md). Treat only the three named components as initial independent Terraform module repositories. All other initial Terraform modules are internal composition under `modules/` in their owner root repository.
+Adopt the delivered topology: this GitOps repository owns active root
+composition and root-specific workflows; reusable implementations with an
+independent lifecycle live in versioned `aws.modules.*` repositories. Every
+consumer pins a signed release commit. New capabilities are introduced as a
+reviewed active root, not kept as a parallel draft tree.
 
 Require a root for each `(account, Region, environment)` deployment tuple, module inputs rather than cross-team remote-state reads, semantic and signed module tags, protected `main`, CODEOWNERS, two approvals including a code owner, required checks, and GitHub OIDC rather than long-lived AWS credentials. ADR 0017 establishes the initial personal-repository controls and a permissionless sandbox trust proof; root-specific delivery roles, backend configuration, and independent reviewers remain uncreated. The two-approval target cannot be met until independent GitHub reviewers are added.
 
@@ -43,5 +47,7 @@ Require a root for each `(account, Region, environment)` deployment tuple, modul
 
 - Option 1 is rejected: it has a low initial setup cost, but it couples unrelated plans, review queues, releases, and least-privilege deployment credentials.
 - Option 2 is rejected: it creates versioning, ownership, release, and compatibility obligations before modules have independent consumers or stable interfaces.
-- A candidate module cannot be extracted merely to remove duplication. It needs the A-18 threshold, an ADR, semantic-version/migration plan, owners, tests, and consumer migration evidence.
+- A new module cannot be extracted merely to remove duplication. It needs an
+  ADR, semantic-version/migration plan, owners, tests, and consumer migration
+  evidence.
 - This decision does not authorize GitHub repository creation, branch/ruleset changes, tags, workflow execution, AWS role creation, Terraform initialization, plan, or apply. Those are separately controlled Phase 4 remote and later implementation actions.

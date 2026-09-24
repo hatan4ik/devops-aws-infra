@@ -1,8 +1,9 @@
 # Local .terraform directories
 **/.terraform/*
 
-# Local review-only reference clones. They are not GitOps source or dependencies.
-/reference/github/
+# Local editor and tool caches
+.ruby-lsp/
+.trunk/
 
 # .tfstate files
 *.tfstate

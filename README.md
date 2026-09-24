@@ -1,65 +1,52 @@
-# AWS platform GitOps source
+# AWS platform GitOps
 
-This repository is the GitOps source and operator documentation for an
-AWS-native, multi-account, multi-Region platform. It contains no cloud
-credentials, Terraform state, or customer data.
+This is the single GitOps repository for the AWS platform that exists today.
+It contains executable Terraform roots, the GitHub OIDC delivery workflows that
+operate them, and the documentation an operator needs to make a controlled
+change. It contains no AWS credentials, Terraform state, local modules, or
+unapproved future infrastructure.
 
 ## Start here
 
-Read [Project status and delivery authority](docs/PROJECT-STATUS.md) first.
-It is the authority for what exists in AWS, what may be changed, and what is
-still blocked.
+Read [project status](docs/PROJECT-STATUS.md), then the
+[ConOps](docs/operations/conops.md). They state what is deployed, what is not,
+and the only supported change path.
 
-## One executable path
+## One delivery path
 
 ```text
-.github/workflows/  ->  infra/active/roots/  ->  aws.modules.*@immutable-commit
+pull request -> root-specific GitHub plan -> reviewed merge
+             -> protected GitHub OIDC apply -> post-apply drift check
 ```
 
-`infra/active` is the only executable Terraform delivery tree. Only the five
-roots below are referenced by the root GitHub Actions workflows:
+| Active root | Workflow family | Responsibility |
+|---|---|---|
+| `organization/global` | `organization-{plan,apply,drift}.yml` | Organizations OUs, SCPs, and account records. |
+| `sandbox-delivery/us-east-2/global` | `sandbox-delivery-iam-{plan,apply,drift}.yml` | GitHub OIDC delivery identity and scoped policies. |
+| `sandbox-network/us-east-2/dev` | `sandbox-network-{plan,apply,drift}.yml` | Isolated sandbox VPC and network telemetry. |
+| `sandbox-platform/us-east-2/dev` | `sandbox-platform-{plan,apply,drift}.yml` | Private ECS platform services and data dependencies. |
+| `sandbox-workload/us-east-2/dev` | `sandbox-workload-{plan,apply,drift}.yml` | Private Fargate application services. |
 
-| Active root | Owning delivery workflow family |
-|---|---|
-| `organization/global` | `organization-{plan,apply,drift}.yml` |
-| `sandbox-delivery/us-east-2/global` | `sandbox-delivery-iam-{plan,apply,drift}.yml` |
-| `sandbox-network/us-east-2/dev` | `sandbox-network-{plan,apply,drift}.yml` |
-| `sandbox-platform/us-east-2/dev` | `sandbox-platform-{plan,apply,drift}.yml` |
-| `sandbox-workload/us-east-2/dev` | `sandbox-workload-{plan,apply,drift}.yml` |
-
-All applies require a manual dispatch, an explicit `apply` confirmation, the
-protected GitHub environment, and short-lived GitHub OIDC credentials. Local
-quality checks initialize with `-backend=false` and never apply.
+Every apply requires protected `main`, a matching reviewed plan, an explicit
+`confirm=apply` input, the protected GitHub environment, and short-lived OIDC
+credentials. Local Terraform applies are not supported.
 
 ## Repository map
 
-| Directory | Purpose | Delivery status |
-|---|---|---|
-| [`infra/active`](infra/README.md) | Current roots that call versioned external modules. | Executable only through its named GitHub workflows. |
-| [`infra/candidates`](infra/README.md#candidates) | Future root composition that calls versioned external modules. | Source-only; no root workflow may run it. |
-| [Module repositories](docs/MODULE-REPOSITORIES.md) | Versioned `aws.modules.*` implementations and exact source commit pins. | Each module has its own quality workflow and semantic release tag. |
-| [`archive/prototypes`](archive/prototypes/) | Disabled predecessor modules and roots, each guarded to fail a normal plan. | Never deploy. |
-| [`archive/cloudformation-sandbox-bootstrap`](archive/cloudformation-sandbox-bootstrap/) | Retired CloudFormation bootstrap evidence. | Never deploy. |
-| [`archive/workflow-preflights`](archive/workflow-preflights/) | Retired generic workflow preflights that intentionally fail. | Never restore to `.github/workflows/`. |
-| [`bootstrap`](bootstrap/README.md) | One-time CloudFormation prerequisite for the Organization root's state and OIDC policies. | Use only under ADR 0019's bootstrap procedure. |
-| [`reference`](reference/README.md) | Read-only external architecture-review material. | Never initialize, plan, apply, or edit as platform code. |
-| [terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines) | Released reusable Terraform quality, plan, apply, drift, and module-release workflows. | Consumers pin the `v0.1.0` release commit; it has no AWS identity itself. |
-| [`archive/pipeline-templates-bootstrap`](archive/pipeline-templates-bootstrap/) | Pre-release workflow-template bootstrap retained as history. | Never use as an active workflow source. |
-| [`docs`](docs/README.md) | Status, ADRs, runbooks, architecture, and evidence. | Operating authority. |
-| [`tests`](tests/README.md) | Terraform contract and operational test contracts. | Quality evidence. |
+| Path | Purpose |
+|---|---|
+| [`infra/active`](infra/README.md) | The five executable Terraform roots and their shared naming context. |
+| [`.github/workflows`](.github/workflows) | Root-specific plan, apply, and drift workflows. |
+| [`bootstrap`](bootstrap/README.md) | The one-time Organizations control-plane prerequisite. |
+| [`docs`](docs/README.md) | Current status, decisions, ConOps, roadmap, and runbooks. |
+| [`scripts`](scripts) | Guarded local helpers and repository quality checks. |
+| [`tests`](tests/README.md) | Read-only post-deployment verification contracts. |
 
-## Documentation authority
+Reusable Terraform belongs to the independently versioned
+[`aws.modules.*` repositories](docs/MODULE-REPOSITORIES.md). Active roots pin
+an exact release commit; they never copy a module or follow a branch.
 
-- [Project status](docs/PROJECT-STATUS.md) — current verified AWS state and next gate.
-- [ADRs](docs/adr/README.md) — architecture and delivery decisions.
-- [GitHub Actions Terraform delivery](docs/runbooks/github-actions-delivery.md) — triggers, root roles, apply gates, and operator procedure.
-- [Platform ConOps](docs/operations/conops.md) — current operational model, change lifecycle, and service-delivery gates.
-- [First delivery slice](docs/delivery/first-delivery-slice.md) — bounded work before platform expansion.
-- [`docs/book/`](docs/book/README.md) — explanatory reference only, not approval authority.
-
-## Before enabling a new AWS delivery root
-
-Follow the [external verification checklist](docs/architecture/external-verification.md)
-and [Phase 6–7 traceability](docs/architecture/phase-6-7-traceability.md). Do
-not add credentials or production values to `terraform.tfvars`, source
-control, workflow logs, or CI artifacts.
+Historical prototypes, copied third-party repositories, review snapshots, and
+unapproved candidate roots have intentionally been removed from `main`.
+They remain recoverable from Git history and are not a second implementation or
+delivery path.

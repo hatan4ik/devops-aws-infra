@@ -1,32 +1,16 @@
 # Platform documentation
 
-Start with [Project status and delivery authority](PROJECT-STATUS.md). It
-separates current truth from design reference and historical material.
+This directory contains only current operating documentation. Git history is
+the source for retired designs, review snapshots, and superseded procedures.
 
-## Operating documents
+| Document | Use it for |
+|---|---|
+| [Project status](PROJECT-STATUS.md) | What is deployed, what is deliberately absent, and the next approved gate. |
+| [Platform ConOps](operations/conops.md) | The operator model, delivery order, roles, and stop conditions. |
+| [Roadmap](ROADMAP.md) | The controlled path from the sandbox to the intended multi-account, multi-Region platform. |
+| [ADRs](adr/README.md) | Architecture and delivery decisions. |
+| [Module catalog](MODULE-REPOSITORIES.md) | Module ownership, releases, and immutable consumer pins. |
+| [Runbooks](runbooks/README.md) | Repeatable operational procedures. |
 
-- [Architecture decisions](adr/README.md) — the decision authority; ADR 0015
-  selects the first delivery milestone.
-- [First delivery slice](delivery/first-delivery-slice.md) — the bounded work
-  that must complete before platform expansion.
-- [External verification checklist](architecture/external-verification.md) —
-  inputs and approvals required before any AWS apply.
-- [Runbooks](runbooks/README.md) — controlled operational procedures; a
-  runbook is not automatic authorization to execute an AWS change.
-- [GitHub Actions Terraform delivery](runbooks/github-actions-delivery.md) —
-  active workflow ownership, triggers, OIDC roles, and apply gates.
-- [Platform ConOps](operations/conops.md) — operating model for the current
-  sandbox and the controlled path to private application services.
-- [Discussion ConOps](operations/discussion-conops.md) — one-page statement of
-  current capability, setup order, operating boundaries, and deployment proof.
-- [Versioned module repositories](MODULE-REPOSITORIES.md) — the reusable
-  `aws.modules.*` implementations, their immutable release commits, and the
-  consumer-source rule.
-
-## Reference and history
-
-- [Engineering reference](book/README.md) explains the target design. It is
-  not current deployment status or an approval record.
-- [Historical reviews](reviews/README.md) are preserved evidence only. Their
-  findings must be reconciled against current decisions and source before work
-  is scheduled.
+Documentation is not approval to change AWS. A change still needs its root
+plan, review, protected environment approval, and post-apply evidence.
