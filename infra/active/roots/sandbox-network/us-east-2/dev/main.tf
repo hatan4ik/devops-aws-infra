@@ -10,11 +10,15 @@ module "naming" {
 
 module "sandbox_network" {
   # Pre-release pin for plan verification; replaced by the v1.0.0 release commit before merge.
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=f7047053200ecf7735e171e0be8d4472483b9466" # v1.0.0
+  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=e6f697f5e60f358574e6db595ed42b022cd8527f" # v1.0.0
 
   name       = module.naming.name_prefix
   cidr_block = var.vpc_cidr
   tags       = module.naming.tags
+
+  # v1 enables Network Address Usage metrics by default; the sandbox VPC was
+  # created without them, so keep them off to leave the resource untouched.
+  enable_network_address_usage_metrics = false
 
   subnets = {
     private = {
