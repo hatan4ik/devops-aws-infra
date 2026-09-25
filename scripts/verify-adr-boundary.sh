@@ -145,6 +145,7 @@ grep -Fq 'prepare_platform_deletion' "$reusable_destroy_workflow" || fail 'reusa
 grep -Fq 'module.sandbox_platform_core.module.cognito' "$reusable_destroy_workflow" || fail 'reusable destroy must resolve only the exact Terraform-owned Cognito pool state module'
 grep -Fq 'module.sandbox_platform_core" and' "$reusable_destroy_workflow" || fail 'reusable destroy must resolve only the exact Terraform-owned DynamoDB table state module'
 grep -Fq 'aws cognito-idp update-user-pool' "$reusable_destroy_workflow" || fail 'reusable destroy must deactivate Cognito deletion protection through the reviewed path'
+grep -Fq 'already absent; no deletion protections to deactivate' "$reusable_destroy_workflow" || fail 'reusable destroy must treat an already-destroyed platform root as a no-op'
 grep -Fq -- '--no-deletion-protection-enabled' "$reusable_destroy_workflow" || fail 'reusable destroy must deactivate DynamoDB deletion protection through the reviewed path'
 
 grep -Fq 'workflow_dispatch:' "$sandbox_teardown_workflow" || fail 'sandbox teardown must require manual dispatch'

@@ -165,26 +165,39 @@ jobs:
           accepted_keys_file="$RUNNER_TEMP/update-user-pool-keys-${GITHUB_RUN_ID}.json"
           trap 'rm -f "$platform_state_file" "$user_pool_file" "$update_input_file" "$accepted_keys_file"' EXIT
           terraform state pull > "$platform_state_file"
-          user_pool_id="$(jq -er '
-            .resources[] |
-            select(
-              .module == "module.sandbox_platform_core.module.cognito" and
-              .mode == "managed" and
-              .type == "aws_cognito_user_pool" and
-              .name == "this"
-            ) |
-            .instances | map(select(.deposed == null))[0].attributes.id
+          user_pool_id="$(jq -r '
+            [
+              .resources[]? |
+              select(
+                .module == "module.sandbox_platform_core.module.cognito" and
+                .mode == "managed" and
+                .type == "aws_cognito_user_pool" and
+                .name == "this"
+              ) |
+              .instances | map(select(.deposed == null))[0].attributes.id
+            ] | first // empty
           ' "$platform_state_file")"
-          session_table_name="$(jq -er '
-            .resources[] |
-            select(
-              .module == "module.sandbox_platform_core" and
-              .mode == "managed" and
-              .type == "aws_dynamodb_table" and
-              .name == "session"
-            ) |
-            .instances | map(select(.deposed == null))[0].attributes.name
+          session_table_name="$(jq -r '
+            [
+              .resources[]? |
+              select(
+                .module == "module.sandbox_platform_core" and
+                .mode == "managed" and
+                .type == "aws_dynamodb_table" and
+                .name == "session"
+              ) |
+              .instances | map(select(.deposed == null))[0].attributes.name
+            ] | first // empty
           ' "$platform_state_file")"
+
+          if [[ -z "$user_pool_id" && -z "$session_table_name" ]]; then
+            echo 'Terraform-owned platform pool and table are already absent; no deletion protections to deactivate.'
+            exit 0
+          fi
+          if [[ -z "$user_pool_id" || -z "$session_table_name" ]]; then
+            echo 'Terraform platform state is incomplete: expected both the Cognito pool and DynamoDB session table.' >&2
+            exit 1
+          fi
 
           aws cognito-idp describe-user-pool --user-pool-id "$user_pool_id" --query 'UserPool' --output json > "$user_pool_file"
           aws cognito-idp update-user-pool --generate-cli-skeleton input --output json \
