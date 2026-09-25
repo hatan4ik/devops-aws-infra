@@ -42,8 +42,10 @@ delete that repository.
    `DeletionProtection` to `INACTIVE`; the
    workflow verifies both protections are inactive before it creates the
    final binary destroy plan.
-7. A repeated teardown is idempotent: a root that was already destroyed after
-   an interrupted run reports zero planned deletes and proceeds as a no-op,
+7. A repeated teardown is idempotent. When both exact platform resources are
+   already absent from state, the protection-preparation step is a no-op; a
+   partially missing platform pair fails closed. A root that was already
+   destroyed after an interrupted run reports zero planned deletes and proceeds as a no-op,
    while downstream roots remain ordered behind successful predecessors.
 
 ## Consequences
