@@ -1,0 +1,158 @@
+name: Sandbox application-plane teardown
+
+run-name: "Sandbox teardown: ${{ inputs.operation }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Run a read-only plan first; destroy is enabled only after reviewing a successful plan from this exact main revision.
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - destroy
+      reviewed_plan_run_id:
+        description: Required only for destroy. Enter the successful teardown-plan Actions run ID for this exact main revision.
+        required: false
+        type: string
+      confirm:
+        description: Required only for destroy. Type DESTROY-SANDBOX-APPLICATION-PLANE exactly.
+        required: false
+        type: string
+      acknowledge_data_loss:
+        description: Required only for destroy. Type DELETE-COGNITO-ECR-DYNAMODB-LOGS exactly.
+        required: false
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+concurrency:
+  group: sandbox-application-plane-teardown
+  cancel-in-progress: false
+
+jobs:
+  authorize_destroy:
+    name: authorize_destroy
+    runs-on: ubuntu-24.04
+    outputs:
+      authorized: ${{ steps.authorize.outputs.authorized }}
+    steps:
+      - name: Validate the teardown request and reviewed-plan provenance
+        id: authorize
+        env:
+          OPERATION: ${{ inputs.operation }}
+          CONFIRM: ${{ inputs.confirm }}
+          ACKNOWLEDGE_DATA_LOSS: ${{ inputs.acknowledge_data_loss }}
+          REVIEWED_PLAN_RUN_ID: ${{ inputs.reviewed_plan_run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ "$OPERATION" == "plan" ]]; then
+            echo 'authorized=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          test "$OPERATION" = "destroy"
+          test "$CONFIRM" = "DESTROY-SANDBOX-APPLICATION-PLANE"
+          test "$ACKNOWLEDGE_DATA_LOSS" = "DELETE-COGNITO-ECR-DYNAMODB-LOGS"
+          [[ "$REVIEWED_PLAN_RUN_ID" =~ ^[0-9]+$ ]]
+          run_json="$(curl --fail-with-body --silent --show-error \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/runs/$REVIEWED_PLAN_RUN_ID")"
+          echo "$run_json" | jq -e \
+            --arg sha "$GITHUB_SHA" \
+            '.conclusion == "success" and
+             .event == "workflow_dispatch" and
+             .path == ".github/workflows/sandbox-teardown.yml" and
+             .head_branch == "main" and
+             .head_sha == $sha and
+             .display_title == "Sandbox teardown: plan"' >/dev/null
+          echo 'authorized=true' >> "$GITHUB_OUTPUT"
+
+  workload_plan:
+    needs: authorize_destroy
+    uses: ./.github/workflows/_terraform-root-destroy.yml
+    with:
+      mode: plan
+      root_directory: infra/active/roots/sandbox-workload/us-east-2/dev
+      aws_region: us-east-2
+      environment: dev
+      plan_role_variable: AWS_SANDBOX_WORKLOAD_PLAN_ROLE_ARN
+      apply_role_variable: AWS_SANDBOX_WORKLOAD_APPLY_ROLE_ARN
+      session_prefix: sandbox-workload
+      job_name: sandbox_workload
+
+  platform_plan:
+    needs: authorize_destroy
+    uses: ./.github/workflows/_terraform-root-destroy.yml
+    with:
+      mode: plan
+      root_directory: infra/active/roots/sandbox-platform/us-east-2/dev
+      aws_region: us-east-2
+      environment: dev
+      plan_role_variable: AWS_SANDBOX_PLATFORM_PLAN_ROLE_ARN
+      apply_role_variable: AWS_SANDBOX_PLATFORM_APPLY_ROLE_ARN
+      session_prefix: sandbox-platform
+      job_name: sandbox_platform
+      purge_ecr_images: true
+
+  network_plan:
+    needs: authorize_destroy
+    uses: ./.github/workflows/_terraform-root-destroy.yml
+    with:
+      mode: plan
+      root_directory: infra/active/roots/sandbox-network/us-east-2/dev
+      aws_region: us-east-2
+      environment: dev
+      plan_role_variable: AWS_SANDBOX_NETWORK_PLAN_ROLE_ARN
+      apply_role_variable: AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN
+      session_prefix: sandbox-network
+      job_name: sandbox_network
+
+  workload_destroy:
+    needs: authorize_destroy
+    if: inputs.operation == 'destroy' && needs.authorize_destroy.outputs.authorized == 'true'
+    uses: ./.github/workflows/_terraform-root-destroy.yml
+    with:
+      mode: destroy
+      root_directory: infra/active/roots/sandbox-workload/us-east-2/dev
+      aws_region: us-east-2
+      environment: dev
+      plan_role_variable: AWS_SANDBOX_WORKLOAD_PLAN_ROLE_ARN
+      apply_role_variable: AWS_SANDBOX_WORKLOAD_APPLY_ROLE_ARN
+      session_prefix: sandbox-workload
+      job_name: sandbox_workload
+
+  platform_destroy:
+    needs: [authorize_destroy, workload_destroy]
+    if: inputs.operation == 'destroy' && needs.authorize_destroy.outputs.authorized == 'true' && needs.workload_destroy.result == 'success'
+    uses: ./.github/workflows/_terraform-root-destroy.yml
+    with:
+      mode: destroy
+      root_directory: infra/active/roots/sandbox-platform/us-east-2/dev
+      aws_region: us-east-2
+      environment: dev
+      plan_role_variable: AWS_SANDBOX_PLATFORM_PLAN_ROLE_ARN
+      apply_role_variable: AWS_SANDBOX_PLATFORM_APPLY_ROLE_ARN
+      session_prefix: sandbox-platform
+      job_name: sandbox_platform
+      purge_ecr_images: true
+
+  network_destroy:
+    needs: [authorize_destroy, platform_destroy]
+    if: inputs.operation == 'destroy' && needs.authorize_destroy.outputs.authorized == 'true' && needs.platform_destroy.result == 'success'
+    uses: ./.github/workflows/_terraform-root-destroy.yml
+    with:
+      mode: destroy
+      root_directory: infra/active/roots/sandbox-network/us-east-2/dev
+      aws_region: us-east-2
+      environment: dev
+      plan_role_variable: AWS_SANDBOX_NETWORK_PLAN_ROLE_ARN
+      apply_role_variable: AWS_SANDBOX_NETWORK_APPLY_ROLE_ARN
+      session_prefix: sandbox-network
+      job_name: sandbox_network

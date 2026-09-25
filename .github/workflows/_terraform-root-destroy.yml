@@ -1,0 +1,191 @@
+name: Reusable Terraform root teardown
+
+on:
+  workflow_call:
+    inputs:
+      mode:
+        required: true
+        type: string
+      root_directory:
+        required: true
+        type: string
+      aws_region:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      plan_role_variable:
+        required: true
+        type: string
+      apply_role_variable:
+        required: true
+        type: string
+      session_prefix:
+        required: true
+        type: string
+      job_name:
+        required: true
+        type: string
+      purge_ecr_images:
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  plan:
+    name: ${{ inputs.job_name }}_destroy_plan
+    if: inputs.mode == 'plan'
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: ${{ inputs.root_directory }}
+    steps:
+      - name: Check out protected default-branch source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Require the scoped plan role
+        env:
+          ROLE_TO_ASSUME: ${{ vars[inputs.plan_role_variable] }}
+        run: |
+          set -euo pipefail
+          test -n "$ROLE_TO_ASSUME"
+
+      - name: Read the repository Terraform version
+        id: terraform-version
+        working-directory: .
+        run: echo "version=$(tr -d '[:space:]' < .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: ${{ steps.terraform-version.outputs.version }}
+          terraform_wrapper: false
+
+      - name: Exchange GitHub OIDC for the dedicated plan role
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.0
+        with:
+          role-to-assume: ${{ vars[inputs.plan_role_variable] }}
+          role-session-name: ${{ inputs.session_prefix }}-destroy-plan-${{ github.run_id }}
+          aws-region: ${{ inputs.aws_region }}
+          mask-aws-account-id: true
+
+      - name: Initialize the dedicated remote state
+        run: terraform init -input=false -lockfile=readonly -backend-config=backend.hcl
+
+      - name: Produce and summarize the destruction plan
+        run: |
+          set -euo pipefail
+          terraform plan -destroy -input=false -lock-timeout=5m -var-file=terraform.tfvars -out=tfplan
+          delete_count="$(terraform show -json tfplan | jq '[.resource_changes[]? | select(.change.actions == ["delete"])] | length')"
+          test "$delete_count" -gt 0
+          printf 'Planned deletes: %s\n' "$delete_count"
+          terraform show -no-color tfplan
+
+  destroy:
+    name: ${{ inputs.job_name }}_destroy_apply
+    if: inputs.mode == 'destroy'
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.root_directory }}
+    steps:
+      - name: Check out protected default-branch source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Require the scoped apply role
+        env:
+          ROLE_TO_ASSUME: ${{ vars[inputs.apply_role_variable] }}
+        run: |
+          set -euo pipefail
+          test -n "$ROLE_TO_ASSUME"
+
+      - name: Read the repository Terraform version
+        id: terraform-version
+        working-directory: .
+        run: echo "version=$(tr -d '[:space:]' < .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: ${{ steps.terraform-version.outputs.version }}
+          terraform_wrapper: false
+
+      - name: Exchange GitHub OIDC for the dedicated apply role
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.0
+        with:
+          role-to-assume: ${{ vars[inputs.apply_role_variable] }}
+          role-session-name: ${{ inputs.session_prefix }}-destroy-${{ github.run_id }}
+          aws-region: ${{ inputs.aws_region }}
+          mask-aws-account-id: true
+
+      - name: Initialize the dedicated remote state
+        run: terraform init -input=false -lockfile=readonly -backend-config=backend.hcl
+
+      - name: Save an encrypted pre-destroy state snapshot
+        run: |
+          set -euo pipefail
+          state_bucket="$(awk -F '"' '/^[[:space:]]*bucket[[:space:]]*=/{print $2; exit}' backend.hcl)"
+          state_key="$(awk -F '"' '/^[[:space:]]*key[[:space:]]*=/{print $2; exit}' backend.hcl)"
+          state_kms_key="$(awk -F '"' '/^[[:space:]]*kms_key_id[[:space:]]*=/{print $2; exit}' backend.hcl)"
+          test -n "$state_bucket"
+          test -n "$state_key"
+          test -n "$state_kms_key"
+          state_file="$RUNNER_TEMP/pre-destroy-${GITHUB_RUN_ID}.tfstate"
+          trap 'rm -f "$state_file"' EXIT
+          terraform state pull > "$state_file"
+          state_parent="${state_key%/*}"
+          backup_key="${state_parent}/backups/pre-destroy-${GITHUB_RUN_ID}.tfstate"
+          aws s3 cp "$state_file" "s3://${state_bucket}/${backup_key}" \
+            --sse aws:kms \
+            --sse-kms-key-id "$state_kms_key" \
+            --only-show-errors
+          printf 'Encrypted state snapshot: s3://%s/%s (sha256 %s)\n' \
+            "$state_bucket" "$backup_key" "$(sha256sum "$state_file" | awk '{print $1}')"
+
+      - name: Re-plan and summarize protected-root destruction
+        run: |
+          set -euo pipefail
+          terraform plan -destroy -input=false -lock-timeout=5m -var-file=terraform.tfvars -out=tfplan
+          delete_count="$(terraform show -json tfplan | jq '[.resource_changes[]? | select(.change.actions == ["delete"])] | length')"
+          test "$delete_count" -gt 0
+          printf 'Planned deletes: %s\n' "$delete_count"
+          terraform show -no-color tfplan
+
+      - name: Purge only the Terraform-owned platform ECR repository
+        if: inputs.purge_ecr_images
+        run: |
+          set -euo pipefail
+          repository_url="$(terraform output -json application | jq -er '.ecr_repository_url')"
+          repository_name="${repository_url##*/}"
+          image_ids_file="$RUNNER_TEMP/ecr-image-ids-${GITHUB_RUN_ID}.json"
+          trap 'rm -f "$image_ids_file"' EXIT
+          aws ecr list-images --repository-name "$repository_name" --query 'imageIds' --output json > "$image_ids_file"
+          image_count="$(jq '[.[] | {imageDigest}] | unique_by(.imageDigest) | length' "$image_ids_file")"
+          if [[ "$image_count" -gt 0 ]]; then
+            while IFS= read -r image_batch; do
+              aws ecr batch-delete-image \
+                --repository-name "$repository_name" \
+                --image-ids "$image_batch" \
+                --output json >/dev/null
+            done < <(
+              jq -c '
+                [.[] | {imageDigest}] | unique_by(.imageDigest) as $images |
+                range(0; ($images | length); 100) as $offset |
+                $images[$offset:$offset + 100]
+              ' "$image_ids_file"
+            )
+          fi
+          printf 'Purged %s image digests from Terraform-owned ECR repository %s.\n' "$image_count" "$repository_name"
+
+      - name: Apply the reviewed destruction plan exactly once
+        run: terraform apply -input=false tfplan

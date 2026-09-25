@@ -28,6 +28,7 @@ active_adrs=(
   docs/adr/0020-cognito-mrr-cloudformation-ownership.md
   docs/adr/0021-sandbox-platform-core-single-account.md
   docs/adr/0022-terraform-owned-sandbox-delivery-identity.md
+  docs/adr/0023-protected-sandbox-application-plane-teardown.md
 )
 
 fail() {
@@ -81,12 +82,14 @@ organization_drift_workflow=.github/workflows/organization-drift.yml
 reusable_plan_workflow=.github/workflows/_terraform-root-plan.yml
 reusable_apply_workflow=.github/workflows/_terraform-root-apply.yml
 reusable_drift_workflow=.github/workflows/_terraform-root-drift.yml
+reusable_destroy_workflow=.github/workflows/_terraform-root-destroy.yml
+sandbox_teardown_workflow=.github/workflows/sandbox-teardown.yml
 credentialed_workflows="$(grep -lEi 'id-token:[[:space:]]*write|configure-aws-credentials' .github/workflows/*.yml || true)"
 if [[ -n "$credentialed_workflows" ]]; then
   while IFS= read -r workflow; do
     [[ -n "$workflow" ]] || continue
     case "$workflow" in
-      "$oidc_proof_workflow"|"$sandbox_network_plan_workflow"|"$sandbox_network_apply_workflow"|"$sandbox_network_drift_workflow"|"$sandbox_platform_plan_workflow"|"$sandbox_platform_apply_workflow"|"$sandbox_platform_drift_workflow"|"$sandbox_workload_plan_workflow"|"$sandbox_workload_apply_workflow"|"$sandbox_workload_drift_workflow"|"$sandbox_delivery_iam_plan_workflow"|"$sandbox_delivery_iam_apply_workflow"|"$sandbox_delivery_iam_drift_workflow"|"$organization_plan_workflow"|"$organization_apply_workflow"|"$organization_drift_workflow"|"$reusable_plan_workflow"|"$reusable_apply_workflow"|"$reusable_drift_workflow") ;;
+      "$oidc_proof_workflow"|"$sandbox_network_plan_workflow"|"$sandbox_network_apply_workflow"|"$sandbox_network_drift_workflow"|"$sandbox_platform_plan_workflow"|"$sandbox_platform_apply_workflow"|"$sandbox_platform_drift_workflow"|"$sandbox_workload_plan_workflow"|"$sandbox_workload_apply_workflow"|"$sandbox_workload_drift_workflow"|"$sandbox_delivery_iam_plan_workflow"|"$sandbox_delivery_iam_apply_workflow"|"$sandbox_delivery_iam_drift_workflow"|"$organization_plan_workflow"|"$organization_apply_workflow"|"$organization_drift_workflow"|"$reusable_plan_workflow"|"$reusable_apply_workflow"|"$reusable_drift_workflow"|"$reusable_destroy_workflow"|"$sandbox_teardown_workflow") ;;
       *) fail "unexpected credentialed root workflow: $workflow" ;;
     esac
   done <<< "$credentialed_workflows"
@@ -117,6 +120,8 @@ fi
 [[ -f "$reusable_plan_workflow" ]] || fail "missing reusable Terraform plan workflow"
 [[ -f "$reusable_apply_workflow" ]] || fail "missing reusable Terraform apply workflow"
 [[ -f "$reusable_drift_workflow" ]] || fail "missing reusable Terraform drift workflow"
+[[ -f "$reusable_destroy_workflow" ]] || fail "missing reusable Terraform destroy workflow"
+[[ -f "$sandbox_teardown_workflow" ]] || fail "missing protected sandbox teardown workflow"
 
 grep -Fq 'github.event.pull_request.head.repo.full_name == github.repository' "$reusable_plan_workflow" || fail 'reusable plan must reject fork pull requests'
 grep -Fq 'terraform plan' "$reusable_plan_workflow" || fail 'reusable plan must produce a Terraform plan'
@@ -128,6 +133,25 @@ grep -Fq 'terraform apply' "$reusable_apply_workflow" || fail 'reusable apply wo
 grep -Fq 'terraform plan -detailed-exitcode' "$reusable_drift_workflow" || fail 'reusable drift must report detected changes'
 if grep -nEi 'terraform[[:space:]]+apply' "$reusable_drift_workflow"; then
   fail 'reusable drift must not apply Terraform'
+fi
+
+grep -Fq 'workflow_call:' "$reusable_destroy_workflow" || fail 'reusable destroy workflow must be callable only from a reviewed caller'
+grep -Fq 'github.event.repository.default_branch' "$reusable_destroy_workflow" || fail 'reusable destroy must check out protected default-branch source'
+grep -Fq 'terraform state pull' "$reusable_destroy_workflow" || fail 'reusable destroy must save a pre-destroy state snapshot'
+grep -Fq 'terraform plan -destroy' "$reusable_destroy_workflow" || fail 'reusable destroy must produce a destruction plan'
+grep -Fq 'terraform apply' "$reusable_destroy_workflow" || fail 'reusable destroy workflow is missing its controlled apply step'
+grep -Fq 'aws ecr batch-delete-image' "$reusable_destroy_workflow" || fail 'reusable destroy must purge only the reviewed ECR repository before deletion'
+
+grep -Fq 'workflow_dispatch:' "$sandbox_teardown_workflow" || fail 'sandbox teardown must require manual dispatch'
+grep -Fq 'DESTROY-SANDBOX-APPLICATION-PLANE' "$sandbox_teardown_workflow" || fail 'sandbox teardown must require its exact destruction confirmation'
+grep -Fq 'DELETE-COGNITO-ECR-DYNAMODB-LOGS' "$sandbox_teardown_workflow" || fail 'sandbox teardown must require its exact data-loss acknowledgement'
+grep -Fq 'reviewed_plan_run_id' "$sandbox_teardown_workflow" || fail 'sandbox teardown must require a reviewed plan run identifier'
+grep -Fq 'head_branch == "main"' "$sandbox_teardown_workflow" || fail 'sandbox teardown must validate plan provenance from protected main'
+grep -Fq 'sandbox-workload/us-east-2/dev' "$sandbox_teardown_workflow" || fail 'sandbox teardown must include the workload root'
+grep -Fq 'sandbox-platform/us-east-2/dev' "$sandbox_teardown_workflow" || fail 'sandbox teardown must include the platform root'
+grep -Fq 'sandbox-network/us-east-2/dev' "$sandbox_teardown_workflow" || fail 'sandbox teardown must include the network root'
+if grep -nE 'organization/global|sandbox-delivery/us-east-2/global' "$sandbox_teardown_workflow"; then
+  fail 'sandbox teardown must not destroy the organization or delivery control plane'
 fi
 
 grep -Fq 'github.event.pull_request.head.repo.full_name == github.repository' "$sandbox_network_plan_workflow" || fail 'sandbox-network plan must reject fork pull requests'

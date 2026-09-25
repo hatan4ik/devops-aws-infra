@@ -29,3 +29,4 @@ comparison but they are not implementation authority.
 | 0020 | [CloudFormation ownership for Cognito MRR lifecycle](0020-cognito-mrr-cloudformation-ownership.md) |
 | 0021 | [Single-account sandbox platform core](0021-sandbox-platform-core-single-account.md) |
 | 0022 | [Terraform-owned sandbox GitHub delivery identity](0022-terraform-owned-sandbox-delivery-identity.md) |
+| 0023 | [Protected sandbox application-plane teardown](0023-protected-sandbox-application-plane-teardown.md) |
