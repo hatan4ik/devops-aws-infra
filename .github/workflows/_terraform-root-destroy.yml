@@ -181,7 +181,7 @@ jobs:
             --no-deletion-protection-enabled \
             --output json >/dev/null
 
-          for attempt in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             user_pool_protection="$(aws cognito-idp describe-user-pool --user-pool-id "$user_pool_id" --query 'UserPool.DeletionProtection' --output text)"
             table_protection="$(aws dynamodb describe-table --table-name "$session_table_name" --query 'Table.DeletionProtectionEnabled' --output text)"
             table_status="$(aws dynamodb describe-table --table-name "$session_table_name" --query 'Table.TableStatus' --output text)"
