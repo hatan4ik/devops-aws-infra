@@ -142,6 +142,8 @@ grep -Fq 'terraform plan -destroy' "$reusable_destroy_workflow" || fail 'reusabl
 grep -Fq 'terraform apply' "$reusable_destroy_workflow" || fail 'reusable destroy workflow is missing its controlled apply step'
 grep -Fq 'aws ecr batch-delete-image' "$reusable_destroy_workflow" || fail 'reusable destroy must purge only the reviewed ECR repository before deletion'
 grep -Fq 'prepare_platform_deletion' "$reusable_destroy_workflow" || fail 'reusable destroy must support bounded platform-protection teardown preparation'
+grep -Fq 'module.sandbox_platform_core.module.cognito.aws_cognito_user_pool.this' "$reusable_destroy_workflow" || fail 'reusable destroy must resolve only the exact Terraform-owned Cognito pool state address'
+grep -Fq 'module.sandbox_platform_core.aws_dynamodb_table.session' "$reusable_destroy_workflow" || fail 'reusable destroy must resolve only the exact Terraform-owned DynamoDB table state address'
 grep -Fq 'aws cognito-idp update-user-pool' "$reusable_destroy_workflow" || fail 'reusable destroy must deactivate Cognito deletion protection through the reviewed path'
 grep -Fq -- '--no-deletion-protection-enabled' "$reusable_destroy_workflow" || fail 'reusable destroy must deactivate DynamoDB deletion protection through the reviewed path'
 

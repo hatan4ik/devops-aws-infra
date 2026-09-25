@@ -159,13 +159,22 @@ jobs:
         if: inputs.prepare_platform_deletion
         run: |
           set -euo pipefail
-          application_json="$(terraform output -json application)"
-          user_pool_id="$(jq -er '.user_pool.id' <<<"$application_json")"
-          session_table_name="$(jq -er '.session_table_name' <<<"$application_json")"
+          platform_state_file="$RUNNER_TEMP/platform-state-${GITHUB_RUN_ID}.json"
           user_pool_file="$RUNNER_TEMP/user-pool-${GITHUB_RUN_ID}.json"
           update_input_file="$RUNNER_TEMP/user-pool-update-${GITHUB_RUN_ID}.json"
           accepted_keys_file="$RUNNER_TEMP/update-user-pool-keys-${GITHUB_RUN_ID}.json"
-          trap 'rm -f "$user_pool_file" "$update_input_file" "$accepted_keys_file"' EXIT
+          trap 'rm -f "$platform_state_file" "$user_pool_file" "$update_input_file" "$accepted_keys_file"' EXIT
+          terraform state pull > "$platform_state_file"
+          user_pool_id="$(jq -er '
+            .. | objects |
+            select(.address == "module.sandbox_platform_core.module.cognito.aws_cognito_user_pool.this") |
+            .values.id
+          ' "$platform_state_file")"
+          session_table_name="$(jq -er '
+            .. | objects |
+            select(.address == "module.sandbox_platform_core.aws_dynamodb_table.session") |
+            .values.name
+          ' "$platform_state_file")"
 
           aws cognito-idp describe-user-pool --user-pool-id "$user_pool_id" --query 'UserPool' --output json > "$user_pool_file"
           aws cognito-idp update-user-pool --generate-cli-skeleton input --output json \
