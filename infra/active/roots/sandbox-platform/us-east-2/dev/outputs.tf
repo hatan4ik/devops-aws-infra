@@ -7,3 +7,8 @@ output "application" {
   description = "Non-secret application platform identifiers."
   value       = module.sandbox_platform_core.application
 }
+
+output "user_pool" {
+  description = "Primary user-pool identifiers required by application token validation."
+  value       = module.cognito.user_pool
+}

@@ -32,8 +32,24 @@ resource "terraform_data" "network_contract" {
   }
 }
 
+module "cognito" {
+  source = "git::https://github.com/hatan4ik/aws.modules.cognito.git?ref=67dab780e709293970bc0092ef882d93ebc479ea" # PRE-RELEASE pin — re-pin to the v1.0.0 tag once PR #1 is merged and released
+
+  name                = "${module.naming.name_prefix}-users"
+  feature_plan        = "ESSENTIALS"
+  deletion_protection = true
+  mfa_configuration   = "OPTIONAL"
+  password_policy = {
+    minimum_length                   = 14
+    temporary_password_validity_days = 7
+  }
+  clients          = {}
+  resource_servers = {}
+  tags             = module.naming.tags
+}
+
 module "sandbox_platform_core" {
-  source = "git::https://github.com/hatan4ik/aws.modules.ecs.git?ref=878a733843a8fd3b790aa9d5d4e3a7f7810a8efe" # v0.1.2
+  source = "git::https://github.com/hatan4ik/aws.modules.ecs.git?ref=e38e9c5f55db3001bb66ef3be095aa446ff62c31" # PRE-RELEASE pin — re-pin to the v1.0.0 tag once PR #2 is merged and released
 
   name                    = module.naming.name_prefix
   vpc_id                  = data.aws_vpc.sandbox.id
@@ -51,7 +67,11 @@ module "sandbox_platform_core" {
     "sts",
   ])
   gateway_endpoint_services = toset(["dynamodb", "s3"])
-  log_retention_in_days     = var.log_retention_in_days
+  # Preserves the live security group's existing (immutable) description
+  # exactly; v1's own default text differs by one word and would otherwise
+  # force a destroy/recreate of this group during migration.
+  interface_endpoint_security_group_description = "Accepts TLS only from the sandbox VPC to AWS PrivateLink endpoints."
+  log_retention_in_days                         = var.log_retention_in_days
   additional_cloudwatch_log_group_arns = toset([
     "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/ecs/${module.naming.names.workload}/*",
   ])
