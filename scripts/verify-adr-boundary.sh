@@ -141,6 +141,9 @@ grep -Fq 'terraform state pull' "$reusable_destroy_workflow" || fail 'reusable d
 grep -Fq 'terraform plan -destroy' "$reusable_destroy_workflow" || fail 'reusable destroy must produce a destruction plan'
 grep -Fq 'terraform apply' "$reusable_destroy_workflow" || fail 'reusable destroy workflow is missing its controlled apply step'
 grep -Fq 'aws ecr batch-delete-image' "$reusable_destroy_workflow" || fail 'reusable destroy must purge only the reviewed ECR repository before deletion'
+grep -Fq 'prepare_platform_deletion' "$reusable_destroy_workflow" || fail 'reusable destroy must support bounded platform-protection teardown preparation'
+grep -Fq 'aws cognito-idp update-user-pool' "$reusable_destroy_workflow" || fail 'reusable destroy must deactivate Cognito deletion protection through the reviewed path'
+grep -Fq -- '--no-deletion-protection-enabled' "$reusable_destroy_workflow" || fail 'reusable destroy must deactivate DynamoDB deletion protection through the reviewed path'
 
 grep -Fq 'workflow_dispatch:' "$sandbox_teardown_workflow" || fail 'sandbox teardown must require manual dispatch'
 grep -Fq 'DESTROY-SANDBOX-APPLICATION-PLANE' "$sandbox_teardown_workflow" || fail 'sandbox teardown must require its exact destruction confirmation'
@@ -150,6 +153,7 @@ grep -Fq 'head_branch == "main"' "$sandbox_teardown_workflow" || fail 'sandbox t
 grep -Fq 'sandbox-workload/us-east-2/dev' "$sandbox_teardown_workflow" || fail 'sandbox teardown must include the workload root'
 grep -Fq 'sandbox-platform/us-east-2/dev' "$sandbox_teardown_workflow" || fail 'sandbox teardown must include the platform root'
 grep -Fq 'sandbox-network/us-east-2/dev' "$sandbox_teardown_workflow" || fail 'sandbox teardown must include the network root'
+grep -Fq 'prepare_platform_deletion: true' "$sandbox_teardown_workflow" || fail 'sandbox teardown must prepare only the platform root for deletion'
 if grep -nE 'organization/global|sandbox-delivery/us-east-2/global' "$sandbox_teardown_workflow"; then
   fail 'sandbox teardown must not destroy the organization or delivery control plane'
 fi

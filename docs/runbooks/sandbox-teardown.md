@@ -26,10 +26,12 @@ does not operate `organization/global` or
 - The teardown workflow change is merged to protected `main` and its required
   checks are green.
 - The sandbox delivery IAM module release that grants
-  `ecr:BatchDeleteImage` is pinned by
+  `ecr:BatchDeleteImage` and the required KMS-key `kms:DeleteAlias`
+  permission is pinned by
   `sandbox-delivery/us-east-2/global` and that delivery-IAM root has been
   applied. Until then the protected teardown stops before platform destruction
-  if the ECR repository contains images.
+  if the ECR repository contains images or Terraform cannot remove the
+  application-data alias.
 - You have reviewed the current project status and have approval to erase the
   sandbox application plane. A teardown plan is evidence, not authorization
   to destroy a different revision.
@@ -45,6 +47,13 @@ session data, ECR image digests, ECS service configuration, and platform log
 groups. The workflow intentionally purges the ECR repository only after the
 second exact acknowledgement below, because the module keeps ECR
 `force_delete` disabled during normal operation.
+
+The platform stage also deactivates deletion protection only for the Cognito
+user pool and DynamoDB session table identified by the platform Terraform
+output. It reads the full current Cognito configuration and retains every
+field accepted by `UpdateUserPool` before changing only deletion protection;
+it then waits for both protections to be inactive. Do not run console or
+ad-hoc CLI updates for these protections.
 
 Before each root is destroyed, the workflow writes an encrypted Terraform
 state snapshot under that root's state prefix:
@@ -78,6 +87,10 @@ Wait for the run to succeed, inspect all three plans, and record its numeric
 run ID. Every plan must show only the expected sandbox application-plane
 deletions. Any unexpected deletion, replacement, permission error, or
 non-empty control-plane scope is a stop condition.
+
+After an interrupted teardown, an already-completed upstream root may
+legitimately report zero deletes on the retry. That is a verified no-op; the
+workflow continues in the documented dependency order.
 
 ## 2. Execute the protected teardown
 
