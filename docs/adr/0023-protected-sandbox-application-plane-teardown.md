@@ -35,6 +35,15 @@ delete that repository.
    named by the platform Terraform output. The owning IAM module grants only
    `ecr:BatchDeleteImage` in addition to the pre-existing platform ECR
    lifecycle permissions; no administrator policy is introduced.
+6. Under the same reviewed destroy request, the platform stage may deactivate
+   deletion protection only for the Terraform output's Cognito user pool and
+   DynamoDB session table. The Cognito request preserves the current accepted
+   pool configuration before changing `DeletionProtection` to `INACTIVE`; the
+   workflow verifies both protections are inactive before it creates the
+   final binary destroy plan.
+7. A repeated teardown is idempotent: a root that was already destroyed after
+   an interrupted run reports zero planned deletes and proceeds as a no-op,
+   while downstream roots remain ordered behind successful predecessors.
 
 ## Consequences
 

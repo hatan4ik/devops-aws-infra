@@ -76,6 +76,7 @@ jobs:
 
   workload_plan:
     needs: authorize_destroy
+    if: inputs.operation == 'plan'
     uses: ./.github/workflows/_terraform-root-destroy.yml
     with:
       mode: plan
@@ -89,6 +90,7 @@ jobs:
 
   platform_plan:
     needs: authorize_destroy
+    if: inputs.operation == 'plan'
     uses: ./.github/workflows/_terraform-root-destroy.yml
     with:
       mode: plan
@@ -103,6 +105,7 @@ jobs:
 
   network_plan:
     needs: authorize_destroy
+    if: inputs.operation == 'plan'
     uses: ./.github/workflows/_terraform-root-destroy.yml
     with:
       mode: plan
@@ -142,6 +145,7 @@ jobs:
       session_prefix: sandbox-platform
       job_name: sandbox_platform
       purge_ecr_images: true
+      prepare_platform_deletion: true
 
   network_destroy:
     needs: [authorize_destroy, platform_destroy]
