@@ -37,8 +37,8 @@ delete that repository.
    lifecycle permissions; no administrator policy is introduced.
 6. Under the same reviewed destroy request, the platform stage may deactivate
    deletion protection only for the Cognito user pool and DynamoDB session
-   table at the exact Terraform state addresses. The Cognito request preserves
-   the current accepted pool configuration before changing
+   table at the exact Terraform state resource identity. The Cognito request
+   preserves the current accepted pool configuration before changing
    `DeletionProtection` to `INACTIVE`; the
    workflow verifies both protections are inactive before it creates the
    final binary destroy plan.

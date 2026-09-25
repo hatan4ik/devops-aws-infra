@@ -166,14 +166,24 @@ jobs:
           trap 'rm -f "$platform_state_file" "$user_pool_file" "$update_input_file" "$accepted_keys_file"' EXIT
           terraform state pull > "$platform_state_file"
           user_pool_id="$(jq -er '
-            .. | objects |
-            select(.address == "module.sandbox_platform_core.module.cognito.aws_cognito_user_pool.this") |
-            .values.id
+            .resources[] |
+            select(
+              .module == "module.sandbox_platform_core.module.cognito" and
+              .mode == "managed" and
+              .type == "aws_cognito_user_pool" and
+              .name == "this"
+            ) |
+            .instances | map(select(.deposed == null))[0].attributes.id
           ' "$platform_state_file")"
           session_table_name="$(jq -er '
-            .. | objects |
-            select(.address == "module.sandbox_platform_core.aws_dynamodb_table.session") |
-            .values.name
+            .resources[] |
+            select(
+              .module == "module.sandbox_platform_core" and
+              .mode == "managed" and
+              .type == "aws_dynamodb_table" and
+              .name == "session"
+            ) |
+            .instances | map(select(.deposed == null))[0].attributes.name
           ' "$platform_state_file")"
 
           aws cognito-idp describe-user-pool --user-pool-id "$user_pool_id" --query 'UserPool' --output json > "$user_pool_file"
