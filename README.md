@@ -31,12 +31,18 @@ Every apply requires protected `main`, a matching reviewed plan, an explicit
 `confirm=apply` input, the protected GitHub environment, and short-lived OIDC
 credentials. Local Terraform applies are not supported.
 
+For an approved clean rebuild, the separate
+[sandbox application-plane teardown](docs/runbooks/sandbox-teardown.md) is the
+only delete path. It requires a successful destroy plan from the exact `main`
+revision and explicit data-loss acknowledgements; it retains the organization,
+delivery identity, and remote-state control plane.
+
 ## Repository map
 
 | Path | Purpose |
 |---|---|
 | [`infra/active`](infra/README.md) | The five executable Terraform roots and their shared naming context. |
-| [`.github/workflows`](.github/workflows) | Root-specific plan, apply, and drift workflows. |
+| [`.github/workflows`](.github/workflows) | Root-specific plan, apply, drift, and protected teardown workflows. |
 | [`bootstrap`](bootstrap/README.md) | The one-time Organizations control-plane prerequisite. |
 | [`docs`](docs/README.md) | Current status, decisions, ConOps, roadmap, and runbooks. |
 | [`scripts`](scripts) | Guarded local helpers and repository quality checks. |

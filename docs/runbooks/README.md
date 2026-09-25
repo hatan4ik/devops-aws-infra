@@ -8,6 +8,7 @@ still apply.
 |---|---|
 | [AWS access bootstrap](bootstrap-aws-access.md) | Configure and verify short-lived IAM Identity Center access. |
 | [GitHub Actions delivery](github-actions-delivery.md) | Plan, apply, and detect drift through root-specific GitHub OIDC workflows. |
+| [Sandbox application-plane teardown](sandbox-teardown.md) | Produce a reviewed destroy plan and, after explicit data-loss acknowledgement, remove workload, platform, and network while retaining the control plane. |
 | [Sandbox workload delivery](sandbox-workload-delivery.md) | Deliver and roll back a private Fargate service from an immutable ECR image. |
 | [Terraform state restore](state-restore.md) | Recover Terraform state after a confirmed state incident. |
 | [Break-glass access](break-glass-access.md) | Respond to an approved incident when normal access cannot restore service. |

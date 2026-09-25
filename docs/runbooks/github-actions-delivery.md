@@ -11,7 +11,7 @@ All active delivery workflows use a pinned action revision, short-lived GitHub
 OIDC credentials, a root-specific role, `-lockfile=readonly`, and a dedicated
 remote-state key. No active workflow accepts static AWS credentials. The
 root-specific workflow files are intentionally thin callers of the local,
-reviewed `_terraform-root-{plan,apply,drift}.yml` reusable workflows. This keeps
+reviewed `_terraform-root-{plan,apply,drift,destroy}.yml` reusable workflows. This keeps
 the implementation consistent without sharing an AWS role, state key, or
 environment between roots. The separate
 [terraform-pipelines](https://github.com/hatan4ik/terraform-pipelines)
@@ -30,6 +30,7 @@ for other repositories; consumers pin its release commit.
 | `sandbox-network-{plan,apply,drift}.yml` | PR/manual; manual apply; weekday schedule/manual drift | Sandbox network plan/apply/drift roles | Operates only the isolated sandbox network root. |
 | `sandbox-platform-{plan,apply,drift}.yml` | PR/manual; manual apply; weekday schedule/manual drift | Sandbox platform plan/apply/drift roles | Operates only the private ECS/Cognito/data platform root. |
 | `sandbox-workload-{plan,apply,drift}.yml` | PR/manual; manual apply; weekday schedule/manual drift | Sandbox workload plan/apply/drift roles | Operates only the private Fargate-service root and has its own remote-state key. |
+| `sandbox-teardown.yml` | Manual | Existing scoped sandbox plan/apply roles | Produces a destroy plan or performs the protected application-plane teardown only after plan-provenance and data-loss checks. It never destroys organization, delivery identity, or the state backend. |
 
 Each drift workflow uses `terraform plan -detailed-exitcode` and intentionally
 fails when it detects drift. It never changes AWS.
@@ -56,3 +57,13 @@ waits for declared ECS services to become stable after apply.
 Never run a local Terraform apply against an active root. Human AWS access is
 for approved IAM Identity Center inspection or the narrow documented bootstrap
 procedures only.
+
+## Sandbox teardown
+
+The teardown control is separate from routine apply. First dispatch
+`sandbox-teardown.yml` from `main` with `operation=plan` and review all three
+destroy plans. A later destroy dispatch must provide that successful plan run
+ID plus the exact scope and data-loss acknowledgements. It re-plans from
+protected `main`, snapshots encrypted state, and destroys workload, platform,
+then network. The detailed, copyable procedure and recovery boundary are in
+[Sandbox application-plane teardown](sandbox-teardown.md).
