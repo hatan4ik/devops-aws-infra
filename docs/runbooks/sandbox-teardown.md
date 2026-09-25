@@ -50,8 +50,8 @@ second exact acknowledgement below, because the module keeps ECR
 
 The platform stage also deactivates deletion protection only for the Cognito
 user pool and DynamoDB session table at the exact platform Terraform state
-addresses. It reads the full current Cognito configuration and retains every
-field accepted by `UpdateUserPool` before changing only deletion protection;
+resource identity. It reads the full current Cognito configuration and retains
+every field accepted by `UpdateUserPool` before changing only deletion protection;
 it then waits for both protections to be inactive. Do not run console or
 ad-hoc CLI updates for these protections.
 
