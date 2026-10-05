@@ -8,9 +8,10 @@ unapproved future infrastructure.
 
 ## Start here
 
-Read [project status](docs/PROJECT-STATUS.md), then the
-[ConOps](docs/operations/conops.md). They state what is deployed, what is not,
-and the only supported change path.
+Start with the [documentation index](docs/README.md). It defines the reading
+order, which document owns each answer, and what must be updated after a
+change. Do not infer current state from an ADR, dated review, runbook, or
+implementation prompt.
 
 ## One delivery path
 
@@ -52,7 +53,8 @@ Reusable Terraform belongs to the independently versioned
 [`aws.modules.*` repositories](docs/MODULE-REPOSITORIES.md). Active roots pin
 an exact release commit; they never copy a module or follow a branch.
 
-Historical prototypes, copied third-party repositories, review snapshots, and
-unapproved candidate roots have intentionally been removed from `main`.
-They remain recoverable from Git history and are not a second implementation or
-delivery path.
+Historical prototypes, copied third-party repositories, obsolete review
+drafts, and unapproved candidate roots have intentionally been removed from
+`main`. The dated assessment under `docs/reviews` is retained as evidence, not
+as current operating authority. Removed material remains recoverable from Git
+history and is not a second implementation or delivery path.

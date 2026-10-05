@@ -4,6 +4,10 @@
 not a Terraform root itself; run the root-specific GitHub workflow listed in
 the top-level [README](../README.md) after a reviewed pull request.
 
+For current state, architecture, and operational order, begin at the
+[documentation index](../docs/README.md). This file describes code ownership;
+it does not replace project status, an ADR, or an approved plan.
+
 ## Rules
 
 - One root represents one account, Region, and environment boundary.
