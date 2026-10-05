@@ -47,10 +47,20 @@ for retired_path in \
   docs/book \
   docs/architecture \
   docs/delivery \
-  docs/reference \
-  docs/reviews; do
+  docs/reference; do
   [[ ! -e "$retired_path" ]] || fail "retired source path must not return: $retired_path"
 done
+
+# Dated assessments may remain as non-authoritative evidence, but this path
+# must never become a second implementation, artifact, or delivery tree.
+if [[ -d docs/reviews ]]; then
+  if find docs/reviews -type f ! -name '*.md' -print -quit | grep -q .; then
+    fail 'docs/reviews may contain Markdown assessment evidence only'
+  fi
+  while IFS= read -r review_index; do
+    grep -Fq 'Dated assessment evidence' "$review_index" || fail "retained review must declare its evidence-only boundary: $review_index"
+  done < <(find docs/reviews -mindepth 2 -maxdepth 2 -type f -name README.md -print)
+fi
 
 historical_profile_prefix='AWS-hatan4ik-'
 historical_profile="${historical_profile_prefix}gmail"

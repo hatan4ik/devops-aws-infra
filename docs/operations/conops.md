@@ -2,21 +2,24 @@
 
 ## Scope
 
-This ConOps governs the current private sandbox in `us-east-2`. It is the
-operating model for GitOps delivery, verification, and recovery. The future
-multi-account, multi-Region, TGW, and VPN architecture is intentionally not an
-executable path until the roadmap gates are complete.
+This ConOps governs the retained GitOps control plane and the deliberately
+empty Sandbox application plane. It is the operating model for delivery,
+verification, recovery, and the next landing-zone adoption gates. The detailed
+current inventory and proposed target are in the
+[architecture overview](../ARCHITECTURE.md). The multi-account, multi-Region,
+TGW, and VPN architecture is intentionally not executable until its gates are
+complete.
 
 ## Reference answers
 
 | Topic | Current answer |
 |---|---|
-| What controls AWS? | Only the five roots in `infra/active`, invoked by their matching protected GitHub workflow. |
+| What controls AWS? | Only the active Terraform roots in `infra/active`, invoked by their matching protected GitHub workflow. |
 | How do humans authenticate? | AWS IAM Identity Center, using short-lived SSO profiles. |
 | How does CI authenticate? | Environment-scoped GitHub OIDC roles. No static AWS keys are stored in GitHub or this repository. |
-| What network exists? | A private `10.64.0.0/16` sandbox VPC with two private subnets and endpoint-only AWS service access. |
-| How is an app delivered? | An application repository publishes an immutable ECR digest; the workload root supplies its typed task contract and a reviewed GitOps plan. |
-| What is deliberately absent? | Public ingress, NAT/Internet egress, Control Tower, additional accounts, TGW, VPN/BGP, a second Region, and production. |
+| What network exists? | No Terraform-tagged sandbox VPC is currently present. The private `10.64.0.0/16` design remains source capability only until a reviewed rebuild plan is applied. |
+| How is an app delivered? | An application repository will publish an immutable ECR digest; the workload root will supply its typed task contract and a reviewed GitOps plan. No application is currently deployed. |
+| What is deliberately absent? | Public ingress, NAT/Internet egress, central Security/Audit, Log Archive, and Network accounts, TGW, VPN/BGP, a deployable second Region, and production. |
 
 ## Change lifecycle
 
@@ -33,11 +36,14 @@ executable path until the roadmap gates are complete.
 
 ## Delivery order
 
-`organization` → `sandbox-delivery` → `sandbox-network` →
-`sandbox-platform` → application image → `sandbox-workload`.
+`root-MFA remediation` → `organization adoption` → `Network hub and SCP
+replacement` → `central security/cost foundation` → `sandbox-delivery` →
+`sandbox-network` → `sandbox-platform` → application image →
+`sandbox-workload`.
 
-Each root has independent remote state and an OIDC role. Do not apply a later
-root when the prior dependency is unplanned, unhealthy, or drifting.
+Each executable root has independent remote state and an OIDC role. Do not
+apply a later root when the prior dependency is unplanned, unhealthy, drifting,
+or blocked by an unapproved account/security prerequisite.
 
 ## Roles
 
