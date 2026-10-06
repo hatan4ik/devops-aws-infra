@@ -3,6 +3,8 @@
 **Status:** Current-state discovery and proposed target.
 **Last validated:** 2026-09-29, using read-only AWS Organizations, IAM Identity
 Center, IAM, CloudTrail, Config, and sandbox service APIs.
+**Module implementation refreshed:** 2026-10-06. This does not refresh or
+change the live AWS baseline date above.
 **Change authority:** This document is architecture guidance, not approval to
 change AWS. The protected GitHub OIDC Terraform workflow remains the only
 supported apply path.
@@ -136,7 +138,8 @@ flowchart LR
 |---|---|---|
 | Regions | US only: Identity Center remains in `us-east-1`; initial workload Region is `us-east-2`. | `us-west-2` becomes secondary only after the root SCP permits the required services and a tested plan proves it. |
 | Workloads | Private ECS Fargate services, ECR image digests, Cognito authentication, DynamoDB where appropriate, KMS encryption, and VPC endpoints. | Rebuild only after account adoption and the normal network → platform → workload delivery order. |
-| Ingress | No public ingress by default. | Require owned domain, ACM, WAF, DNS, OAuth callback, SLO, and rollback approval. |
+| End-user identity | A secure primary Cognito pool is available in the platform module; no pool is deployed today. | ADR 0024's AWSCC submodule can create an `INACTIVE` MRR secondary only after an eligible KMS-backed pool, signed module release, separate state/role, routing design, and activation evidence are approved. |
+| Ingress | No public ingress by default. The edge blueprint repository now composes private S3, CloudFront OAC, ACM, WAF, encrypted logs, and Route 53, but no active root consumes it. | Require a signed blueprint release, owned domain, public-root state/role, OAuth callbacks, SLO, rollback, and reviewed plan before exposure. |
 | Multi-account networking | No TGW, RAM, IPAM, VPN, or BGP deployed today. | Create a dedicated Network account only when the TGW/hybrid design inputs are approved. |
 | On-premises connectivity | Not deployed. | Require two customer-gateway IPs per Region, BGP ASN, prefixes, route-leak matrix, monitoring, and incident owner. |
 

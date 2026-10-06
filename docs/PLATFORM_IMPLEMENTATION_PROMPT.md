@@ -98,7 +98,7 @@ Build a phased AWS-native landing-zone-style platform:
 
 The module repositories are:
 
-`aws.modules.acm`, `cognito`, `dynamodb`, `ecs`, `ecs-service`, `iam`, `ksm`,
+`aws.modules.acm`, `cognito`, `dynamodb`, `ecs`, `ecs-service`, `iam`, `kms`,
 `naming`, `route53`, `s3`, `state`, `tgw`, and `vpc`.
 
 Before using or changing a module:

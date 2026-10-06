@@ -1,6 +1,6 @@
 # ADR 0020: Use CloudFormation for Cognito MRR lifecycle until Terraform has complete support
 
-**Status:** Accepted — stakeholder approval recorded 2026-09-21.
+**Status:** Superseded by ADR 0024 on 2026-10-06. No Cognito MRR CloudFormation stack was adopted by an active root.
 **Decision date:** 2026-09-21
 
 ## Context
@@ -49,3 +49,11 @@ The MRR stack will not be deployed until the following are versioned inputs:
   protected apply, state/output, and drift evidence requirements as Terraform.
 - A primary-only Terraform Cognito pool cannot be called a multi-Region
   identity deployment and is not eligible for production traffic.
+
+## Supersession
+
+The maintained HashiCorp AWS Cloud Control provider now exposes both the
+replica lifecycle and the secondary Region configuration attachment used by
+AWS Cognito MRR. ADR 0024 replaces this temporary CloudFormation ownership
+decision with native Terraform resources and retains the same prerequisite,
+activation, failover-test, and protected-delivery gates.

@@ -4,15 +4,20 @@ Reusable Terraform is maintained in its owning `aws.modules.*` repository.
 This GitOps repository contains root composition only; it never copies module
 implementation into `infra/active`.
 
-| Capability | Repository | Release used or available |
+| Capability | Repository | Consumption status |
 |---|---|---|
-| Private Fargate services | [aws.modules.ecs-service](https://github.com/hatan4ik/aws.modules.ecs-service) | Active workload root uses `v0.1.4`. The v1 design requires a signed release and a state-move migration. |
-| ECS platform foundation | [aws.modules.ecs](https://github.com/hatan4ik/aws.modules.ecs) | `v0.1.2` in the active sandbox-platform root. |
-| GitHub OIDC and delivery IAM | [aws.modules.iam](https://github.com/hatan4ik/aws.modules.iam) | `v0.1.10` in the active sandbox-delivery root. |
-| VPC foundations | [aws.modules.vpc](https://github.com/hatan4ik/aws.modules.vpc) | `v1.0.0` is pinned by the active sandbox-network root. |
-| Deterministic names and tags | [aws.modules.naming](https://github.com/hatan4ik/aws.modules.naming) | `v0.1.0` in active sandbox roots. |
-| Cognito | [aws.modules.cognito](https://github.com/hatan4ik/aws.modules.cognito) | `v0.1.1`, consumed by the platform foundation. |
-| Supporting services | [ACM](https://github.com/hatan4ik/aws.modules.acm), [KMS](https://github.com/hatan4ik/aws.modules.ksm), [Route 53](https://github.com/hatan4ik/aws.modules.route53), [S3](https://github.com/hatan4ik/aws.modules.s3), [DynamoDB](https://github.com/hatan4ik/aws.modules.dynamodb), [TGW](https://github.com/hatan4ik/aws.modules.tgw), and [state](https://github.com/hatan4ik/aws.modules.state) | Available for a separately approved root. |
+| Private Fargate services | [aws.modules.ecs-service](https://github.com/hatan4ik/aws.modules.ecs-service) | Active workload root pins `v0.1.4`; the v1 design still needs a signed release and reviewed state migration. |
+| ECS platform foundation | [aws.modules.ecs](https://github.com/hatan4ik/aws.modules.ecs) | Active sandbox-platform root pins `v0.1.2`. |
+| GitHub OIDC and delivery IAM | [aws.modules.iam](https://github.com/hatan4ik/aws.modules.iam) | Active sandbox-delivery root pins `v0.1.13`. |
+| VPC foundations | [aws.modules.vpc](https://github.com/hatan4ik/aws.modules.vpc) | Active sandbox-network root pins `v1.0.0`. |
+| Deterministic names and tags | [aws.modules.naming](https://github.com/hatan4ik/aws.modules.naming) | Active sandbox roots pin `v0.1.0`. |
+| Cognito primary pool and native MRR adoption | [aws.modules.cognito](https://github.com/hatan4ik/aws.modules.cognito) | Primary pool `v0.1.1` is consumed by the platform foundation. The AWSCC MRR submodule is merged but has no signed release or active-root consumer; see ADR 0024. |
+| Network hub and three-phase spoke routing | [aws.modules.tgw](https://github.com/hatan4ik/aws.modules.tgw) | Attachment request, network routing receipt, and spoke-route activation barrier are implemented; no Network root consumes them yet. |
+| Static web edge composition | [aws.modules.blueprint-edge-web-app](https://github.com/hatan4ik/aws.modules.blueprint-edge-web-app) | Secure S3/CloudFront/ACM/WAF/KMS/Route 53 baseline is published; no signed release or active-root consumer yet. |
+| Private microservice composition | [aws.modules.blueprint-microservice-private](https://github.com/hatan4ik/aws.modules.blueprint-microservice-private) | VPC/ALB/ECS-service golden path is available; no active root consumes it. |
+| Edge and ingress leaves | [ACM](https://github.com/hatan4ik/aws.modules.acm), [CloudFront](https://github.com/hatan4ik/aws.modules.cloudfront), [WAF](https://github.com/hatan4ik/aws.modules.waf), [Route 53](https://github.com/hatan4ik/aws.modules.route53), [ALB](https://github.com/hatan4ik/aws.modules.alb), [Global Accelerator](https://github.com/hatan4ik/aws.modules.global-accelerator), and [security group](https://github.com/hatan4ik/aws.modules.security-group) | Independently tested leaves; consume only through an approved root or blueprint release. |
+| Data, encryption, and state leaves | [KMS](https://github.com/hatan4ik/aws.modules.kms), [S3](https://github.com/hatan4ik/aws.modules.s3), [DynamoDB](https://github.com/hatan4ik/aws.modules.dynamodb), and [state](https://github.com/hatan4ik/aws.modules.state) | Independently tested leaves; consume only through an approved immutable pin. `aws.modules.kms` is the canonical repository name; `aws.modules.ksm` is obsolete. |
+| Legacy CloudFormation wrapper | [aws.modules.cloudformation](https://github.com/hatan4ik/aws.modules.cloudformation) | Not approved for new Cognito MRR ownership after ADR 0024. Confirm all consumers are absent before separately archiving the repository. |
 
 ## Consumer rule
 
