@@ -18,7 +18,7 @@ or superseded it. **Proposed** means not approved; **Closed** and
 | 0008 | Accepted | [Security baseline and isolated Terraform state](0008-security-and-state.md) |
 | 0009 | Accepted | [Observability access and independent evidence retention](0009-observability-and-sre.md) |
 | 0010 | Accepted | [Repository and module topology](0010-repository-and-module-topology.md) |
-| 0011 | Accepted; amended by 0020 | [Cognito MRR provider boundary](0011-cognito-mrr-provider-boundary.md) |
+| 0011 | Superseded by 0024 after its provider condition was satisfied | [Cognito MRR provider boundary](0011-cognito-mrr-provider-boundary.md) |
 | 0012 | Accepted | [OIDC-gated Terraform delivery](0012-oidc-gated-terraform-delivery.md) |
 | 0013 | Accepted | [Layered verification and no automatic fault injection](0013-layered-verification-no-automatic-fault-injection.md) |
 | 0014 | Accepted | [Canonical architecture and IaC boundary](0014-canonical-architecture-and-iac-boundary.md) |
@@ -27,7 +27,8 @@ or superseded it. **Proposed** means not approved; **Closed** and
 | 0017 | Superseded by 0022 for Sandbox OIDC ownership | [GitHub OIDC bootstrap proof](0017-github-oidc-bootstrap-proof.md) |
 | 0018 | Accepted; IAM ownership superseded by 0022 | [Sandbox network GitOps delivery](0018-sandbox-network-gitops-delivery.md) |
 | 0019 | Accepted | [Direct Organizations account vending; defer Control Tower and VPN](0019-direct-organizations-account-vending.md) |
-| 0020 | Accepted | [CloudFormation ownership for Cognito MRR lifecycle](0020-cognito-mrr-cloudformation-ownership.md) |
+| 0020 | Superseded by 0024 | [CloudFormation ownership for Cognito MRR lifecycle](0020-cognito-mrr-cloudformation-ownership.md) |
 | 0021 | Accepted; IAM ownership superseded by 0022 | [Single-account sandbox platform core](0021-sandbox-platform-core-single-account.md) |
 | 0022 | Accepted | [Terraform-owned sandbox GitHub delivery identity](0022-terraform-owned-sandbox-delivery-identity.md) |
 | 0023 | Accepted | [Protected sandbox application-plane teardown](0023-protected-sandbox-application-plane-teardown.md) |
+| 0024 | Accepted | [Terraform AWSCC ownership for Cognito MRR](0024-cognito-mrr-awscc-ownership.md) |

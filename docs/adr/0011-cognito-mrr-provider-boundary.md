@@ -1,6 +1,6 @@
 # ADR 0011: Block Terraform deployment of Cognito MRR until it has a provider-backed resource
 
-**Status:** Accepted — Phase 5 stakeholder approval recorded 2026-09-18.  
+**Status:** Superseded by ADR 0024 on 2026-10-06 after maintained AWSCC resources satisfied the provider-backed lifecycle condition.
 **Decision date:** 2026-09-18
 
 ## Context

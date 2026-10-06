@@ -29,6 +29,7 @@ active_adrs=(
   docs/adr/0021-sandbox-platform-core-single-account.md
   docs/adr/0022-terraform-owned-sandbox-delivery-identity.md
   docs/adr/0023-protected-sandbox-application-plane-teardown.md
+  docs/adr/0024-cognito-mrr-awscc-ownership.md
 )
 
 fail() {

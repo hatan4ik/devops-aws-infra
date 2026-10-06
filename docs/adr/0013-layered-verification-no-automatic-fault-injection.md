@@ -35,7 +35,7 @@ synthetics use only HTTPS endpoints. The full AuthN/AuthZ journey uses a
 protected, non-human staging identity and stores no credential/token or
 customer data in source/artifacts.
 
-Regional failover, VPN/BGP path withdrawal, data recovery, and Cognito MRR validation are change-approved game-day actions in the runbooks. They are not scheduled by CI, and the MRR test remains blocked until ADR 0011's provider-backed deployment condition is satisfied.
+Regional failover, VPN/BGP path withdrawal, data recovery, and Cognito MRR validation are change-approved game-day actions in the runbooks. They are not scheduled by CI. ADR 0024 satisfies the provider-backed implementation condition, but an MRR game day remains blocked until the submodule has a signed release, an approved active root adopts an eligible KMS-backed pool, the secondary is created `INACTIVE`, and replica authentication evidence is reviewed before activation.
 
 ## Consequences
 

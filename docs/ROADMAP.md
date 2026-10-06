@@ -16,6 +16,9 @@ not executable Terraform source. See the
 - No currently observed Terraform-tagged sandbox VPC, ECS cluster, Cognito
   pool, ECR repository, or Transit Gateway. The Sandbox application plane was
   intentionally torn down and must be rebuilt only through GitOps.
+- Provider-backed TGW three-phase routing, Cognito MRR adoption, and static
+  edge blueprint code now exist in their owning module repositories. They are
+  not signed releases, active-root pins, plans, or deployed infrastructure.
 
 ## Next controlled stages
 
@@ -35,16 +38,17 @@ not executable Terraform source. See the
 4. **Sandbox rebuild and service-module migration.** Pin approved immutable
    module releases, review network/platform/workload plans, and apply only
    through the ordered GitHub workflow path.
-5. **Public application decision.** Approve a domain owner, DNS, ACM, WAF,
-   ingress, OAuth callback URLs, application SLOs, and rollback design before
-   exposing an application publicly.
+5. **Public application decision.** Approve a domain owner, DNS, OAuth callback
+   URLs, application SLOs, and rollback design; publish a signed edge-blueprint
+   release and create an isolated active root before exposing an application.
 6. **Hybrid connectivity.** Obtain on-premises ASNs, two customer-gateway IPs
    per Region, accepted prefixes, tunnel ownership, and monitoring. Deploy
    Site-to-Site VPN/BGP only after the Network foundation exists.
 7. **Second Region and production.** Validate latency, quotas, data residency,
-   Cognito capability, replication/data recovery, capacity, observability,
-   game-day evidence, and cost acceptance before a second Region or production
-   workload is created.
+   Cognito eligibility and matching multi-Region KMS key replicas; release and
+   adopt ADR 0024's MRR submodule with an `INACTIVE` secondary; then validate
+   authentication, replication/data recovery, capacity, observability,
+   game-day evidence, and cost acceptance before activation or production.
 
 Every stage requires a decision record where the architecture changes, a new
 root-specific OIDC role/workflow where the delivery boundary changes, a
