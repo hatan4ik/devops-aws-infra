@@ -1,6 +1,6 @@
 # Comprehensive FAANG/Principal Engineering Audit: `hatan4ik/aws.modules.*`
 
-> **Dated assessment record:** This report captures the module catalog as it
+> **Dated assessment evidence:** This report captures the module catalog as it
 > was reviewed on October 6, 2026. Several findings were remediated after the
 > evidence was collected, so the scores and gap statements below are not a
 > declaration of current platform state. Use the
