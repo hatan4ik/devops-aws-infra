@@ -46,3 +46,16 @@ terraform.rc
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Local review/editor scratch artifacts (generated, date-specific, or unsafe
+# as shared automation). Formal assessments belong under docs/reviews/.
+/.vscode/settings.json
+/check_designs.sh
+/check_latest_commits.sh
+/check_recent_commits.sh
+/designs_summary.txt
+/inspect_repos.sh
+/latest_commits.txt
+/recent_commits.txt
+/repo_summary.txt
+/resolve_prs.sh
