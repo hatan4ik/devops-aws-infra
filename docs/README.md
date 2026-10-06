@@ -68,6 +68,7 @@ need -> ADR when a decision changes -> module release or active-root change
 | Reference | Classification |
 |---|---|
 | [Well-Architected Review — 2026-09-29](reviews/well-architected-2026-09-29/README.md) | Dated read-only evidence and recommendations. Findings may become stale and do not override current status. |
+| [AWS module catalog assessment — 2026-10-06](reviews/aws-modules-faang-analysis-2026-10-06/README.md) | Dated module-integration assessment. Scores and findings are historical and require verification against current releases. |
 | [Platform implementation brief](PLATFORM_IMPLEMENTATION_PROMPT.md) | Reusable planning prompt. It is not source of truth, an ADR, a runbook, or permission to apply. |
 | Git history | Retired and superseded material for forensic comparison only. |
 
