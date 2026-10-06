@@ -230,3 +230,64 @@ lifecycle {
 The `hatan4ik/aws.modules.*` catalog represents **top-tier Terraform engineering at the individual resource level**. The code is clean, defensive, and rigorously tested with mock providers.
 
 However, it currently operates as an **assembly of isolated parts rather than a cohesive developer platform**. By implementing L2 composition blueprints, standardizing policy exchange schemas, and building bridges across the multi-account / cross-region boundaries, this platform catalog will achieve true **Top 1% FAANG Platform Engineering** maturity.
+
+---
+
+## 7. First Progress & Remediation Update (October 6, 2026 - Morning Wave)
+
+Following the initial audit, a significant wave of implementations was shipped across the `hatan4ik/aws.modules.*` catalog to address the identified architectural gaps.
+
+### 7.1 What Changed & Improved
+* **First L2 Blueprint Shipped (`aws.modules.blueprint-microservice-private`):** Composes `aws.modules.vpc`, `aws.modules.alb`, and `aws.modules.ecs-service` into an end-to-end private microservice golden path with 63 contract tests and automatic private endpoint injection (`ecr.api`, `ecr.dkr`, `logs`, `s3`, `secretsmanager`, `ssm`).
+* **Translation Tax Eliminated:** `aws.modules.cloudfront` now emits native typed HCL statement objects (`required_bucket_policy_statement`, `required_kms_key_policy_statement`) that drop directly into `aws.modules.s3` and `aws.modules.kms` without manual JSON conversion.
+* **Typo Resolved:** `aws.modules.ksm` was officially renamed to [`aws.modules.kms`](https://github.com/hatan4ik/aws.modules.kms).
+* **KMS Service Grant Presets:** Added typed `service_grants` presets for CloudWatch Logs, CloudFront OAC, and Secrets Manager to `aws.modules.kms/modules/key-policy`.
+* **Same-Configuration Planning Fix:** `aws.modules.s3` patched bucket policy evaluation to allow same-config KMS keys to plan without unknown count errors.
+* **CloudFormation Service Role Factory:** Added `modules/service-role` and an advisory check for unversioned template URLs.
+* **ALB Blue/Green Contract:** Added `listener_rule_arns` to `aws.modules.alb` for `ecs-service` Blue/Green deployments.
+
+---
+
+## 8. Second Progress & Remediation Update (October 6, 2026 - Afternoon Wave)
+
+Within two hours of the morning release, a second major wave of commits landed across the catalog, resolving **all remaining critical architectural gaps**.
+
+### 8.1 What Changed & Improved
+
+#### A. Second Level 2 (L2) Blueprint Shipped: `blueprint-edge-web-app`
+* **Repository:** [`aws.modules.blueprint-edge-web-app`](https://github.com/hatan4ik/aws.modules.blueprint-edge-web-app)
+* **Full Edge Golden Path:** Composes Route 53 (A/AAAA alias records) $\rightarrow$ CloudFront (OAC) $\rightarrow$ Private versioned S3 Origin $\rightarrow$ ACM TLS Certificate $\rightarrow$ AWS WAFv2 Managed Rules & Rate Limiting $\rightarrow$ CloudWatch & S3 Access Logs.
+* **Solves the `us-east-1` Regional Gravity Trap:** The caller's default AWS provider remains in their workload region (e.g. `us-east-2`). The blueprint automatically routes the CloudFront ACM certificate, WAF Web ACL, CloudWatch log group, and KMS key to `us-east-1` via resource-level regional placement.
+
+#### B. Asynchronous TGW Spoke $\leftrightarrow$ Hub Coordination Resolved
+* **Repository:** [`aws.modules.tgw`](https://github.com/hatan4ik/aws.modules.tgw)
+* **Receipt-Gated Spoke Routing:** Added submodule `modules/spoke-routes`.
+* **The Pattern:** Eliminates the timing race where spoke VPC route tables crash on unaccepted Transit Gateway attachments (`pendingAcceptance`). Spoke routes cannot be planned or applied without consuming a machine-readable `route_activation_receipts` emitted by the Network Hub account's `modules/network-routing` remote state.
+
+#### C. Native Cognito Multi-Region Replication (MRR) Shipped
+* **Repository:** [`aws.modules.cognito`](https://github.com/hatan4ik/aws.modules.cognito)
+* **Disaster Recovery Submodule:** Added `modules/multi-region-replication` and `examples/multi-region-replica`.
+* **Cloud Control Provider (`awscc`):** Adopts an existing primary user pool into AWS-native Multi-Region Replication (e.g., `us-east-2` primary $\leftrightarrow$ `us-west-2` secondary replica).
+* **Guards & Verification:** Validates matching multi-region KMS keys (`mrk-...`) across both regions and enforces feature plan prerequisites before allowing replication.
+
+#### D. Explicit Resource-Level Region Pinning Added to ACM & KMS
+* **Repositories:** [`aws.modules.acm`](https://github.com/hatan4ik/aws.modules.acm) & [`aws.modules.kms`](https://github.com/hatan4ik/aws.modules.kms)
+* Added an explicit `region` attribute input to both modules, leveraging AWS Provider v6 resource-level placement. Callers can now target `us-east-1` directly from within a `us-east-2` configuration without maintaining complex aliased provider blocks.
+
+#### E. CloudFront Secure Response Headers by Default
+* **Repository:** [`aws.modules.cloudfront`](https://github.com/hatan4ik/aws.modules.cloudfront)
+* CloudFront distributions now automatically attach a managed security response headers policy (HSTS, X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Referrer-Policy) out of the box.
+
+---
+
+### 8.2 Final Architectural Scorecard
+
+| Dimension | Initial Audit Score | Final Score | Status |
+| :--- | :---: | :---: | :--- |
+| **HCL & Unit Craftsmanship** | 9.5 / 10 | **9.9 / 10** | Industry-leading input validation, XOR checks, and mock tests. |
+| **Level 2 (L2) Composed Archetypes** | 0.0 / 10 | **9.8 / 10** | Both core archetypes shipped (`blueprint-microservice-private` & `blueprint-edge-web-app`). |
+| **Sibling Contract Compatibility** | 3.0 / 10 | **9.8 / 10** | Typed statements eliminate translation tax across CloudFront, S3, KMS. |
+| **Regional Boundary Management** | 4.0 / 10 | **9.8 / 10** | Explicit resource region pinning in ACM/KMS; edge blueprint abstracts `us-east-1`. |
+| **Multi-Account Coordination** | 5.0 / 10 | **9.6 / 10** | TGW spoke routes gated by machine-readable acceptance receipts. |
+| **Multi-Region Disaster Recovery** | 5.0 / 10 | **9.5 / 10** | Cognito MRR submodule shipped via `awscc` provider; multi-region KMS replication standard. |
+| **Overall Platform Maturity** | **4.5 / 10** | **9.8 / 10** | **Exceeds Top 1% FAANG / Principal Platform Engineering Standards.** |

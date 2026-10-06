@@ -49,6 +49,7 @@ Thumbs.db
 
 # Local review/editor scratch artifacts (generated, date-specific, or unsafe
 # as shared automation). Formal assessments belong under docs/reviews/.
+/AWS_MODULES_FAANG_ANALYSIS.md
 /.vscode/settings.json
 /check_designs.sh
 /check_latest_commits.sh
