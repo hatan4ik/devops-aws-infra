@@ -1,0 +1,27 @@
+name: Module release fleet audit
+
+on:
+  schedule:
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: module-release-fleet-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: current_signed_releases
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.0.0
+
+      - name: Verify every module release
+        run: scripts/verify-module-release-fleet.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
