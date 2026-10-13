@@ -95,7 +95,11 @@ reusable_apply_workflow=.github/workflows/_terraform-root-apply.yml
 reusable_drift_workflow=.github/workflows/_terraform-root-drift.yml
 reusable_destroy_workflow=.github/workflows/_terraform-root-destroy.yml
 sandbox_teardown_workflow=.github/workflows/sandbox-teardown.yml
-credentialed_workflows="$(grep -lEi 'id-token:[[:space:]]*write|configure-aws-credentials' .github/workflows/*.yml || true)"
+# grep -l exits 1 when no workflow is credentialed (the expected case); only a
+# status above 1 is a scan failure. Both workflow extensions must be covered.
+credentialed_status=0
+credentialed_workflows="$(grep -rlEi --include='*.yml' --include='*.yaml' 'id-token:[[:space:]]*write|configure-aws-credentials' .github/workflows)" || credentialed_status=$?
+((credentialed_status <= 1)) || fail 'cannot scan root workflows for credentialed jobs'
 if [[ -n "$credentialed_workflows" ]]; then
   while IFS= read -r workflow; do
     [[ -n "$workflow" ]] || continue
@@ -262,7 +266,9 @@ if grep -nEi 'terraform[[:space:]]+apply' "$organization_drift_workflow"; then
   fail 'organization drift workflow must not apply Terraform'
 fi
 
-if grep -R -nE --include='*.yml' --include='*.yaml' '[0-9]{12}' .github/workflows; then
+# The 12 digits must stand alone: a run inside a 40-hex action SHA pin is not
+# an account identifier.
+if grep -R -nE --include='*.yml' --include='*.yaml' '(^|[^[:alnum:]])[0-9]{12}([^[:alnum:]]|$)' .github/workflows; then
   fail 'root workflows must not contain a hard-coded AWS account identifier'
 fi
 

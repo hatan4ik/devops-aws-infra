@@ -15,6 +15,7 @@ state_key_prefix="gitops/organization/global/"
 state_lock_table="devops-aws-infra-organization-lock"
 state_key_alias="alias/devops-aws-infra-organization-state"
 state_bucket=""
+review_only=false
 
 usage() {
   cat <<'USAGE'
@@ -33,6 +34,8 @@ Options:
   --state-key-prefix PREFIX   Dedicated state key prefix
   --state-lock-table NAME     Dedicated DynamoDB lock table
   --state-key-alias ALIAS     Customer-managed KMS alias for state encryption
+  --review                    Create the CloudFormation change set but do not execute it,
+                              so it can be inspected before a normal run applies it
   -h, --help                  Show this help
 USAGE
 }
@@ -47,6 +50,7 @@ while (($# > 0)); do
     --state-key-prefix) state_key_prefix="${2:?missing state-key-prefix value}"; shift 2 ;;
     --state-lock-table) state_lock_table="${2:?missing state-lock-table value}"; shift 2 ;;
     --state-key-alias) state_key_alias="${2:?missing state-key-alias value}"; shift 2 ;;
+    --review) review_only=true; shift ;;
     -h|--help) usage; exit 0 ;;
     *) printf 'Unknown argument: %s\n' "$1" >&2; usage >&2; exit 64 ;;
   esac
@@ -65,7 +69,22 @@ if [[ -z "$state_bucket" ]]; then
 fi
 
 for role_name in "${role_prefix}-plan" "${role_prefix}-drift" "${role_prefix}-landing-zone"; do
-  aws iam get-role --profile "$profile" --role-name "$role_name" --query 'Role.Arn' --output text >/dev/null
+  role_arn="$(aws iam get-role --profile "$profile" --role-name "$role_name" --query 'Role.Arn' --output text)"
+  printf 'Preflight: role %s is %s\n' "$role_name" "$role_arn"
+  # The template builds the PlanRoleArn and LandingZoneRoleArn outputs from the
+  # fixed path /github-actions/ instead of looking the roles up. Compare that
+  # assumption with the ARN IAM actually returned before deploying anything.
+  case "$role_name" in
+    *-plan|*-landing-zone)
+      case "$role_arn" in
+        arn:*:iam::"${caller_account_id}":role/github-actions/"${role_name}") ;;
+        *)
+          printf 'Refusing bootstrap: IAM returned %s for role %s, but the template publishes arn:<partition>:iam::%s:role/github-actions/%s for it.\nThe stack would export an ARN that does not exist; fix the role path or the template first.\n' "$role_arn" "$role_name" "$caller_account_id" "$role_name" >&2
+          exit 1
+          ;;
+      esac
+      ;;
+  esac
 done
 
 aws cloudformation validate-template \
@@ -73,7 +92,13 @@ aws cloudformation validate-template \
   --region "$region" \
   --template-body "file://$template_file" >/dev/null
 
-printf 'Bootstrapping direct Organizations control plane in management account %s, region %s.\n' "$caller_account_id" "$region"
+deploy_extra_args=()
+if [[ "$review_only" == "true" ]]; then
+  deploy_extra_args+=(--no-execute-changeset)
+  printf 'Review mode: creating the change set for management account %s, region %s without executing it.\n' "$caller_account_id" "$region"
+else
+  printf 'Bootstrapping direct Organizations control plane in management account %s, region %s.\n' "$caller_account_id" "$region"
+fi
 aws cloudformation deploy \
   --profile "$profile" \
   --region "$region" \
@@ -81,6 +106,7 @@ aws cloudformation deploy \
   --template-file "$template_file" \
   --capabilities CAPABILITY_NAMED_IAM \
   --no-fail-on-empty-changeset \
+  ${deploy_extra_args[@]+"${deploy_extra_args[@]}"} \
   --parameter-overrides \
     "RoleNamePrefix=$role_prefix" \
     "StateBucketName=$state_bucket" \
@@ -88,6 +114,13 @@ aws cloudformation deploy \
     "StateLockTableName=$state_lock_table" \
     "StateKeyAlias=$state_key_alias" \
   --tags ManagedBy=devops-aws-infra Root=organization
+
+if [[ "$review_only" == "true" ]]; then
+  printf 'Change set created but NOT executed (--review). Inspect it with:\n'
+  printf '  aws cloudformation list-change-sets --profile %s --region %s --stack-name %s\n' "$profile" "$region" "$stack_name"
+  printf 'Then re-run this script without --review to deploy.\n'
+  exit 0
+fi
 
 aws cloudformation describe-stacks \
   --profile "$profile" \

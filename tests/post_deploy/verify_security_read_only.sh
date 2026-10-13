@@ -17,14 +17,24 @@ archived through the documented security process before this strict gate passes.
 USAGE
 }
 
+# A flag with no value must take the usage path (exit 64), not a bare
+# parameter-expansion abort.
+need_value() {
+  if [[ -z "${2-}" || "${2-}" == -* ]]; then
+    echo "missing value for $1" >&2
+    usage >&2
+    exit 64
+  fi
+}
+
 region=""
 profile=""
 config_recorder_name=""
 while (($#)); do
   case "$1" in
-    --region) region="${2:?missing value for --region}"; shift 2 ;;
-    --profile) profile="${2:?missing value for --profile}"; shift 2 ;;
-    --config-recorder-name) config_recorder_name="${2:?missing value for --config-recorder-name}"; shift 2 ;;
+    --region) need_value "$1" "${2-}"; region="$2"; shift 2 ;;
+    --profile) need_value "$1" "${2-}"; profile="$2"; shift 2 ;;
+    --config-recorder-name) need_value "$1" "${2-}"; config_recorder_name="$2"; shift 2 ;;
     --help|-h) usage; exit 0 ;;
     *) echo "unknown argument: $1" >&2; usage >&2; exit 64 ;;
   esac
@@ -45,8 +55,15 @@ assert_minimum() {
   echo "PASS: $description"
 }
 
-active_high_critical="$("${aws_args[@]}" securityhub get-findings --filters '{"RecordState":[{"Value":"ACTIVE","Comparison":"EQUALS"}],"SeverityLabel":[{"Value":"HIGH","Comparison":"EQUALS"},{"Value":"CRITICAL","Comparison":"EQUALS"}]}' --query 'length(Findings)' --output text)"
-assert_equal "Security Hub has no ACTIVE HIGH/CRITICAL findings" "$active_high_critical" "0"
+# The gate only needs zero versus non-zero, so stop paging after one finding.
+# The count below is therefore capped at 1 and is not the number of findings.
+active_high_critical="$("${aws_args[@]}" securityhub get-findings --max-items 1 --filters '{"RecordState":[{"Value":"ACTIVE","Comparison":"EQUALS"}],"SeverityLabel":[{"Value":"HIGH","Comparison":"EQUALS"},{"Value":"CRITICAL","Comparison":"EQUALS"}]}' --query 'length(Findings)' --output text)"
+if [[ "$active_high_critical" == "0" ]]; then
+  echo "PASS: Security Hub has no ACTIVE HIGH/CRITICAL findings"
+else
+  echo "FAIL: Security Hub has at least one ACTIVE HIGH/CRITICAL finding (probe returned $active_high_critical; capped at 1 by --max-items)" >&2
+  exit 1
+fi
 
 detector_id="$("${aws_args[@]}" guardduty list-detectors --query 'DetectorIds[0]' --output text)"
 [[ -n "$detector_id" && "$detector_id" != "None" ]] || { echo "FAIL: GuardDuty detector is absent" >&2; exit 1; }
