@@ -58,16 +58,20 @@ func RunValidate(ctx context.Context, exec Executor, rootDir string, dirs *Dirs)
 
 // RunLint runs tflint across all discovered directories.
 func RunLint(ctx context.Context, exec Executor, rootDir string, dirs *Dirs) error {
-	configPath := filepath.Join(rootDir, ".tflint.hcl")
+	absRoot, err := filepath.Abs(rootDir)
+	if err != nil {
+		return err
+	}
+	configPath := filepath.Join(absRoot, ".tflint.hcl")
 	var initArgs []string
 	if _, err := os.Stat(configPath); err == nil {
 		initArgs = append(initArgs, "--config="+configPath)
 	}
 
-	_ = exec.Run(ctx, rootDir, "tflint", append([]string{"--init"}, initArgs...)...)
+	_ = exec.Run(ctx, absRoot, "tflint", append([]string{"--init"}, initArgs...)...)
 
 	for _, relDir := range dirs.All {
-		targetDir := filepath.Join(rootDir, relDir)
+		targetDir := filepath.Join(absRoot, relDir)
 		lintArgs := []string{"--format", "compact"}
 		if len(initArgs) > 0 {
 			lintArgs = append(lintArgs, initArgs...)
@@ -100,9 +104,13 @@ func RunTest(ctx context.Context, exec Executor, rootDir string, dirs *Dirs) err
 
 // RunDocs generates or checks terraform-docs across all module directories.
 func RunDocs(ctx context.Context, exec Executor, rootDir string, dirs *Dirs, checkOnly bool) error {
-	configFile := filepath.Join(rootDir, ".terraform-docs.yml")
+	absRoot, err := filepath.Abs(rootDir)
+	if err != nil {
+		return err
+	}
+	configFile := filepath.Join(absRoot, ".terraform-docs.yml")
 	for _, relDir := range dirs.All {
-		targetDir := filepath.Join(rootDir, relDir)
+		targetDir := filepath.Join(absRoot, relDir)
 		args := []string{}
 		if _, err := os.Stat(configFile); err == nil {
 			args = append(args, "-c", configFile)
@@ -111,7 +119,7 @@ func RunDocs(ctx context.Context, exec Executor, rootDir string, dirs *Dirs, che
 			args = append(args, "--output-check")
 		}
 		args = append(args, targetDir)
-		if err := exec.Run(ctx, rootDir, "terraform-docs", args...); err != nil {
+		if err := exec.Run(ctx, absRoot, "terraform-docs", args...); err != nil {
 			return fmt.Errorf("terraform-docs %s: %w", relDir, err)
 		}
 	}
