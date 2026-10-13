@@ -35,7 +35,23 @@ Concurrently verifies all 6 release invariants (default branch SHA parity, annot
 ./tools/tfkit/bin/tfkit fleet verify-releases --owner hatan4ik
 ```
 
-### 3. Static Workflow & Documentation Policy Gates
+### 3. SRE ConOps Diagnostics, Triage & Janitor (Phase 2)
+Replaces brittle shell scripts with concurrent, structured AWS and GitHub Actions operational commands:
+
+```bash
+# Live AWS stack inspection (ECS tasks, stopped errors, endpoints, zero-egress routes, SG regex)
+./tools/tfkit/bin/tfkit ops diagnose --prefix bp-e2e-
+
+# GitHub Actions incident triage (isolates failed steps and extracts root-cause logs)
+./tools/tfkit/bin/tfkit ops triage --repo hatan4ik/aws.modules.blueprint-microservice-private --limit 5
+./tools/tfkit/bin/tfkit ops triage --repo hatan4ik/aws.modules.blueprint-microservice-private --run-id 38297205266
+
+# Safe dependency-ordered orphan resource janitor (defaults to dry-run)
+./tools/tfkit/bin/tfkit ops janitor --prefix bp-e2e- --dry-run
+./tools/tfkit/bin/tfkit ops janitor --prefix bp-e2e- --force
+```
+
+### 4. Static Workflow & Documentation Policy Gates (Phase 3)
 Replaces `check-action-pins.sh`, `validate-workflows.rb`, and `check-markdown-links.rb` with native Go checks:
 
 ```bash
