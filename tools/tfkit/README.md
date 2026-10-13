@@ -62,6 +62,25 @@ Replaces `check-action-pins.sh`, `validate-workflows.rb`, and `check-markdown-li
 ./tools/tfkit/bin/tfkit policy markdown --dir docs
 ```
 
+### 5. Module Quality Gates & Developer Experience (Phase 4)
+Replaces fragmented, repetitive bash loops in module Makefiles with unified, high-performance Go subcommands:
+
+```bash
+# Discovers root, submodules, examples, and test fixtures
+./tools/tfkit/bin/tfkit module dirs --dir ~/aws.modules.blueprint-microservice-private
+
+# Full quality gate pipeline (fmt, validate, lint, test, docs-check, security)
+./tools/tfkit/bin/tfkit module check --dir .
+
+# Individual quality workflows
+./tools/tfkit/bin/tfkit module fmt --fix
+./tools/tfkit/bin/tfkit module validate
+./tools/tfkit/bin/tfkit module lint
+./tools/tfkit/bin/tfkit module test
+./tools/tfkit/bin/tfkit module docs
+./tools/tfkit/bin/tfkit module lock --platform linux_amd64,darwin_arm64
+```
+
 ---
 
 ## Deterministic Exit Code Contract
