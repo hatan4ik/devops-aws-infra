@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/hatan4ik/tfkit/internal/fleet"
+	"github.com/hatan4ik/tfkit/internal/module"
 	"github.com/hatan4ik/tfkit/internal/ops"
 	"github.com/hatan4ik/tfkit/internal/output"
 	"github.com/hatan4ik/tfkit/internal/policy"
@@ -22,10 +23,11 @@ var Version = "0.1.0-dev"
 
 // App encapsulates the CLI runtime streams and dependencies.
 type App struct {
-	Out       io.Writer
-	Err       io.Writer
-	GitHubAPI fleet.GitHubAPI
-	AWS       ops.AWSCaller
+	Out        io.Writer
+	Err        io.Writer
+	GitHubAPI  fleet.GitHubAPI
+	AWS        ops.AWSCaller
+	ModuleExec module.Executor
 }
 
 // NewApp constructs a default App writing to stdout and stderr.
@@ -51,6 +53,8 @@ func (a *App) Run(ctx context.Context, args []string) error {
 		return a.runVersion(args[1:])
 	case "fleet":
 		return a.runFleet(ctx, args[1:])
+	case "module":
+		return a.runModule(ctx, args[1:])
 	case "ops":
 		return a.runOps(ctx, args[1:])
 	case "policy":
@@ -71,6 +75,14 @@ Commands:
   fleet status            Audit local aws.modules.* repositories (branch, dirty tree, ahead/behind)
   fleet sync              Fetch remotes, switch clean feature checkouts to main, and fast-forward
   fleet verify-releases   Verify signed tags and GitHub Release parity across all module repos
+  module check            Run complete quality gate (fmt, validate, lint, test, docs, security)
+  module fmt              Format or check formatting recursively
+  module validate         Initialize and validate all discovered directories
+  module lint             Run tflint across all discovered directories
+  module test             Run terraform test on roots and submodules
+  module docs             Generate or check terraform-docs across all directories
+  module lock             Generate multi-platform provider lockfiles (Linux/Darwin x86/ARM)
+  module dirs             Discover and list all Terraform directories in a module
   ops diagnose            Live AWS stack inspector (ECS tasks, VPC endpoints, zero-egress routes)
   ops triage              GitHub Actions integration run failure analyzer and root cause extractor
   ops janitor             Safe dependency-ordered cleanup of orphan integration test resources
