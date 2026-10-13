@@ -14,6 +14,28 @@ done
 failures=0
 repository_count=0
 
+# gh_call runs `gh api` and keeps its real HTTP error text (status and message)
+# so a token-scope or rate-limit problem is not mistaken for an invariant
+# violation. On success the response is in api_output; on failure api_error
+# carries the error text.
+gh_error_file="$(mktemp "${TMPDIR:-/tmp}/module-release-fleet.XXXXXX")"
+trap 'rm -f "$gh_error_file"' EXIT
+api_output=''
+api_error=''
+gh_call() {
+  api_output=''
+  api_error=''
+  if api_output=$(gh api "$@" 2>"$gh_error_file"); then
+    return 0
+  fi
+  # gh prints the message on stderr and the JSON error body on stdout.
+  api_error=$(tr '\n' ' ' <"$gh_error_file")
+  [[ -n "${api_error// /}" ]] || api_error=$(tr '\n' ' ' <<<"$api_output")
+  api_error="${api_error:0:300}"
+  api_error="${api_error%"${api_error##*[![:space:]]}"}"
+  return 1
+}
+
 record_failure() {
   local repository="$1"
   local reason="$2"
@@ -21,35 +43,61 @@ record_failure() {
   failures=$((failures + 1))
 }
 
+# Discovery runs before the loop (not as a process substitution) so a failed or
+# rate-limited call stops the audit instead of its error body being iterated as
+# repository names.
+if ! gh_call --paginate "/users/$owner/repos?per_page=100&type=owner" \
+  --jq '.[] | select(.name | startswith("aws.modules.")) | .name'; then
+  printf 'FAIL: repository discovery for %s failed: %s\n' "$owner" "$api_error" >&2
+  exit 1
+fi
+repositories="$(sort <<<"$api_output")"
+
 while IFS= read -r repository; do
   [[ -n "$repository" ]] || continue
   repository_count=$((repository_count + 1))
   repository_failed=0
 
-  if ! repository_json=$(gh api "repos/$owner/$repository" 2>/dev/null); then
-    record_failure "$repository" 'repository metadata is unavailable'
+  if ! gh_call "repos/$owner/$repository"; then
+    record_failure "$repository" "repository metadata is unavailable: $api_error"
     continue
   fi
+  repository_json="$api_output"
   default_branch=$(jq -r '.default_branch // empty' <<<"$repository_json")
   if [[ -z "$default_branch" ]]; then
     record_failure "$repository" 'default branch is absent'
     continue
   fi
 
-  if ! main_sha=$(gh api "repos/$owner/$repository/commits/$default_branch" --jq .sha 2>/dev/null); then
-    record_failure "$repository" "cannot resolve $default_branch"
+  if ! gh_call "repos/$owner/$repository/commits/$default_branch" --jq .sha; then
+    record_failure "$repository" "cannot resolve $default_branch: $api_error"
     continue
   fi
-  latest_tag=$(gh api "repos/$owner/$repository/tags?per_page=1" --jq '.[0].name // empty' 2>/dev/null || true)
+  main_sha="$api_output"
+
+  # The tags endpoint is not semver-ordered and lists prereleases (for example
+  # v1.1.0-rc2 ahead of v1.0.0), while /releases/latest excludes them. Take the
+  # highest stable semver tag so both sides compare the same notion of latest.
+  if ! gh_call --paginate "repos/$owner/$repository/tags?per_page=100" --jq '.[].name'; then
+    record_failure "$repository" "cannot list tags: $api_error"
+    continue
+  fi
+  if ! latest_tag=$(jq -Rrn '[inputs | select(test("^v?[0-9]+\\.[0-9]+\\.[0-9]+$"))]
+      | sort_by(ltrimstr("v") | split(".") | map(tonumber))
+      | .[-1] // empty' <<<"$api_output"); then
+    record_failure "$repository" 'cannot evaluate the tag list'
+    continue
+  fi
   if [[ -z "$latest_tag" ]]; then
-    record_failure "$repository" 'no tag exists'
+    record_failure "$repository" 'no stable semver tag exists'
     continue
   fi
 
-  if ! tag_reference_json=$(gh api "repos/$owner/$repository/git/ref/tags/$latest_tag" 2>/dev/null); then
-    record_failure "$repository" "cannot resolve tag $latest_tag"
+  if ! gh_call "repos/$owner/$repository/git/ref/tags/$latest_tag"; then
+    record_failure "$repository" "cannot resolve tag $latest_tag: $api_error"
     continue
   fi
+  tag_reference_json="$api_output"
   tag_object_type=$(jq -r '.object.type // empty' <<<"$tag_reference_json")
   if [[ "$tag_object_type" != 'tag' ]]; then
     record_failure "$repository" "$latest_tag is not an annotated tag"
@@ -57,10 +105,11 @@ while IFS= read -r repository; do
   fi
 
   tag_object_sha=$(jq -r '.object.sha // empty' <<<"$tag_reference_json")
-  if ! tag_object_json=$(gh api "repos/$owner/$repository/git/tags/$tag_object_sha" 2>/dev/null); then
-    record_failure "$repository" "annotated tag object $latest_tag is unavailable"
+  if ! gh_call "repos/$owner/$repository/git/tags/$tag_object_sha"; then
+    record_failure "$repository" "annotated tag object $latest_tag is unavailable: $api_error"
     continue
   fi
+  tag_object_json="$api_output"
   tag_target_sha=$(jq -r '.object.sha // empty' <<<"$tag_object_json")
   tag_verified=$(jq -r '.verification.verified // false' <<<"$tag_object_json")
   if [[ "$tag_verified" != 'true' ]]; then
@@ -72,11 +121,11 @@ while IFS= read -r repository; do
     repository_failed=1
   fi
 
-  if ! release_json=$(gh api "repos/$owner/$repository/releases/latest" 2>/dev/null); then
-    record_failure "$repository" 'no published non-prerelease GitHub Release exists'
+  if ! gh_call "repos/$owner/$repository/releases/latest"; then
+    record_failure "$repository" "no published non-prerelease GitHub Release exists: $api_error"
     repository_failed=1
   else
-    release_tag=$(jq -r '.tag_name // empty' <<<"$release_json")
+    release_tag=$(jq -r '.tag_name // empty' <<<"$api_output")
     if [[ "$release_tag" != "$latest_tag" ]]; then
       record_failure "$repository" "latest Release $release_tag does not match tag $latest_tag"
       repository_failed=1
@@ -86,10 +135,7 @@ while IFS= read -r repository; do
   if ((repository_failed == 0)); then
     printf 'PASS: %s %s %s\n' "$repository" "$latest_tag" "$main_sha"
   fi
-done < <(
-  gh api --paginate "/users/$owner/repos?per_page=100&type=owner" \
-    --jq '.[] | select(.name | startswith("aws.modules.")) | .name' | sort
-)
+done <<<"$repositories"
 
 if ((repository_count == 0)); then
   printf 'no aws.modules.* repositories were discovered for %s\n' "$owner" >&2
