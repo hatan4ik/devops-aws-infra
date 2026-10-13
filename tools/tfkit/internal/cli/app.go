@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/hatan4ik/tfkit/internal/fleet"
+	"github.com/hatan4ik/tfkit/internal/ops"
 	"github.com/hatan4ik/tfkit/internal/output"
 	"github.com/hatan4ik/tfkit/internal/policy"
 )
@@ -24,6 +25,7 @@ type App struct {
 	Out       io.Writer
 	Err       io.Writer
 	GitHubAPI fleet.GitHubAPI
+	AWS       ops.AWSCaller
 }
 
 // NewApp constructs a default App writing to stdout and stderr.
@@ -49,6 +51,8 @@ func (a *App) Run(ctx context.Context, args []string) error {
 		return a.runVersion(args[1:])
 	case "fleet":
 		return a.runFleet(ctx, args[1:])
+	case "ops":
+		return a.runOps(ctx, args[1:])
 	case "policy":
 		return a.runPolicy(ctx, args[1:])
 	default:
@@ -67,6 +71,9 @@ Commands:
   fleet status            Audit local aws.modules.* repositories (branch, dirty tree, ahead/behind)
   fleet sync              Fetch remotes, switch clean feature checkouts to main, and fast-forward
   fleet verify-releases   Verify signed tags and GitHub Release parity across all module repos
+  ops diagnose            Live AWS stack inspector (ECS tasks, VPC endpoints, zero-egress routes)
+  ops triage              GitHub Actions integration run failure analyzer and root cause extractor
+  ops janitor             Safe dependency-ordered cleanup of orphan integration test resources
   policy workflows        Validate GitHub Actions workflow structure and 40-char commit SHA pins
   policy markdown         Verify all repository-relative Markdown links resolve on disk
   version                 Print tfkit version and runtime metadata
