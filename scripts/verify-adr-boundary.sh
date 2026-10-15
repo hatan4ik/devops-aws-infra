@@ -284,12 +284,12 @@ for naming_root in \
   infra/active/roots/sandbox-network/us-east-2/dev \
   infra/active/roots/sandbox-platform/us-east-2/dev \
   infra/active/roots/sandbox-workload/us-east-2/dev; do
-  grep -Eq 'aws\.modules\.naming\.git\?ref=[0-9a-f]{40}' "$naming_root/main.tf" || fail "active root does not use an immutable naming module commit: $naming_root"
+  grep -Eq 'aws\.modules\.naming\.git\?ref=v[0-9]+\.[0-9]+\.[0-9]+' "$naming_root/main.tf" || fail "active root does not use a semantic naming module release tag: $naming_root"
   grep -Fq 'module.naming.tags' "$naming_root/providers.tf" || fail "active root does not apply canonical provider tags: $naming_root"
 done
 
 while IFS= read -r module_source; do
-  [[ "$module_source" =~ \?ref=[0-9a-f]{40}\" ]] || fail "external module source is not pinned to a full commit SHA: $module_source"
+  [[ "$module_source" =~ \?ref=v[0-9]+\.[0-9]+\.[0-9]+\" ]] || fail "external module source is not pinned to a semantic release tag: $module_source"
 done < <(git grep -nE 'source[[:space:]]*=[[:space:]]*"git::https://github\.com/hatan4ik/aws\.modules\.' -- infra)
 
 printf 'PASS: ADR and Terraform delivery boundary\n'

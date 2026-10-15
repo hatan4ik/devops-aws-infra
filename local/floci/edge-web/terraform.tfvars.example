@@ -1,0 +1,9 @@
+aws_region = "us-east-2"
+zone_id    = "Z0000000000000"
+zone_name  = "example.test"
+
+naming_base_tags = {
+  DeploymentScope = "local"
+  Emulator        = "floci"
+  Purpose         = "integration"
+}
