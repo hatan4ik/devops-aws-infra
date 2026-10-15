@@ -66,21 +66,31 @@ active root consumes it.
   ADR 0007 ("no node SSH") only for callers that opt in. Using
   `access = "key_pair"` or `"both"` in an active root needs its own review of
   the port 22 rule, the key custody, and Session Manager logging.
-- **The module has never been applied to AWS.** Its tests use a mocked
-  provider, and the integration suite has not run. Acceptance of this ADR
-  should wait for one run of that suite in the sandbox account.
+- **The module has been applied live once.** On 2026-10-15 the integration
+  suite passed (5 of 5) in the sandbox account and was torn down, and a second
+  throwaway stack exercised key pair registration and rotation and a rolling
+  refresh; nothing was left behind. Both runs used administrator credentials,
+  so the least-privilege CI role has not been tried, and SSH through a real
+  port 22 rule, snapshot restore, IPv6, arm64 and other partitions are not
+  proven. The evidence is recorded in the module's
+  `tests/integration/README.md`.
 - **A new repository changes the release audit.** `verify-module-release-fleet.sh`
   discovers every public `aws.modules.*` repository and fails until it has a
   signed tag and a matching release. `aws.modules.ec2` will fail it until its
   first release.
-- **`aws.modules.kms` needs a release that contains the preset** (merged to
-  `main`, not yet tagged) before an example can pin it by signed tag.
+- **`aws.modules.kms` v2.1.0** contains the `autoscaling-ebs` preset; the
+  Auto Scaling service-linked role must exist before KMS accepts a key policy
+  that names it, and it did not exist in the sandbox account.
 
 ## Acceptance conditions
 
 - The workload that needs EC2 is named here, with why Fargate and Lambda do
   not fit.
-- The integration suite has run once against the sandbox account and passed,
-  including the key pair and SSM paths.
-- `aws.modules.kms` has a signed release containing `autoscaling-ebs`.
-- `aws.modules.ec2` has a signed `v1.0.0` release and a catalog row.
+- The integration suite has run under the least-privilege CI role, not only
+  with administrator credentials. (It has run once with administrator
+  credentials and passed.)
+- `aws.modules.kms` has a signed release containing `autoscaling-ebs`. (Done:
+  v2.1.0.)
+- `aws.modules.ec2` has a signed `v1.0.0` release and a catalog row. (It has
+  `v0.1.0` and `v0.1.1`; `v1.0.0` waits for the CI-role run and a decision on
+  the paths listed as not proven.)
