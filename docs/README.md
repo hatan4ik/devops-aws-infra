@@ -15,8 +15,9 @@ overrides the current-state and decision records.
 4. [Roadmap](ROADMAP.md) — see the approved sequence of future outcomes; it is
    not executable infrastructure.
 5. Use the [ADR index](adr/README.md), [runbook index](runbooks/README.md),
-   [module catalog](MODULE-REPOSITORIES.md), or an active root README only when
-   the first four documents direct you there.
+   [module catalog](MODULE-REPOSITORIES.md),
+   [local Floci catalog](../local/floci/README.md), or an active root README
+   only when the first four documents direct you there.
 
 ```mermaid
 flowchart LR
@@ -45,6 +46,7 @@ evidence before approving a change.
 | What code can change AWS? | [`infra/active`](../infra/README.md) and each root README | The only executable Terraform tree. |
 | How is an approved operation performed? | [Runbooks](runbooks/README.md) | A procedure still requires its normal plan and approvals. |
 | Where does reusable Terraform live? | [Module catalog](MODULE-REPOSITORIES.md) | Modules live in independently released repositories. |
+| How do I test modules or cloud patterns offline? | [Local Floci catalog](../local/floci/README.md) and [Floci tooling](../tools/floci/README.md) | Local emulator only; never accesses AWS or shares state. |
 
 ## Change flow
 

@@ -3,11 +3,14 @@ SHELL := /usr/bin/env bash
 
 TF := ./bin/tf-local.sh
 
-.PHONY: help up status smoke verify-region init validate plan apply destroy reset contract
+.PHONY: help up down status logs smoke verify-region init validate plan apply destroy reset contract
 
 help:
 	@printf '%s\n' \
 	  'make up                 Start pinned Floci locally.' \
+	  'make down               Stop Floci containers (preserves data volume).' \
+	  'make status             Show status of running Floci containers.' \
+	  'make logs               Stream live logs from Floci core emulator.' \
 	  'make smoke              Verify local AWS CLI/ECS/SQS behaviour.' \
 	  'make verify-region      Verify core and UI regional configuration.' \
 	  'make init STACK=...     Initialize a named local stack.' \
@@ -21,8 +24,14 @@ help:
 up:
 	docker compose -f ../../tools/floci/compose.yaml up -d
 
+down:
+	docker compose -f ../../tools/floci/compose.yaml down
+
 status:
 	docker compose -f ../../tools/floci/compose.yaml ps
+
+logs:
+	docker compose -f ../../tools/floci/compose.yaml logs -f
 
 smoke:
 	@bash -c 'source ../../tools/floci/env.sh && ../../tools/floci/smoke.sh'

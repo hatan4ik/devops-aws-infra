@@ -30,7 +30,11 @@ pull request -> root-specific GitHub plan -> reviewed merge
 
 Every apply requires protected `main`, a matching reviewed plan, an explicit
 `confirm=apply` input, the protected GitHub environment, and short-lived OIDC
-credentials. Local Terraform applies are not supported.
+credentials. Local Terraform applies against AWS accounts are not supported.
+
+For offline emulation, local module testing, and fast developer feedback without
+AWS credentials, use the [local Floci integration catalog](local/floci/README.md)
+and [Floci emulator tooling](tools/floci/README.md).
 
 For an approved clean rebuild, the separate
 [sandbox application-plane teardown](docs/runbooks/sandbox-teardown.md) is the
@@ -44,6 +48,8 @@ delivery identity, and remote-state control plane.
 |---|---|
 | [`infra/active`](infra/README.md) | The five executable Terraform roots and their shared naming context. |
 | [`.github/workflows`](.github/workflows) | Root-specific plan, apply, drift, and protected teardown workflows. |
+| [`local/floci`](local/floci/README.md) | Local AWS emulator integration catalog and developer quickstart guide. |
+| [`tools/floci`](tools/floci/README.md) | Pinned Docker Compose definitions, environment exports, and region verification. |
 | [`bootstrap`](bootstrap/README.md) | The one-time Organizations control-plane prerequisite. |
 | [`docs`](docs/README.md) | Current status, decisions, ConOps, roadmap, and runbooks. |
 | [`scripts`](scripts) | Guarded local helpers and repository quality checks. |

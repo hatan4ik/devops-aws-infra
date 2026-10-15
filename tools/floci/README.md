@@ -10,6 +10,9 @@ It mounts the Docker socket because ECS and Lambda-style runtime tests need to
 start local containers. Docker socket access is host-privileged: run this only
 on a trusted developer workstation, never in CI or AWS.
 
+> [!TIP]
+> For the developer quickstart, day-in-the-life workflows, AWS CLI cookbook, Web UI console guide, and Terraform integration testing, see the [Local Floci Integration Catalog & Developer Guide](../../local/floci/README.md).
+
 ## Start
 
 ```sh
