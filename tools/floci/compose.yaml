@@ -1,0 +1,26 @@
+name: devops-aws-infra-local
+
+services:
+  floci:
+    # Pin the digest used by the validated local smoke tests. Update it only
+    # after re-running tools/floci/smoke.sh and the Terraform smoke workflow.
+    image: floci/floci@sha256:e97cd0c1dc2aa14e7697fb5ef5018404c4d6345169dbd276315f0bed2c7b0520
+    container_name: floci
+    ports:
+      - "4566:4566"
+    environment:
+      - FLOCI_DEFAULT_REGION=us-east-2
+      - FLOCI_DEFAULT_AVAILABILITY_ZONE=us-east-2a
+      - AWS_DEFAULT_REGION=us-east-2
+      - AWS_REGION=us-east-2
+      - FLOCI_SERVICES_UI_EXTRA_ENV=AWS_REGION=us-east-2,AWS_DEFAULT_REGION=us-east-2
+    volumes:
+      # Required only because this platform develops and tests ECS/Lambda-like
+      # workloads locally. Docker socket access is host-privileged: use this
+      # Compose file only on a developer workstation, never in CI or AWS.
+      - /var/run/docker.sock:/var/run/docker.sock
+      - floci-local-data:/app/data
+
+volumes:
+  floci-local-data:
+    name: floci-local-data

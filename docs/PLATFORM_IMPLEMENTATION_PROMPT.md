@@ -110,8 +110,8 @@ Before using or changing a module:
    - Published only after Terraform format, validate, tests, TFLint, Checkov,
      Trivy, and terraform-docs checks pass.
    - Protected against tag mutation. Protect `main` and release tags with
-     available GitHub branch/tag protection. If tag protection is unavailable,
-     consumers must pin the exact commit SHA, never a branch or mutable tag.
+     available GitHub branch/tag protection. Consumers pin the signed semantic
+     release tag, never a branch.
 3. Every module must have:
    - README generated with terraform-docs.
    - Design rationale and upgrade notes for breaking behavior.

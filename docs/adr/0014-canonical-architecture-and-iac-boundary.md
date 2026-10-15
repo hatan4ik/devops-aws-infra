@@ -18,7 +18,7 @@ that could change AWS.
 2. `infra/active/` is the only executable Terraform tree. It may reach AWS
    solely through its root-specific GitHub OIDC workflows.
 3. Reusable implementation belongs in independently released `aws.modules.*`
-   repositories and active roots consume only immutable commit pins.
+   repositories and active roots consume only signed semantic release tags.
 4. Historical prototypes, duplicate ADRs, copied references, review snapshots,
    and unapproved candidate roots are removed from `main`. Git history retains
    them for forensic comparison; they must not be restored as a deployment path.

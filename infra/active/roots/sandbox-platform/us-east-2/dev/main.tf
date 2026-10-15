@@ -1,5 +1,5 @@
 module "naming" {
-  source = "git::https://github.com/hatan4ik/aws.modules.naming.git?ref=c0fa6b65f35b1a3c11f64959a753af6bfe8e256e" # v0.1.0
+  source = "git::https://github.com/hatan4ik/aws.modules.naming.git?ref=v0.1.0"
 
   environment     = var.environment
   root            = "sandbox-platform"
@@ -33,7 +33,7 @@ resource "terraform_data" "network_contract" {
 }
 
 module "sandbox_platform_core" {
-  source = "git::https://github.com/hatan4ik/aws.modules.ecs.git?ref=878a733843a8fd3b790aa9d5d4e3a7f7810a8efe" # v0.1.2
+  source = "git::https://github.com/hatan4ik/aws.modules.ecs.git?ref=v0.1.2"
 
   name                    = module.naming.name_prefix
   vpc_id                  = data.aws_vpc.sandbox.id

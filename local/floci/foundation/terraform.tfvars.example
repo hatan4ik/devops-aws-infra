@@ -1,0 +1,10 @@
+# Copy to terraform.tfvars only to vary local names or CIDRs. Do not copy
+# values from an AWS environment: this stack must remain unmistakably local.
+aws_region  = "us-east-2"
+vpc_cidr    = "10.250.0.0/16"
+
+naming_base_tags = {
+  DeploymentScope = "local"
+  Emulator        = "floci"
+  Purpose         = "integration"
+}

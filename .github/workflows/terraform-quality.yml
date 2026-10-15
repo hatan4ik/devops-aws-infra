@@ -72,6 +72,10 @@ jobs:
           quiet: true
           soft_fail: false
           download_external_modules: false
+          # CKV_TF_1 accepts only commit hashes. The repository deliberately
+          # consumes signed, immutable semantic release tags; the stricter
+          # repository-local enforcement is scripts/verify-adr-boundary.sh.
+          skip_check: CKV_TF_1
 
       - name: Run Trivy HIGH and CRITICAL IaC checks
         uses: aquasecurity/trivy-action@d2a0b60797ff03db6132bd4e2b293f9b37081297 # pinned upstream commit

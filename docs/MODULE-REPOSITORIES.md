@@ -49,17 +49,16 @@ matching published release.
 
 ## Consumer rule
 
-Every root pins the full 40-character commit SHA resolved from an annotated
-semantic-version release tag. The tag is retained as an inline comment for
-reviewers; verify its signature when the release authority has signing
-material available.
+Every root pins the signed annotated semantic-version release tag directly.
+The release-fleet verifier proves that the tag, the repository default branch,
+and the published GitHub Release resolve to the same revision.
 
 ```hcl
 module "network" {
-  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=5c0092737c51c99c699bb7122ea147c65b9ca507" # v1.0.0
+  source = "git::https://github.com/hatan4ik/aws.modules.vpc.git?ref=v1.0.0"
 }
 ```
 
-Never follow `main`, a mutable tag, a local checkout, or a relative module
-path. A module upgrade is a root pull request: its plan is the compatibility
-proof, and its rollback is a revert to the previous immutable commit.
+Never follow `main`, a local checkout, or a relative module path. A module
+upgrade is a root pull request: its plan is the compatibility proof, and its
+rollback is a revert to the previous signed release tag.
