@@ -32,3 +32,4 @@ or superseded it. **Proposed** means not approved; **Closed** and
 | 0022 | Accepted | [Terraform-owned sandbox GitHub delivery identity](0022-terraform-owned-sandbox-delivery-identity.md) |
 | 0023 | Accepted | [Protected sandbox application-plane teardown](0023-protected-sandbox-application-plane-teardown.md) |
 | 0024 | Accepted | [Terraform AWSCC ownership for Cognito MRR](0024-cognito-mrr-awscc-ownership.md) |
+| 0025 | Proposed | [EC2 fleet module with Session Manager as the default access path](0025-ec2-workload-module.md) |
