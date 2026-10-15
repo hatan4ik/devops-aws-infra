@@ -3,12 +3,13 @@ SHELL := /usr/bin/env bash
 
 TF := ./bin/tf-local.sh
 
-.PHONY: help up status smoke init validate plan apply destroy reset contract
+.PHONY: help up status smoke verify-region init validate plan apply destroy reset contract
 
 help:
 	@printf '%s\n' \
 	  'make up                 Start pinned Floci locally.' \
 	  'make smoke              Verify local AWS CLI/ECS/SQS behaviour.' \
+	  'make verify-region      Verify core and UI regional configuration.' \
 	  'make init STACK=...     Initialize a named local stack.' \
 	  'make validate STACK=... Validate a named local stack.' \
 	  'make plan STACK=...     Plan a local stack through the loopback-only wrapper.' \
@@ -25,6 +26,9 @@ status:
 
 smoke:
 	@bash -c 'source ../../tools/floci/env.sh && ../../tools/floci/smoke.sh'
+
+verify-region:
+	@FLOCI_EXPECTED_REGION="$${FLOCI_EXPECTED_REGION:-us-east-2}" ../../tools/floci/verify-region.sh
 
 init:
 	@test -n "$(STACK)" || (echo 'STACK is required, e.g. make init STACK=foundation' >&2; exit 64)

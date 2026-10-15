@@ -19,7 +19,11 @@ aws sts get-caller-identity
 ```
 
 The identity must be the emulator's local account, `000000000000`; it must not
-be one of your AWS accounts. The endpoint is `http://localhost:4566`.
+be one of your AWS accounts.
+- Floci core emulator endpoint: `http://localhost:4566`
+- Floci AWS web UI console: `http://localhost:4500` (launches on demand as a sidecar container when clicking "Open UI" at `http://localhost:4566`)
+
+Both the core emulator and the on-demand web UI are configured and pinned to `us-east-2` (`FLOCI_DEFAULT_REGION=us-east-2` and `FLOCI_DEFAULT_AVAILABILITY_ZONE=us-east-2a` for core; `AWS_REGION=us-east-2` and `AWS_DEFAULT_REGION=us-east-2` for both core and spawned UI).
 
 ## Verify the local environment
 
@@ -30,6 +34,16 @@ tools/floci/smoke.sh
 
 The smoke test creates and deletes an SQS queue and ECS cluster in Floci. It
 refuses to run unless `AWS_ENDPOINT_URL` is a localhost Floci endpoint.
+
+Check that the emulator and its optional web console use the intended region:
+
+```sh
+FLOCI_EXPECTED_REGION=us-east-2 tools/floci/verify-region.sh
+```
+
+This is read-only. It verifies `FLOCI_DEFAULT_REGION` on the core emulator and
+`AWS_REGION`/`AWS_DEFAULT_REGION` plus `FLOCI_ENDPOINT` on the web UI. It does
+not change containers or local state.
 
 ## Terraform workflow
 
