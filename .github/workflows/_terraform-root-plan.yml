@@ -34,6 +34,27 @@ on:
         required: false
         default: ""
         type: string
+      dependency_scope:
+        description: "Live prerequisite check: none, platform, or workload."
+        required: false
+        default: none
+        type: string
+      dependency_network_name:
+        required: false
+        default: ""
+        type: string
+      dependency_cluster_name:
+        required: false
+        default: ""
+        type: string
+      dependency_kms_alias:
+        required: false
+        default: ""
+        type: string
+      dependency_session_table:
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -93,6 +114,45 @@ jobs:
       - name: Confirm the short-lived target identity
         run: aws sts get-caller-identity --query '{Account:Account,Arn:Arn}' --output json
 
+      - name: Check live dependencies for a meaningful plan
+        id: dependencies
+        if: inputs.dependency_scope != 'none'
+        env:
+          DEPENDENCY_SCOPE: ${{ inputs.dependency_scope }}
+          DEPENDENCY_NETWORK_NAME: ${{ inputs.dependency_network_name }}
+          DEPENDENCY_CLUSTER_NAME: ${{ inputs.dependency_cluster_name }}
+          DEPENDENCY_KMS_ALIAS: ${{ inputs.dependency_kms_alias }}
+          DEPENDENCY_SESSION_TABLE: ${{ inputs.dependency_session_table }}
+        working-directory: .
+        run: |
+          set -euo pipefail
+          set +e
+          scripts/verify-live-plan-prerequisites.sh \
+            --scope "$DEPENDENCY_SCOPE" \
+            --network-name "$DEPENDENCY_NETWORK_NAME" \
+            --cluster-name "$DEPENDENCY_CLUSTER_NAME" \
+            --kms-alias "$DEPENDENCY_KMS_ALIAS" \
+            --session-table "$DEPENDENCY_SESSION_TABLE"
+          status=$?
+          set -e
+
+          case "$status" in
+            0)
+              echo 'ready=true' >> "$GITHUB_OUTPUT"
+              ;;
+            3)
+              echo 'ready=false' >> "$GITHUB_OUTPUT"
+              {
+                echo '### Live Terraform plan deferred'
+                echo
+                echo 'The dependency root is intentionally not provisioned. Source validation will run; a live plan resumes after the prerequisite application-plane root is applied.'
+              } >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            *)
+              exit "$status"
+              ;;
+          esac
+
       - name: Write ephemeral remote-state configuration
         if: inputs.backend_mode == 'ephemeral'
         env:
@@ -112,7 +172,15 @@ jobs:
           EOF
 
       - name: Initialize the dedicated remote state
+        if: inputs.dependency_scope == 'none' || steps.dependencies.outputs.ready == 'true'
         run: terraform init -input=false -lockfile=readonly -backend-config=backend.hcl
 
       - name: Produce a non-mutating Terraform plan
+        if: inputs.dependency_scope == 'none' || steps.dependencies.outputs.ready == 'true'
         run: terraform plan -input=false -lock-timeout=5m -var-file=terraform.tfvars -out=tfplan
+
+      - name: Validate deferred Terraform source without live dependencies
+        if: inputs.dependency_scope != 'none' && steps.dependencies.outputs.ready == 'false'
+        run: |
+          terraform init -backend=false -input=false -lockfile=readonly
+          terraform validate -no-color

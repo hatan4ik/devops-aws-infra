@@ -28,3 +28,8 @@ jobs:
       role_variable: AWS_SANDBOX_WORKLOAD_PLAN_ROLE_ARN
       session_prefix: sandbox-workload
       job_name: sandbox_workload_plan
+      dependency_scope: workload
+      dependency_network_name: sandbox-network-dev
+      dependency_cluster_name: sandbox-platform-dev-cluster
+      dependency_kms_alias: alias/sandbox-platform-dev-application-data
+      dependency_session_table: sandbox-platform-dev-session

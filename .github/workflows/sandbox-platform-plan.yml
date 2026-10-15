@@ -28,3 +28,5 @@ jobs:
       role_variable: AWS_SANDBOX_PLATFORM_PLAN_ROLE_ARN
       session_prefix: sandbox-platform
       job_name: sandbox_platform_plan
+      dependency_scope: platform
+      dependency_network_name: sandbox-network-dev
